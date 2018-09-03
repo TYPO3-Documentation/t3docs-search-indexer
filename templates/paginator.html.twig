@@ -1,0 +1,13 @@
+<ul class="pagination">
+    {% for pageDesc, page in result.pagesToLinkTo %}
+        {% if result.currentPage == page %}
+                <li class="active">
+                    <a href="{{ path('searchresult', {'q':q, 'page':page}) }}">Page {{ page }}</a>
+                </li>
+            {% else %}
+                <li>
+                    <a href="{{ path('searchresult', {'q':q, 'page':page}) }}">Page {{ page }}</a>
+                </li>
+        {% endif %}
+    {% endfor %}
+</ul>

@@ -1,0 +1,7 @@
+<ul class="pagination">
+    <f:for each="{result.pagesToLinkTo}" as="page" key="pageDesc">
+        <li {f:if(condition:'{result.currentPage} == {page}',then:'class="active"')}>
+            <fs:link route="searchresult" arguments="{q: q, page: page}">{page}</fs:link>
+        </li>
+    </f:for>
+</ul>

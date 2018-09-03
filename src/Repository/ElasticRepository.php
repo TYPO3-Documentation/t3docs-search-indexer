@@ -1,0 +1,262 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: mathiasschreiber
+ * Date: 15.01.18
+ * Time: 20:53
+ */
+
+namespace App\Repository;
+
+
+use Elastica\Aggregation\Terms;
+use Elastica\Client;
+use Elastica\Document;
+use Elastica\Index;
+use Elastica\Query;
+
+class ElasticRepository
+{
+    /**
+     * @var Index
+     */
+    private $elasticIndex;
+
+    private $currentPage = 1;
+
+    private $perPage = 10;
+
+    private $totalHits = 0;
+
+    /**
+     * @var Client
+     */
+    private $elasticClient;
+
+    public function __construct()
+    {
+        $elasticConfig = [
+            'host' => 'localhost',
+            'port' => '9200',
+            'path' =>  '',
+            'transport' => 'Http',
+            'index' => 'docsearch',
+        ];
+        if (!empty($elasticConfig['username']) && !empty($elasticConfig['password'])) {
+            $elasticConfig['headers'] = [
+                'Authorization' => 'Basic ' .
+                    base64_encode($elasticConfig['username'] . ':' . $elasticConfig['password']) . '==',
+            ];
+        }
+
+        $this->elasticClient = new Client($elasticConfig);
+        $this->elasticIndex = $this->elasticClient->getIndex($elasticConfig['index']);
+    }
+
+    /**
+     * @return Client
+     */
+    public function getElasticClient() : Client
+    {
+        return $this->elasticClient;
+    }
+
+    /**
+     * @return Index
+     */
+    public function getElasticIndex() : Index
+    {
+        return $this->elasticIndex;
+    }
+
+    public function addOrUpdateDocument(array $snippet): void
+    {
+        // Generate id
+        $urlFragment = str_replace('/', '-', $snippet['book_slug'] . '-' . $snippet['relative_url']);
+        $document = new Document($urlFragment . '-' . $snippet['fragment']);
+        $document->setData($snippet);
+        $snippetType = $this->elasticIndex->getType('snippet');
+        $snippetType->addDocument($document);
+    }
+
+    public function deleteByBookAnVersion(string $type, string $bookName, string $version): void
+    {
+        $snippets = $this->elasticIndex->getType('snippet');
+        $query = [
+            'query' => [
+                'bool' => [
+                    'must' => [
+                        [
+                            'term' => [
+                                'book_title' => $bookName,
+                            ],
+                        ],
+                        [
+                            'term' => [
+                                'book_version' => $version,
+                            ],
+                        ],
+                        [
+                            'term' => [
+                                'book_type' => $type,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+        $deleteQuery = new Query($query);
+        $response = $snippets->deleteByQuery($deleteQuery);
+        $foo = '';
+    }
+
+    /**
+     * @param string $searchTerms
+     * @return array
+     * @throws \Elastica\Exception\InvalidException
+     */
+    public function findByQuery(string $searchTerms): array
+    {
+        $searchTerms = $this->escape($searchTerms);
+        $query = [
+            'query' => [
+                'bool' => [
+                    'must' => [
+                        [
+                            'query_string' => [
+                                'query' => $searchTerms,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+        if (array_key_exists('page', $_GET)) {
+            $this->currentPage = (int) $_GET['page'];
+        }
+        #$usedFilters = $this->addFilters();
+        #if (count($usedFilters) > 0) {
+        #    $query['post_filter'] = $usedFilters;
+        #}
+
+        $search = $this->elasticIndex->createSearch($query);
+        $search->addType('snippet');
+        $search->getQuery()->setSize($this->perPage);
+        $search->getQuery()->setFrom(($this->currentPage * $this->perPage) - $this->perPage);
+
+        $this->addAggregations($search->getQuery());
+
+        $elasticaResultSet = $search->search();
+        $results = $elasticaResultSet->getResults();
+        $maxScore = $elasticaResultSet->getMaxScore();
+        $aggs = $elasticaResultSet->getAggregations();
+
+        $this->totalHits = $elasticaResultSet->getTotalHits();
+
+        $out = [
+            'pagesToLinkTo' => $this->getPages(),
+            'currentPage' => $this->currentPage,
+            'prev' => $this->currentPage - 1,
+            'next' => $this->currentPage < ceil($this->totalHits / $this->perPage) ? $this->currentPage + 1 : 0,
+            'totalResults' => $this->totalHits,
+            'startingAtItem' => ($this->currentPage * $this->perPage) - ($this->perPage - 1),
+            'endingAtItem' => $this->currentPage * $this->perPage,
+            'results' => $results,
+            'maxScore' => $maxScore,
+            'aggs' => $aggs,
+        ];
+        if ($this->totalHits <= (int) $out['endingAtItem']) {
+            $out['endingAtItem'] = $this->totalHits;
+        }
+        return $out;
+    }
+
+    /**
+     * @param Query $elasticaQuery
+     */
+    private function addAggregations(Query $elasticaQuery): void
+    {
+        $catAggregation = new Terms('Document Type');
+        $catAggregation->setField('book_type');
+        $elasticaQuery->addAggregation($catAggregation);
+
+        $trackerAggregation = new Terms('Document');
+        $trackerAggregation->setField('book_title');
+        $catAggregation->addAggregation($trackerAggregation);
+//
+//        $status = new Terms('Status');
+//        $status->setField('status.name');
+//        $elasticaQuery->addAggregation($status);
+//
+//        $priority = new Terms('Priority');
+//        $priority->setField('priority.name');
+//        $elasticaQuery->addAggregation($priority);
+//
+//        $t3ver = new Terms('TYPO3 Version');
+//        $t3ver->setField('typo3_version');
+//        $elasticaQuery->addAggregation($t3ver);
+//
+//        $targetver = new Terms('Target Version');
+//        $targetver->setField('fixed_version.name');
+//        $elasticaQuery->addAggregation($targetver);
+//
+//        $phpVer = new Terms('PHP Version');
+//        $phpVer->setField('php_version');
+//        $elasticaQuery->addAggregation($phpVer);
+    }
+
+    /**
+     * @return array
+     */
+    protected function getPages() : array
+    {
+        $numPages = ceil($this->totalHits / $this->perPage);
+        $i = 0;
+        /*
+         *
+         */
+        $maxPages = $numPages;
+        if ($numPages > 15 && $this->currentPage <= 7) {
+            $numPages = 15;
+        }
+        if ($this->currentPage > 7) {
+            $i = $this->currentPage - 7;
+            $numPages = $this->currentPage + 6;
+        }
+        if ($numPages > $maxPages) {
+            $numPages = $maxPages;
+            $i = $maxPages - 15;
+        }
+
+        if ($i < 0) {
+            $i = 0;
+        }
+
+        $out = [];
+        while ($i < $numPages) {
+            $out[(int) $i] = ($i + 1);
+            ++$i;
+        }
+
+        return $out;
+    }
+
+    /**
+     * Escape a value for special query characters such as ':', '(', ')', '*', '?', etc.
+     * NOTE: inside a phrase fewer characters need escaped, use {@link Apache_Solr_Service::escapePhrase()} instead.
+     *
+     * @param string $value
+     *
+     * @return string
+     */
+    private function escape($value) : string
+    {
+        //list taken from http://lucene.apache.org/java/docs/queryparsersyntax.html#Escaping%20Special%20Characters
+        $pattern = '/(\+|-|&&|\|\||!|\(|\)|\{|}|\[|]|\^|"|~|\*|\?|:|\\\)/';
+        $replace = '\\\$1';
+        $escapedString = preg_replace($pattern, $replace, $value);
+        $escapedString = str_replace('/', '\/', $escapedString);
+
+        return $escapedString;
+    }
+}

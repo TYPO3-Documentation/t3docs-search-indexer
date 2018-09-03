@@ -1,0 +1,18 @@
+snippet_id:
+  type: keyword
+book_title:
+  type: keyword
+book_type:
+  type: keyword
+book_version:
+  type: keyword
+page_title:
+  type: text
+rootline:
+  type: keyword
+relative_url:
+  type: keyword
+snippet_title:
+  type: text
+snippet_content:
+  type: text

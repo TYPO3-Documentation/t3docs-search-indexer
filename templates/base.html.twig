@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Welcome!{% endblock %}</title>
+    <link rel="stylesheet" href="https://docs.typo3.org/_static/css/theme.css">
+    <link rel="stylesheet" href="https://docs.typo3.org/_static/jquery-ui/jquery-ui.min.css">
+    <link rel="stylesheet" href="https://docs.typo3.org/_static/css/t3more.css">
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+<div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+        <div class="wy-side-nav-search">
+            <ul class="sidebartop">
+                <li class="docsite">
+                    <a href="https://docs.typo3.org"><img src="https://docs.typo3.org/_static/img/typo3-documentation.png" class="logo"></a>
+                </li>
+                <li class="project">
+                    <a href="#">
+                        Welcome!<br>2.0</a>
+                </li>
+                <li class="nolink search">
+                    <div role="search">
+                        <form id="rtd-search-form" class="wy-form" action="{{ url('searchresult') }}" method="get">
+                            <input type="text" name="q" placeholder="Search this project" id="searchinput" value="{{ q }}">
+                            <input type="hidden" name="check_keywords" value="yes">
+                            <input type="hidden" name="area" value="default">
+                        </form>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="wy-menuXX wy-menu-verticalXX" data-spy="affix" role="navigation" aria-label="main navigation">
+            {% block aggregations %}{% endblock %}
+        </div>
+        &nbsp;
+    </nav>
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+        <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="#">Welcome!</a>
+        </nav>
+        <div class="wy-nav-content">
+            {% block body %}{% endblock %}
+        </div>
+    </section>
+</div>
+{% block javascripts %}{% endblock %}
+<script type="text/javascript" src="https://docs.typo3.org/_static/jquery.js"></script>
+<script type="text/javascript" src="https://docs.typo3.org/_static/underscore.js"></script>
+<script type="text/javascript" src="https://docs.typo3.org/_static/doctools.js"></script>
+<script type="text/javascript" src="https://docs.typo3.org/_static/jquery-ui/jquery-ui.min.js"></script>
+<script type="text/javascript" src="https://docs.typo3.org/_static/js/theme.js"></script>
+<script type="text/javascript" src="https://docs.typo3.org/_static/js/t3autocomplete.js"></script>
+</body>
+</html>
