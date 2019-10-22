@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://docs.typo3.org/_static/css/theme.css">
     <link rel="stylesheet" href="https://docs.typo3.org/_static/jquery-ui/jquery-ui.min.css">
     <link rel="stylesheet" href="https://docs.typo3.org/_static/css/t3more.css">
-    <f:render section="Stylesheets" />
+    <f:render section="Stylesheets" optional="1" />
 </head>
 <body>
 <div class="wy-grid-for-nav">
@@ -22,8 +22,8 @@
                 </li>
                 <li class="nolink search">
                     <div role="search">
-                        <form id="rtd-search-form" class="wy-form" action="<f:render section="searchQuery" />" method="get">
-                            <input type="text" name="q" placeholder="Search this project" id="searchinput" value="<f:render section="searchQuery" />">
+                        <form id="rtd-search-form" class="wy-form" action="/index.php/search" method="get">
+                            <input type="text" name="q" placeholder="Search this project" id="searchinput" value="<f:render section="searchQuery" optional="1"/>">
                             <input type="hidden" name="check_keywords" value="yes">
                             <input type="hidden" name="area" value="default">
                         </form>
@@ -32,7 +32,7 @@
             </ul>
         </div>
         <div class="wy-menuXX wy-menu-verticalXX" data-spy="affix" role="navigation" aria-label="main navigation">
-            <f:render section="Sidebar" />
+            <f:render section="Sidebar" optional="1"/>
         </div>
         &nbsp;
     </nav>
@@ -46,7 +46,7 @@
         </div>
     </section>
 </div>
-<f:render section="Javascripts" />
+<f:render section="Javascripts" optional="1"/>
 <script type="text/javascript" src="https://docs.typo3.org/_static/jquery.js"></script>
 <script type="text/javascript" src="https://docs.typo3.org/_static/underscore.js"></script>
 <script type="text/javascript" src="https://docs.typo3.org/_static/doctools.js"></script>
