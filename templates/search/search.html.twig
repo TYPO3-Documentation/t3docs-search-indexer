@@ -63,8 +63,8 @@
                     <span class="badge badge-secondary">{{ hit.data.book_type }}</span>
                 </h4>
                 <p class="url">
-                    <a href="https://docs.typo3.org/typo3cms/{{ hit.data.book_slug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">
-                        https://docs.typo3.org/typo3cms/{{ hit.data.book_slug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}
+                    <a href="https://docs.typo3.org/{{ hit.data.book_slug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">
+                        https://docs.typo3.org/{{ hit.data.book_slug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}
                     </a>
                     </p>
                 <p class="summary">{{ hit.data.snippet_content|slice(0, 18000) }}...</p>

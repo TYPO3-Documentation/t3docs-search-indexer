@@ -122,45 +122,19 @@ class SnippetImporter extends ContainerAwareCommand
     private function findDocumentationFolders(): Finder
     {
         $finder = new Finder();
-        $finder->directories()->in($this->rootPath)->depth(1);
+        $finder->directories()->in($this->rootPath)->depth('== 4');
         return $finder;
     }
 
     private function getBookMetaData(string $folderName): array
     {
-        $meta = [
-            'bookName' => 'BOOK-NAME',
-            'bookType' => 'BOOK-TYPE',
-            'bookVersion' => 'BOOK-VERSION'
+        list($bookType, $vendor, $name, $version, $language) = explode('/', $folderName);
+
+        return [
+            'bookName' => implode('/', [$vendor, $name]),
+            'bookType' => $bookType ,
+            'bookVersion' => $version,
         ];
-        // get title
-        $document = new \DOMDocument();
-        libxml_use_internal_errors(true);
-        $filename = $this->rootPath . '/' . $folderName . '/Index.html';
-        $content = file_get_contents($filename);
-        $document->loadHTML($content);
-        $xpath = new \DOMXPath($document);
-        $converter = new CssSelectorConverter();
-        $metaTags = $xpath->query($converter->toXPath('meta'));
-        /** @var \DOMElement $item */
-        foreach ($metaTags as $item) {
-            if ($item->hasAttribute('name') && $item->hasAttribute('content')) {
-                $metaName = $item->getAttribute('name');
-                $metaContent = $item->getAttribute('content');
-                switch ($metaName) {
-                    case 'book-name':
-                        $meta['bookName'] = $metaContent;
-                        break;
-                    case 'book-type':
-                        $meta['bookType'] = $metaContent;
-                        break;
-                    case 'book-version':
-                        $meta['bookVersion'] = $metaContent;
-                        break;
-                }
-            }
-        }
-        return $meta;
     }
 
     private function formatMilliseconds(int $milliseconds): string

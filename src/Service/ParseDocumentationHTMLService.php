@@ -25,9 +25,27 @@ class ParseDocumentationHTMLService
         $this->bookMetaData['book_title'] = $bookName;
     }
 
+    /**
+     * @throws \InvalidArgumentException On unkown book type.
+     */
     public function setBookType(string $bookType): void
     {
-        $this->bookMetaData['book_type'] = $bookType;
+        switch ($bookType) {
+            case 'c':
+                $this->bookMetaData['book_type'] = 'Core Extension';
+                break;
+            case 'p':
+                $this->bookMetaData['book_type'] = '3rd Party Extension';
+                break;
+            case 'other':
+                $this->bookMetaData['book_type'] = 'Other';
+                break;
+            case 'm':
+                $this->bookMetaData['book_type'] = 'Manual';
+                break;
+            default:
+                throw new \InvalidArgumentException('Unkown Book type: "' . $bookType  . '".', 1571777579);
+        }
     }
 
     public function setBookVersion(string $bookVersion): void
