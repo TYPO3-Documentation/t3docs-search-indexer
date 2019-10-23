@@ -7,34 +7,47 @@ use App\Event\ImportManual\ManualAdvance;
 use App\Event\ImportManual\ManualFinish;
 use App\Event\ImportManual\ManualStart;
 use App\Service\ImportManualHTMLService;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 
-class SnippetImporter extends ContainerAwareCommand
+class SnippetImporter extends Command
 {
+    /**
+     * @var string
+     */
+    private $defaultRootPath;
+
     /**
      * @var ImportManualHTMLService
      */
     private $importer;
 
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
+
     public function __construct(
+        string $defaultRootPath,
         ImportManualHTMLService $importer,
         EventDispatcherInterface $dispatcher
     ) {
-        parent::__construct(null);
-
+        $this->defaultRootPath = $defaultRootPath;
         $this->importer = $importer;
 
         $dispatcher = $dispatcher;
         $dispatcher->addListener(ManualStart::NAME, [$this, 'startProgress']);
         $dispatcher->addListener(ManualAdvance::NAME, [$this, 'advanceProgress']);
         $dispatcher->addListener(ManualFinish::NAME, [$this, 'finishProgress']);
+
+        parent::__construct(null);
     }
 
     /**
@@ -43,7 +56,8 @@ class SnippetImporter extends ContainerAwareCommand
     protected function configure(): void
     {
         $this->setName('docsearch:import');
-        $this->setDescription('Imports all documentation');
+        $this->setDescription('Imports documentation');
+        $this->addOption('rootPath', null, InputOption::VALUE_REQUIRED, 'Root Path', $this->defaultRootPath);
         $this->addArgument('package', InputArgument::OPTIONAL, 'Package Name');
     }
 
@@ -51,15 +65,13 @@ class SnippetImporter extends ContainerAwareCommand
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int|null|void
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
      * @throws \LogicException
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $rootPath = $this->getContainer()->get('kernel')->getProjectDir() . '/_docs';
+        $rootPath = $input->getOption('rootPath');
         $timer = new Stopwatch();
         $timer->start('importer');
 
