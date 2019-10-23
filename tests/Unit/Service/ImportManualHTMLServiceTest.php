@@ -7,6 +7,7 @@ use App\Repository\ElasticRepository;
 use App\Service\ImportManualHTMLService;
 use App\Service\ParseDocumentationHTMLService;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -20,7 +21,8 @@ class ImportManualHTMLServiceTest extends TestCase
         $parser = $this->getMockBuilder(ParseDocumentationHTMLService::class)->getMock();
         $subject = new ImportManualHTMLService(
             $this->getMockBuilder(ElasticRepository::class)->getMock(),
-            $parser
+            $parser,
+            $this->getMockBuilder(EventDispatcherInterface::class)->getMock()
         );
 
         $folder1 = $this->getMockBuilder(SplFileInfo::class)->disableOriginalConstructor()->getMock();
@@ -61,7 +63,7 @@ class ImportManualHTMLServiceTest extends TestCase
         $parserMock->expects($this->any())->method('getFilesWithSections')->willReturn($finderMock);
         $finderMock->expects($this->any())->method('getIterator')->willReturn(new \ArrayObject());
 
-        $subject = new ImportManualHTMLService($repoMock, $parserMock);
+        $subject = new ImportManualHTMLService($repoMock, $parserMock, $this->getMockBuilder(EventDispatcherInterface::class)->getMock());
 
         $repoMock->expects($this->once())
             ->method('deleteByManual')
@@ -102,7 +104,7 @@ class ImportManualHTMLServiceTest extends TestCase
         $parserMock->expects($this->any())->method('getSectionsFromFile')->willReturn([$section1, $section2]);
         $finderMock->expects($this->any())->method('getIterator')->willReturn(new \ArrayObject([$fileMock]));
 
-        $subject = new ImportManualHTMLService($repoMock, $parserMock);
+        $subject = new ImportManualHTMLService($repoMock, $parserMock, $this->getMockBuilder(EventDispatcherInterface::class)->getMock());
 
         $repoMock->expects($this->exactly(2))
             ->method('addOrUpdateDocument')
