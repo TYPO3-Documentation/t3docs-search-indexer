@@ -9,6 +9,7 @@
 namespace App\Repository;
 
 
+use App\Dto\Manual;
 use Elastica\Aggregation\Terms;
 use Elastica\Client;
 use Elastica\Document;
@@ -79,7 +80,7 @@ class ElasticRepository
         $snippetType->addDocument($document);
     }
 
-    public function deleteByManualAnVersion(string $type, string $manualName, string $version, string $language): void
+    public function deleteByManual(Manual $manual): void
     {
         $snippets = $this->elasticIndex->getType('snippet');
         $query = [
@@ -88,22 +89,22 @@ class ElasticRepository
                     'must' => [
                         [
                             'term' => [
-                                'manual_title' => $manualName,
+                                'manual_title' => $manual->getTitle(),
                             ],
                         ],
                         [
                             'term' => [
-                                'manual_version' => $version,
+                                'manual_version' => $manual->getVersion(),
                             ],
                         ],
                         [
                             'term' => [
-                                'manual_type' => $type,
+                                'manual_type' => $manual->getType(),
                             ],
                         ],
                         [
                             'term' => [
-                                'manual_language' => $language,
+                                'manual_language' => $manual->getLanguage(),
                             ],
                         ],
                     ],

@@ -17,6 +17,7 @@
         "typo3fluid/fluid": "^2.3.0"
     },
     "require-dev": {
+        "mikey179/vfsstream": "^1.6",
         "symfony/dotenv": "^4.0",
         "symfony/phpunit-bridge": "^4.0"
     },

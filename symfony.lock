@@ -32,6 +32,9 @@
     "guzzlehttp/streams": {
         "version": "3.0.0"
     },
+    "mikey179/vfsstream": {
+        "version": "v1.6.7"
+    },
     "psr/cache": {
         "version": "1.0.1"
     },

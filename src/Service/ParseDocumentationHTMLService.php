@@ -8,60 +8,65 @@
 
 namespace App\Service;
 
-
+use App\Dto\Manual;
 use Symfony\Component\CssSelector\CssSelectorConverter;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 
 class ParseDocumentationHTMLService
 {
-    private $metaData = [
-        'manual_title' => 'TBD',
-        'manual_type' => 'TBD',
-        'manual_version' => 'TBD',
-        'manual_language' => 'TBD',
-        'manual_slug' => 'TBD'
-    ];
-
-    public function getTitle(): string
+    /**
+     * @throws \InvalidArgumentException
+     */
+    public function findFolders(string $rootPath): Finder
     {
-        return $this->metaData['manual_title'];
+        $finder = new Finder();
+        $finder->directories()->in($rootPath)->depth('== 4');
+
+        return $finder;
     }
 
-    public function getType(): string
+    public function createFromFolder(string $prefixFolder, SplFileInfo $folder): Manual
     {
-        return $this->metaData['manual_type'];
+        $prefixFolder = rtrim($prefixFolder, '/') . '/';
+        $folderPath = (string) $folder;
+
+        $relativeFolderPath = str_replace($prefixFolder, '', $folderPath);
+        list($type, $vendor, $name, $version, $language) = explode('/', $relativeFolderPath);
+
+        return new Manual(
+            $folder,
+            implode('/', [$vendor, $name]),
+            $type,
+            $version,
+            $language,
+            $relativeFolderPath
+        );
     }
 
-    public function getVersion(): string
+    public function getFilesWithSections(Manual $manual): Finder
     {
-        return $this->metaData['manual_version'];
+        $finder = new Finder();
+        $finder
+            ->files()
+            ->in($manual->getAbsolutePath())
+            ->name('*.html')
+            ->notName('search.html')
+            ->notName('genindex.html')
+            ->notPath('_buildinfo')
+            ->notPath('_static')
+            ->notPath('singlehtml');
+
+        return $finder;
     }
 
-    public function getLanguage(): string
+    public function getSectionsFromFile(SplFileInfo $file): array
     {
-        return $this->metaData['manual_language'];
+        return $this->getSections($file->getContents());
     }
 
-    public function getSlug(): string
+    private function getSections(string $content): array
     {
-        return $this->metaData['manual_slug'];
-    }
-
-    public function setMetaDataByFileName(string $relativeFileName)
-    {
-        list($manualType, $vendor, $name, $version, $language) = explode('/', $relativeFileName);
-
-        $this->metaData['manual_title'] = implode('/', [$vendor, $name]);
-        $this->metaData['manual_type'] = $manualType;
-        $this->metaData['manual_version'] = $version;
-        $this->metaData['manual_language'] = $language;
-        $this->metaData['manual_slug'] = $relativeFileName;
-    }
-
-    public function getSections(string $content, string $relativeFileName): array
-    {
-        $metaData = $this->metaData;
-        $metaData['relative_url'] = $relativeFileName;
-
         libxml_use_internal_errors(true);
         $document = new \DOMDocument();
         $document->loadHTML($content);
@@ -71,13 +76,13 @@ class ParseDocumentationHTMLService
         $query = $xpath->query($mainContentQuery);
         if ($query->length > 0) {
             $mainSection = $query->item(0)->C14N();
-            return $this->getAllSections($mainSection, $metaData);
+            return $this->getAllSections($mainSection);
         }
 
         return [];
     }
 
-    private function getAllSections(string $markup, array $metaData): array
+    private function getAllSections(string $markup): array
     {
         $sectionPieces = [];
         $document = new \DOMDocument();
@@ -92,15 +97,19 @@ class ParseDocumentationHTMLService
         foreach ($sections as $index => $section) {
             $foundHeadline = $this->findHeadline($section, $xpath);
             if ($foundHeadline !== []) {
-                $sectionPiece = $metaData;
-                $sectionPiece['fragment'] = $section->getAttribute('id');
-                $sectionPiece['snippet_title'] = $foundHeadline['headlineText'];
+                $sectionPiece = [
+                    'fragment' => $section->getAttribute('id'),
+                    'snippet_title' => $foundHeadline['headlineText'],
+                ];
+
                 $section->removeChild($foundHeadline['node']);
-                $sectionPiece['snippet_content'] = $this->sanitizeString($this->stripSubSectionsIfAny($section, $xpath));
+                $sectionPiece['snippet_content'] = $this->sanitizeString(
+                    $this->stripSubSectionsIfAny($section, $xpath)
+                );
                 $sectionPieces[] = $sectionPiece;
             }
-
         }
+
         return $sectionPieces;
     }
 

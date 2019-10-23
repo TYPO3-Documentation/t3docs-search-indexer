@@ -1,28 +1,42 @@
 <?php
 namespace App\Command;
 
-use App\Repository\ElasticRepository;
-use App\Service\ParseDocumentationHTMLService;
+use App\Dto\Manual;
+use App\Event\ImportManual\ManualAdvance;
+use App\Event\ImportManual\ManualFinish;
+use App\Event\ImportManual\ManualStart;
+use App\Service\ImportManualHTMLService;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\CssSelector\CssSelectorConverter;
-use Symfony\Component\Finder\Finder;
+use Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 
 class SnippetImporter extends ContainerAwareCommand
 {
-    private $rootPath = '';
-
     /**
-     * @var ElasticRepository
+     * @var ImportManualHTMLService
      */
-    private $elasticRepository;
+    private $importer;
+
+    public function __construct(
+        ImportManualHTMLService $importer,
+        EventDispatcherInterface $dispatcher
+    ) {
+        parent::__construct(null);
+
+        $this->importer = $importer;
+
+        $dispatcher = $dispatcher;
+        $dispatcher->addListener(ManualStart::NAME, [$this, 'startProgress']);
+        $dispatcher->addListener(ManualAdvance::NAME, [$this, 'advanceProgress']);
+        $dispatcher->addListener(ManualFinish::NAME, [$this, 'finishProgress']);
+    }
 
     /**
-     *
      * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
      */
     protected function configure():void
@@ -44,90 +58,52 @@ class SnippetImporter extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->rootPath = $this->getContainer()->get('kernel')->getProjectDir() .'/_docs';
-        $this->elasticRepository = new ElasticRepository();
+        $rootPath = $this->getContainer()->get('kernel')->getProjectDir() .'/_docs';
         $timer = new Stopwatch();
         $timer->start('importer');
 
-        $io = new SymfonyStyle($input, $output);
-        $io->title('Starting import');
+        $this->io = new SymfonyStyle($input, $output);
+        $this->io->title('Starting import');
 //        if (is_numeric($input->getArgument('package'))) {
 //
 //        }
-        $io->section('Looking for manuals to import');
-        $manualsToImport = $this->findDocumentationFolders();
-        $io->writeln('Found ' . $manualsToImport->count()  . ' manuals.');
-        foreach ($manualsToImport as $manualFolder) {
-            $io->section('Importing ' . $manualFolder->getRelativePathname()  . ' - sit tight.');
+        $this->io->section('Looking for manuals to import');
+        $manualsToImport = $this->importer->findManuals($rootPath);
+        $this->io->writeln('Found ' . count($manualsToImport) . ' manuals.');
 
-            $parser = new ParseDocumentationHTMLService();
-            $parser->setMetaDataByFileName($manualFolder->getRelativePathname());
-            $this->elasticRepository->deleteByManualAnVersion(
-                $parser->getTitle(),
-                $parser->getTitle(),
-                $parser->getVersion(),
-                $parser->getLanguage()
-            );
-            $this->parseFolder($this->rootPath . '/' . $manualFolder->getRelativePathname() . '', $io, $parser);
+        foreach ($manualsToImport as $manual) {
+            /* @var Manual $manual */
+            $this->io->section('Importing ' . $this->makePathRelative($rootPath, $manual->getAbsolutePath())  . ' - sit tight.');
+
+            $this->importer->importManual($manual);
         }
         $totalTime = $timer->stop('importer');
-        $io->title('importing took '. $this->formatMilliseconds($totalTime->getDuration()));
+        $this->io->title('importing took '. $this->formatMilliseconds($totalTime->getDuration()));
     }
 
-    /**
-     * @param string $folder
-     * @param SymfonyStyle $io
-     * @param ParseDocumentationHTMLService $parser
-     * @throws \RuntimeException
-     * @throws \InvalidArgumentException
-     */
-    private function parseFolder(string $folder, SymfonyStyle $io, ParseDocumentationHTMLService $parser)
+    private function makePathRelative(string $base, string $path)
     {
-        $filesToProcess = $this->findAllHTMLFiles($folder);
-        $io->progressStart($filesToProcess->count());
-        foreach ($filesToProcess as $fileToProcess) {
-            foreach ($parser->getSections($fileToProcess->getContents(), $fileToProcess->getRelativePathname()) as $item) {
-                $this->elasticRepository->addOrUpdateDocument($item);
-            }
-            /** @noinspection DisconnectedForeachInstructionInspection */
-            $io->progressAdvance();
-        }
-        $io->progressFinish();
-    }
-
-    /**
-     * @param string $folder
-     * @return Finder
-     * @throws \InvalidArgumentException
-     */
-    private function findAllHTMLFiles(string $folder): Finder
-    {
-        $finder = new Finder();
-        $finder
-            ->files()
-            ->in($folder)
-            ->name('*.html')
-            ->notName('search.html')
-            ->notName('genindex.html')
-            ->notPath('_static')
-            ->notPath('singlehtml');
-        return $finder;
-    }
-
-    /**
-     * @return Finder
-     * @throws \InvalidArgumentException
-     */
-    private function findDocumentationFolders(): Finder
-    {
-        $finder = new Finder();
-        $finder->directories()->in($this->rootPath)->depth('== 4');
-        return $finder;
+        return str_replace(rtrim($base, '/') . '/', '', $path);
     }
 
     private function formatMilliseconds(int $milliseconds): string
     {
         $t = round($milliseconds / 1000);
         return sprintf('%02d:%02d:%02d', ($t/3600),($t/60%60), $t%60);
+    }
+
+    public function startProgress(Event $event)
+    {
+        $this->io->progressStart($event->getFiles()->count());
+    }
+
+    public function advanceProgress(Event $event)
+    {
+         $this->io->progressAdvance();
+    }
+
+    public function finishProgress(Event $event)
+    {
+        $this->io->progressFinish();
     }
 }
