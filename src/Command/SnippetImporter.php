@@ -8,7 +8,6 @@ use App\Event\ImportManual\ManualFinish;
 use App\Event\ImportManual\ManualStart;
 use App\Service\ImportManualHTMLService;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -58,7 +57,6 @@ class SnippetImporter extends Command
         $this->setName('docsearch:import');
         $this->setDescription('Imports documentation');
         $this->addOption('rootPath', null, InputOption::VALUE_REQUIRED, 'Root Path', $this->defaultRootPath);
-        $this->addArgument('package', InputArgument::OPTIONAL, 'Package Name');
     }
 
     /**
@@ -77,9 +75,7 @@ class SnippetImporter extends Command
 
         $this->io = new SymfonyStyle($input, $output);
         $this->io->title('Starting import');
-//        if (is_numeric($input->getArgument('package'))) {
-//
-//        }
+
         $this->io->section('Looking for manuals to import');
         $manualsToImport = $this->importer->findManuals($rootPath);
         $this->io->writeln('Found ' . count($manualsToImport) . ' manuals.');
@@ -87,9 +83,9 @@ class SnippetImporter extends Command
         foreach ($manualsToImport as $manual) {
             /* @var Manual $manual */
             $this->io->section('Importing ' . $this->makePathRelative($rootPath, $manual->getAbsolutePath())  . ' - sit tight.');
-
             $this->importer->importManual($manual);
         }
+
         $totalTime = $timer->stop('importer');
         $this->io->title('importing took ' . $this->formatMilliseconds($totalTime->getDuration()));
     }
