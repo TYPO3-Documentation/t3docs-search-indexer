@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: mathiasschreiber
@@ -7,7 +8,6 @@
  */
 
 namespace App\Service;
-
 
 use TYPO3Fluid\Fluid\Core\Rendering\RenderingContext;
 

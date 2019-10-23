@@ -7,5 +7,5 @@ use Symfony\Component\Finder\Finder;
 
 class ManualAdvance extends Event
 {
-    const NAME = 'importManual.advance';
+    public const NAME = 'importManual.advance';
 }

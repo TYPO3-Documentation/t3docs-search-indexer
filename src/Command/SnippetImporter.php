@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Command;
 
 use App\Dto\Manual;
@@ -39,7 +40,7 @@ class SnippetImporter extends ContainerAwareCommand
     /**
      * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
      */
-    protected function configure():void
+    protected function configure(): void
     {
         $this->setName('docsearch:import');
         $this->setDescription('Imports all documentation');
@@ -58,7 +59,7 @@ class SnippetImporter extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $rootPath = $this->getContainer()->get('kernel')->getProjectDir() .'/_docs';
+        $rootPath = $this->getContainer()->get('kernel')->getProjectDir() . '/_docs';
         $timer = new Stopwatch();
         $timer->start('importer');
 
@@ -78,7 +79,7 @@ class SnippetImporter extends ContainerAwareCommand
             $this->importer->importManual($manual);
         }
         $totalTime = $timer->stop('importer');
-        $this->io->title('importing took '. $this->formatMilliseconds($totalTime->getDuration()));
+        $this->io->title('importing took ' . $this->formatMilliseconds($totalTime->getDuration()));
     }
 
     private function makePathRelative(string $base, string $path)
@@ -89,7 +90,7 @@ class SnippetImporter extends ContainerAwareCommand
     private function formatMilliseconds(int $milliseconds): string
     {
         $t = round($milliseconds / 1000);
-        return sprintf('%02d:%02d:%02d', ($t/3600),($t/60%60), $t%60);
+        return sprintf('%02d:%02d:%02d', ($t / 3600), ($t / 60 % 60), $t % 60);
     }
 
     public function startProgress(Event $event)

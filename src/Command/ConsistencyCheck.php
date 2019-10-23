@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: mathiasschreiber
@@ -7,7 +8,6 @@
  */
 
 namespace App\Command;
-
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,7 +23,7 @@ class ConsistencyCheck extends ContainerAwareCommand
      *
      * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
      */
-    protected function configure():void
+    protected function configure(): void
     {
         $this->setName('docsearch:consistency');
         $this->setDescription('Checks documentation for consistency');
@@ -41,7 +41,7 @@ class ConsistencyCheck extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->rootPath = $this->getContainer()->get('kernel')->getProjectDir() .'/_docs';
+        $this->rootPath = $this->getContainer()->get('kernel')->getProjectDir() . '/_docs';
 
         $io = new SymfonyStyle($input, $output);
         $io->title('Starting import');

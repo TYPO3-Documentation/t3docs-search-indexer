@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: mathiasschreiber
@@ -7,7 +8,6 @@
  */
 
 namespace App\Controller;
-
 
 use App\Repository\ElasticRepository;
 use App\Traits\TYPO3FluidTrait;
@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
 class SearchController extends Controller
 {
     use TYPO3FluidTrait;
+
     /**
      * @Route("/", name="index")
      * @return \Symfony\Component\HttpFoundation\Response

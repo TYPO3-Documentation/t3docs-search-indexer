@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: mathiasschreiber
@@ -7,7 +8,6 @@
  */
 
 namespace App\Viewhelpers;
-
 
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractTagBasedViewHelper;

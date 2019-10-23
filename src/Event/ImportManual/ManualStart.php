@@ -7,7 +7,7 @@ use Symfony\Component\Finder\Finder;
 
 class ManualStart extends Event
 {
-    const NAME = 'importManual.start';
+    public const NAME = 'importManual.start';
 
     /**
      * @var Finder

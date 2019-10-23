@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: mathiasschreiber
@@ -7,7 +8,6 @@
  */
 
 namespace App\Repository;
-
 
 use App\Dto\Manual;
 use Elastica\Aggregation\Terms;
@@ -57,7 +57,7 @@ class ElasticRepository
     /**
      * @return Client
      */
-    public function getElasticClient() : Client
+    public function getElasticClient(): Client
     {
         return $this->elasticClient;
     }
@@ -65,7 +65,7 @@ class ElasticRepository
     /**
      * @return Index
      */
-    public function getElasticIndex() : Index
+    public function getElasticIndex(): Index
     {
         return $this->elasticIndex;
     }
@@ -218,7 +218,7 @@ class ElasticRepository
     /**
      * @return array
      */
-    protected function getPages() : array
+    protected function getPages(): array
     {
         $numPages = ceil($this->totalHits / $this->perPage);
         $i = 0;
@@ -259,7 +259,7 @@ class ElasticRepository
      *
      * @return string
      */
-    private function escape($value) : string
+    private function escape($value): string
     {
         //list taken from http://lucene.apache.org/java/docs/queryparsersyntax.html#Escaping%20Special%20Characters
         $pattern = '/(\+|-|&&|\|\||!|\(|\)|\{|}|\[|]|\^|"|~|\*|\?|:|\\\)/';
