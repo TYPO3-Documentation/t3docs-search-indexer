@@ -15,15 +15,68 @@ class ParseDocumentationHTMLServiceTest extends TestCase
 {
     /**
      * @test
-     * @dataProvider documentationDataProvider
-     * @param string $input
-     * @param array $expectedResult
+     * @dataProvider documentationFilePathDataProvider
      */
-    public function parserTest(string $input, array $expectedResult)
+    public function filePathParsing(
+        string $relativeFileName,
+        string $expectedTitle,
+        string $expectedType,
+        string $expectedVersion,
+        string $expectedLanguage,
+        string $expectedSlug
+    ) {
+        $subject = new ParseDocumentationHTMLService();
+        $subject->setMetaDataByFileName($relativeFileName);
+
+        $this->assertSame($subject->getTitle(), $expectedTitle);
+        $this->assertSame($subject->getType(), $expectedType);
+        $this->assertSame($subject->getVersion(), $expectedVersion);
+        $this->assertSame($subject->getLanguage(), $expectedLanguage);
+        $this->assertSame($subject->getSlug(), $expectedSlug);
+    }
+
+    public function documentationFilePathDataProvider(): array
+    {
+        return [
+            'core-extension-master' => [
+                'relativeFileName' => 'c/typo3/cms-core/master/en-us',
+                'expectedTitle' => 'typo3/cms-core',
+                'expectedType' => 'c',
+                'expectedVersion' => 'master',
+                'expectedLanguage' => 'en-us',
+                'expectedSlug' => 'c/typo3/cms-core/master/en-us',
+            ],
+            'core-extension-9.5' => [
+                'relativeFileName' => 'c/typo3/cms-core/9.5/en-us',
+                'expectedTitle' => 'typo3/cms-core',
+                'expectedType' => 'c',
+                'expectedVersion' => '9.5',
+                'expectedLanguage' => 'en-us',
+                'expectedSlug' => 'c/typo3/cms-core/9.5/en-us',
+            ],
+            '3rd-party-extension-draft' => [
+                'relativeFileName' => 'p/vendor/package-name/draft/en-us',
+                'expectedTitle' => 'vendor/package-name',
+                'expectedType' => 'p',
+                'expectedVersion' => 'draft',
+                'expectedLanguage' => 'en-us',
+                'expectedSlug' => 'p/vendor/package-name/draft/en-us',
+            ],
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider documentationDataProvider
+     */
+    public function contentParsing(string $input, string $relativeFileName, array $expectedResult)
     {
         $subject = new ParseDocumentationHTMLService();
-        $actualResult = $subject->parseContent($input);
-        $this->assertSame($actualResult, $expectedResult);
+        $receivedSection = $subject->getSections($input, $relativeFileName);
+
+        foreach ($expectedResult as $sectionIndex => $expectedSection) {
+            $this->assertSame($receivedSection[$sectionIndex], $expectedSection, 'Section with index ' . $sectionIndex . ' did not match.');
+        }
     }
 
     public function documentationDataProvider()
@@ -31,23 +84,27 @@ class ParseDocumentationHTMLServiceTest extends TestCase
         return [
             'simpleMarkup' => [
                 'input' => '
-                <html>
-                <div class="toBeIndexed">
-                    <div id="first-section" class="section">
-                        <h1>Headline 1</h1>
-                        <p>Content 1</p>
-                    </div>
-                </div>
-                </html>
+                    <html>
+                        <div class="toBeIndexed">
+                            <div id="first-section" class="section">
+                                <h1>Headline 1</h1>
+                                <p>Content 1</p>
+                            </div>
+                        </div>
+                    </html>
                 ',
-                'expected' => [
+                'relativeFileName' => 'p/docsearch/blog/8.7/en-us',
+                'expectedResult' => [
                     [
-                        'manual_name' => 'blog',
-                        'manual-type' => 'Extension Manual',
-                        'manual-version' => '8.7.0',
-                        'id' => 'first-section',
-                        'headline' => 'Headline 1',
-                        'content' => 'Content 1'
+                        'manual_title' => 'TBD',
+                        'manual_type' => 'TBD',
+                        'manual_version' => 'TBD',
+                        'manual_language' => 'TBD',
+                        'manual_slug' => 'TBD',
+                        'relative_url' => 'p/docsearch/blog/8.7/en-us',
+                        'fragment' => 'first-section',
+                        'snippet_title' => 'Headline 1',
+                        'snippet_content' => 'Content 1',
                     ]
                 ]
             ],
@@ -115,62 +172,84 @@ class ParseDocumentationHTMLServiceTest extends TestCase
 
 
                     </div>',
+                'relativeFileName' => 'p/docsearch/blog/8.7/en-us',
                 'expected' => [
                     [
-                        'manual_name' => 'blog',
-                        'manual-type' => 'Extension Manual',
-                        'manual-version' => '8.7.0',
-                        'id' => 'features-and-basic-concept',
-                        'headline' => 'Features and Basic Concept',
-                        'content' => 'The main goal for this blog extension was to use TYPO3s core concepts and elements to provide a full-blown blog that users of TYPO3 can instantly understand and use.'
+                        'manual_title' => 'TBD',
+                        'manual_type' => 'TBD',
+                        'manual_version' => 'TBD',
+                        'manual_language' => 'TBD',
+                        'manual_slug' => 'TBD',
+                        'relative_url' => 'p/docsearch/blog/8.7/en-us',
+                        'fragment' => 'features-and-basic-concept',
+                        'snippet_title' => 'Features and Basic Concept',
+                        'snippet_content' => 'The main goal for this blog extension was to use TYPO3s core concepts and elements to provide a full-blown blog that users of TYPO3 can instantly understand and use.'
                     ],
                     [
-                        'manual_name' => 'blog',
-                        'manual-type' => 'Extension Manual',
-                        'manual-version' => '8.7.0',
-                        'id' => 'pages-as-blog-entries',
-                        'headline' => 'Pages as blog entries',
-                        'content' => 'Blog entries are simply pages with a special page type blog entry and can be created and edited via the well-known page module. Creating new entries is as simple as dragging a new entry into the page tree.'
+                        'manual_title' => 'TBD',
+                        'manual_type' => 'TBD',
+                        'manual_version' => 'TBD',
+                        'manual_language' => 'TBD',
+                        'manual_slug' => 'TBD',
+                        'relative_url' => 'p/docsearch/blog/8.7/en-us',
+                        'fragment' => 'pages-as-blog-entries',
+                        'snippet_title' => 'Pages as blog entries',
+                        'snippet_content' => 'Blog entries are simply pages with a special page type blog entry and can be created and edited via the well-known page module. Creating new entries is as simple as dragging a new entry into the page tree.'
                     ],
                     [
-                        'manual_name' => 'blog',
-                        'manual-type' => 'Extension Manual',
-                        'manual-version' => '8.7.0',
-                        'id' => 'use-all-your-content-elements',
-                        'headline' => 'Use all your content elements',
-                        'content' => 'All your existing elements can be used on the blog pages - including backend layouts, custom content elements or plugins.'
+                        'manual_title' => 'TBD',
+                        'manual_type' => 'TBD',
+                        'manual_version' => 'TBD',
+                        'manual_language' => 'TBD',
+                        'manual_slug' => 'TBD',
+                        'relative_url' => 'p/docsearch/blog/8.7/en-us',
+                        'fragment' => 'use-all-your-content-elements',
+                        'snippet_title' => 'Use all your content elements',
+                        'snippet_content' => 'All your existing elements can be used on the blog pages - including backend layouts, custom content elements or plugins.'
                     ],
                     [
-                        'manual_name' => 'blog',
-                        'manual-type' => 'Extension Manual',
-                        'manual-version' => '8.7.0',
-                        'id' => 'flexible-positioning',
-                        'headline' => 'Flexible positioning',
-                        'content' => 'All parts of your new blog are usable on their own, so you can just use the elements you want. The different elements include for example the comments and comment form, a sidebar or the list of blog posts. All these elements can be used as separate content elements and therefor be positioned and used wherever you want.'
+                        'manual_title' => 'TBD',
+                        'manual_type' => 'TBD',
+                        'manual_version' => 'TBD',
+                        'manual_language' => 'TBD',
+                        'manual_slug' => 'TBD',
+                        'relative_url' => 'p/docsearch/blog/8.7/en-us',
+                        'fragment' => 'flexible-positioning',
+                        'snippet_title' => 'Flexible positioning',
+                        'snippet_content' => 'All parts of your new blog are usable on their own, so you can just use the elements you want. The different elements include for example the comments and comment form, a sidebar or the list of blog posts. All these elements can be used as separate content elements and therefor be positioned and used wherever you want.'
                     ],
                     [
-                        'manual_name' => 'blog',
-                        'manual-type' => 'Extension Manual',
-                        'manual-version' => '8.7.0',
-                        'id' => 'customizable-templates',
-                        'headline' => 'Customizable Templates',
-                        'content' => 'Templating is done via Fluid templates. If you want your blog to have a custom look and feel just replace the templates and styles with your own. If you just want a quick blog installation, use the templates provided by the extension and just add your stylesheets.'
+                        'manual_title' => 'TBD',
+                        'manual_type' => 'TBD',
+                        'manual_version' => 'TBD',
+                        'manual_language' => 'TBD',
+                        'manual_slug' => 'TBD',
+                        'relative_url' => 'p/docsearch/blog/8.7/en-us',
+                        'fragment' => 'customizable-templates',
+                        'snippet_title' => 'Customizable Templates',
+                        'snippet_content' => 'Templating is done via Fluid templates. If you want your blog to have a custom look and feel just replace the templates and styles with your own. If you just want a quick blog installation, use the templates provided by the extension and just add your stylesheets.'
                     ],
                     [
-                        'manual_name' => 'blog',
-                        'manual-type' => 'Extension Manual',
-                        'manual-version' => '8.7.0',
-                        'id' => 'categorizing-and-tagging',
-                        'headline' => 'Categorizing and Tagging',
-                        'content' => 'Use categories and tags to add meta information to your blog posts. Let your users explore your posts based on their interests navigating via tags or categories to find similar entries. Add posts from the same category to your posts to get your readers to read even more.'
+                        'manual_title' => 'TBD',
+                        'manual_type' => 'TBD',
+                        'manual_version' => 'TBD',
+                        'manual_language' => 'TBD',
+                        'manual_slug' => 'TBD',
+                        'relative_url' => 'p/docsearch/blog/8.7/en-us',
+                        'fragment' => 'categorizing-and-tagging',
+                        'snippet_title' => 'Categorizing and Tagging',
+                        'snippet_content' => 'Use categories and tags to add meta information to your blog posts. Let your users explore your posts based on their interests navigating via tags or categories to find similar entries. Add posts from the same category to your posts to get your readers to read even more.'
                     ],
                     [
-                        'manual_name' => 'blog',
-                        'manual-type' => 'Extension Manual',
-                        'manual-version' => '8.7.0',
-                        'id' => 'be-social-share-your-posts',
-                        'headline' => 'Be social - share your posts',
-                        'content' => 'Enable sharing in the commonly used social networks by enabling a single checkbox.'
+                        'manual_title' => 'TBD',
+                        'manual_type' => 'TBD',
+                        'manual_version' => 'TBD',
+                        'manual_language' => 'TBD',
+                        'manual_slug' => 'TBD',
+                        'relative_url' => 'p/docsearch/blog/8.7/en-us',
+                        'fragment' => 'be-social-share-your-posts',
+                        'snippet_title' => 'Be social - share your posts',
+                        'snippet_content' => 'Enable sharing in the commonly used social networks by enabling a single checkbox.'
                     ],
                 ]
             ],
@@ -197,103 +276,32 @@ class ParseDocumentationHTMLServiceTest extends TestCase
 
 
                     </div>',
+                'relativeFileName' => 'p/docsearch/blog/8.7/en-us',
                 'expected' => [
                     [
-                        'manual_name' => 'blog',
-                        'manual-type' => 'Extension Manual',
-                        'manual-version' => '8.7.0',
-                        'id' => 'features-and-basic-concept',
-                        'headline' => 'Features and Basic Concept',
-                        'content' => 'The main goal for this blog extension was to use TYPO3s core concepts and elements to provide a full-blown blog that users of TYPO3 can instantly understand and use.'
+                        'manual_title' => 'TBD',
+                        'manual_type' => 'TBD',
+                        'manual_version' => 'TBD',
+                        'manual_language' => 'TBD',
+                        'manual_slug' => 'TBD',
+                        'relative_url' => 'p/docsearch/blog/8.7/en-us',
+                        'fragment' => 'features-and-basic-concept',
+                        'snippet_title' => 'Features and Basic Concept',
+                        'snippet_content' => 'The main goal for this blog extension was to use TYPO3s core concepts and elements to provide a full-blown blog that users of TYPO3 can instantly understand and use.'
                     ],
                     [
-                        'manual_name' => 'blog',
-                        'manual-type' => 'Extension Manual',
-                        'manual-version' => '8.7.0',
-                        'id' => 'pages-as-blog-entries',
-                        'headline' => 'Pages as blog entries',
-                        'content' => 'Blog entries are simply pages with a special page type blog entry and can be created and edited via the well-known page module. Creating new entries is as simple as dragging a new entry into the page tree.'
+                        'manual_title' => 'TBD',
+                        'manual_type' => 'TBD',
+                        'manual_version' => 'TBD',
+                        'manual_language' => 'TBD',
+                        'manual_slug' => 'TBD',
+                        'relative_url' => 'p/docsearch/blog/8.7/en-us',
+                        'fragment' => 'pages-as-blog-entries',
+                        'snippet_title' => 'Pages as blog entries',
+                        'snippet_content' => 'Blog entries are simply pages with a special page type blog entry and can be created and edited via the well-known page module. Creating new entries is as simple as dragging a new entry into the page tree.'
                     ],
                 ]
             ],
-//            'indexMarkup' => [
-//                'input' => '<div itemprop="articleBody" class="toBeIndexed">
-//
-//  <div class="section" id="typo3-blog-extension">
-//<span id="start"></span><h1>TYPO3 Blog Extension<a class="headerlink" href="#typo3-blog-extension" title="Permalink to this headline">¶</a></h1>
-//<table class="docutils field-list" frame="void" rules="none">
-//<colgroup><col class="field-name">
-//<col class="field-body">
-//</colgroup><tbody valign="top">
-//<tr class="field-odd field"><th class="field-name">Author:</th><td class="field-body">TYPO3 GmbH Team &lt;<a class="reference external" href="mailto:info%40typo3.com">info<span>@</span>typo3<span>.</span>com</a>&gt;</td>
-//</tr>
-//<tr class="field-even field"><th class="field-name">License:</th><td class="field-body">GPL 3.0</td>
-//</tr>
-//<tr class="field-odd field"><th class="field-name">Rendered:</th><td class="field-body">2017-09-04 14:17</td>
-//</tr>
-//<tr class="field-even field"><th class="field-name">Description:</th><td class="field-body">The blog extension for TYPO3 provides a blog based on TYPO3s core features - pages and content elements. Use all your
-//favourite and well-known elements to create a full blown blog with ease.</td>
-//</tr>
-//</tbody>
-//</table>
-//<div class="toctree-wrapper compound">
-//<ul>
-//<li class="toctree-l1"><a class="reference internal" href="Basics/Index.html">Features and Basic Concept</a><ul>
-//<li class="toctree-l2"><a class="reference internal" href="Basics/Index.html#pages-as-blog-entries">Pages as blog entries</a></li>
-//<li class="toctree-l2"><a class="reference internal" href="Basics/Index.html#use-all-your-content-elements">Use all your content elements</a></li>
-//<li class="toctree-l2"><a class="reference internal" href="Basics/Index.html#flexible-positioning">Flexible positioning</a></li>
-//<li class="toctree-l2"><a class="reference internal" href="Basics/Index.html#customizable-templates">Customizable Templates</a></li>
-//<li class="toctree-l2"><a class="reference internal" href="Basics/Index.html#categorizing-and-tagging">Categorizing and Tagging</a></li>
-//<li class="toctree-l2"><a class="reference internal" href="Basics/Index.html#be-social-share-your-posts">Be social - share your posts</a></li>
-//</ul>
-//</li>
-//<li class="toctree-l1"><a class="reference internal" href="Administrators/Index.html">Blogging for Administrators</a><ul>
-//<li class="toctree-l2"><a class="reference internal" href="Administrators/Index.html#installation">Installation</a></li>
-//<li class="toctree-l2"><a class="reference internal" href="Administrators/Index.html#latest-version-from-git">Latest version from git</a></li>
-//<li class="toctree-l2"><a class="reference internal" href="Administrators/Index.html#setup">Setup</a></li>
-//<li class="toctree-l2"><a class="reference internal" href="Administrators/Index.html#plugin-types">Plugin types</a></li>
-//<li class="toctree-l2"><a class="reference internal" href="Administrators/Index.html#creating-categories-and-tags">Creating Categories and Tags</a></li>
-//<li class="toctree-l2"><a class="reference internal" href="Administrators/Index.html#enable-sharing">Enable sharing</a></li>
-//<li class="toctree-l2"><a class="reference internal" href="Administrators/Index.html#avatarprovider">AvatarProvider</a></li>
-//</ul>
-//</li>
-//<li class="toctree-l1"><a class="reference internal" href="Integrators/Index.html">Blogging for Integrators</a><ul>
-//<li class="toctree-l2"><a class="reference internal" href="Integrators/Index.html#typoscript-reference">TypoScript Reference</a></li>
-//</ul>
-//</li>
-//<li class="toctree-l1"><a class="reference internal" href="Editors/Index.html">Blogging for Editors</a><ul>
-//<li class="toctree-l2"><a class="reference internal" href="Editors/Index.html#create-a-new-post">Create a new post</a></li>
-//<li class="toctree-l2"><a class="reference internal" href="Editors/Index.html#add-content-to-your-post">Add content to your post</a></li>
-//</ul>
-//</li>
-//<li class="toctree-l1"><a class="reference internal" href="FAQ/Index.html">Frequently Asked Questions</a><ul>
-//<li class="toctree-l2"><a class="reference internal" href="FAQ/Index.html#where-to-report-bugs-or-improvements">Where to report bugs or improvements?</a></li>
-//<li class="toctree-l2"><a class="reference internal" href="FAQ/Index.html#slack-channel">Slack channel</a></li>
-//<li class="toctree-l2"><a class="reference internal" href="FAQ/Index.html#contributions">Contributions</a></li>
-//<li class="toctree-l2"><a class="reference internal" href="FAQ/Index.html#clone-git-repo">Clone / git repo</a></li>
-//</ul>
-//</li>
-//<li class="toctree-l1"><a class="reference internal" href="Changelog/Index.html">Changelog</a><ul>
-//<li class="toctree-l2"><a class="reference internal" href="Changelog/1.2.0/Index.html">Changes in version 1.2.0</a></li>
-//</ul>
-//</li>
-//</ul>
-//</div>
-//</div>
-//
-//
-//           </div>',
-//                'expected' => [
-//                    [
-//                        'manual_name' => 'blog',
-//                        'manual-type' => 'Extension Manual',
-//                        'manual-version' => '8.7.0',
-//                        'id' => 'first-section',
-//                        'headline' => 'TYPO3 Blog Extension',
-//                        'content' => 'Content 1'
-//                    ]
-//                ]
-//            ],
         ];
     }
 }

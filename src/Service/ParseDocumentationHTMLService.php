@@ -13,7 +13,7 @@ use Symfony\Component\CssSelector\CssSelectorConverter;
 
 class ParseDocumentationHTMLService
 {
-    private $manualMetaData = [
+    private $metaData = [
         'manual_title' => 'TBD',
         'manual_type' => 'TBD',
         'manual_version' => 'TBD',
@@ -21,43 +21,47 @@ class ParseDocumentationHTMLService
         'manual_slug' => 'TBD'
     ];
 
-    public function setManualName(string $manualName): void
+    public function getTitle(): string
     {
-        $this->manualMetaData['manual_title'] = $manualName;
+        return $this->metaData['manual_title'];
     }
 
-    /**
-     * @throws \InvalidArgumentException On unkown manual type.
-     */
-    public function setManualType(string $manualType): void
+    public function getType(): string
     {
-        $this->manualMetaData['manual_type'] = $manualType;
+        return $this->metaData['manual_type'];
     }
 
-    public function setManualVersion(string $manualVersion): void
+    public function getVersion(): string
     {
-        $this->manualMetaData['manual_version'] = $manualVersion;
+        return $this->metaData['manual_version'];
     }
 
-    public function setManualLanguage(string $manualLanguage): void
+    public function getLanguage(): string
     {
-        $this->manualMetaData['manual_language'] = $manualLanguage;
+        return $this->metaData['manual_language'];
     }
 
-    public function setManualSlug(string $manualSlug): void
+    public function getSlug(): string
     {
-        $this->manualMetaData['manual_slug'] = $manualSlug;
+        return $this->metaData['manual_slug'];
     }
 
-    /**
-     * @param string $content
-     * @param string $relativeFileName
-     * @return array
-     */
-    public function parseContent(string $content, string $relativeFileName):array
+    public function setMetaDataByFileName(string $relativeFileName)
     {
-        // Set currentFileName
-        $this->manualMetaData['relative_url'] = $relativeFileName;
+        list($manualType, $vendor, $name, $version, $language) = explode('/', $relativeFileName);
+
+        $this->metaData['manual_title'] = implode('/', [$vendor, $name]);
+        $this->metaData['manual_type'] = $manualType;
+        $this->metaData['manual_version'] = $version;
+        $this->metaData['manual_language'] = $language;
+        $this->metaData['manual_slug'] = $relativeFileName;
+    }
+
+    public function getSections(string $content, string $relativeFileName): array
+    {
+        $metaData = $this->metaData;
+        $metaData['relative_url'] = $relativeFileName;
+
         libxml_use_internal_errors(true);
         $document = new \DOMDocument();
         $document->loadHTML($content);
@@ -67,15 +71,14 @@ class ParseDocumentationHTMLService
         $query = $xpath->query($mainContentQuery);
         if ($query->length > 0) {
             $mainSection = $query->item(0)->C14N();
-            return $this->getAllSections($mainSection);
+            return $this->getAllSections($mainSection, $metaData);
         }
+
         return [];
     }
 
-    private function getAllSections(string $markup): array
+    private function getAllSections(string $markup, array $metaData): array
     {
-        $manualMetaData = $this->manualMetaData;
-
         $sectionPieces = [];
         $document = new \DOMDocument();
         $document->loadHTML($markup);
@@ -89,7 +92,7 @@ class ParseDocumentationHTMLService
         foreach ($sections as $index => $section) {
             $foundHeadline = $this->findHeadline($section, $xpath);
             if ($foundHeadline !== []) {
-                $sectionPiece = $manualMetaData;
+                $sectionPiece = $metaData;
                 $sectionPiece['fragment'] = $section->getAttribute('id');
                 $sectionPiece['snippet_title'] = $foundHeadline['headlineText'];
                 $section->removeChild($foundHeadline['node']);

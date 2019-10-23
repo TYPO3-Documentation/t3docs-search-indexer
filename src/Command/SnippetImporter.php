@@ -59,19 +59,15 @@ class SnippetImporter extends ContainerAwareCommand
         $io->writeln('Found ' . $manualsToImport->count()  . ' manuals.');
         foreach ($manualsToImport as $manualFolder) {
             $io->section('Importing ' . $manualFolder->getRelativePathname()  . ' - sit tight.');
-            $metaData = $this->getmanualMetaData($manualFolder->getRelativePathname());
-            $this->elasticRepository->deleteByManualAnVersion(
-                $metaData['manualType'],
-                $metaData['manualName'],
-                $metaData['manualVersion'],
-                $metaData['manualLanguage']
-            );
+
             $parser = new ParseDocumentationHTMLService();
-            $parser->setManualType($metaData['manualType']);
-            $parser->setManualName($metaData['manualName']);
-            $parser->setManualVersion($metaData['manualVersion']);
-            $parser->setManualLAnguage($metaData['manualLanguage']);
-            $parser->setManualSlug($manualFolder->getRelativePathname());
+            $parser->setMetaDataByFileName($manualFolder->getRelativePathname());
+            $this->elasticRepository->deleteByManualAnVersion(
+                $parser->getTitle(),
+                $parser->getTitle(),
+                $parser->getVersion(),
+                $parser->getLanguage()
+            );
             $this->parseFolder($this->rootPath . '/' . $manualFolder->getRelativePathname() . '', $io, $parser);
         }
         $totalTime = $timer->stop('importer');
@@ -90,9 +86,7 @@ class SnippetImporter extends ContainerAwareCommand
         $filesToProcess = $this->findAllHTMLFiles($folder);
         $io->progressStart($filesToProcess->count());
         foreach ($filesToProcess as $fileToProcess) {
-            $sectionsInFile = $parser->parseContent($fileToProcess->getContents(), $fileToProcess->getRelativePathname());
-            /** @var array $sectionsInFile */
-            foreach ($sectionsInFile as $item) {
+            foreach ($parser->getSections($fileToProcess->getContents(), $fileToProcess->getRelativePathname()) as $item) {
                 $this->elasticRepository->addOrUpdateDocument($item);
             }
             /** @noinspection DisconnectedForeachInstructionInspection */
@@ -129,18 +123,6 @@ class SnippetImporter extends ContainerAwareCommand
         $finder = new Finder();
         $finder->directories()->in($this->rootPath)->depth('== 4');
         return $finder;
-    }
-
-    private function getManualMetaData(string $folderName): array
-    {
-        list($manualType, $vendor, $name, $version, $language) = explode('/', $folderName);
-
-        return [
-            'manualName' => implode('/', [$vendor, $name]),
-            'manualType' => $manualType ,
-            'manualVersion' => $version,
-            'manualLanguage' => $language,
-        ];
     }
 
     private function formatMilliseconds(int $milliseconds): string
