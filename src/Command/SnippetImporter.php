@@ -8,6 +8,7 @@ use App\Event\ImportManual\ManualFinish;
 use App\Event\ImportManual\ManualStart;
 use App\Service\ImportManualHTMLService;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -52,6 +53,7 @@ class SnippetImporter extends Command
         $this->setName('docsearch:import');
         $this->setDescription('Imports documentation');
         $this->addOption('rootPath', null, InputOption::VALUE_REQUIRED, 'Root Path', $this->defaultRootPath);
+        $this->addArgument('packagePath', InputArgument::OPTIONAL, 'Package Path');
     }
 
     /**
@@ -64,7 +66,6 @@ class SnippetImporter extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $rootPath = $input->getOption('rootPath');
         $timer = new Stopwatch();
         $timer->start('importer');
 
@@ -72,17 +73,29 @@ class SnippetImporter extends Command
         $this->io->title('Starting import');
 
         $this->io->section('Looking for manuals to import');
-        $manualsToImport = $this->importer->findManuals($rootPath);
+        $manualsToImport = $this->getManuals($input);
         $this->io->writeln('Found ' . count($manualsToImport) . ' manuals.');
 
         foreach ($manualsToImport as $manual) {
             /* @var Manual $manual */
-            $this->io->section('Importing ' . $this->makePathRelative($rootPath, $manual->getAbsolutePath())  . ' - sit tight.');
+            $this->io->section('Importing ' . $this->makePathRelative($input->getOption('rootPath'), $manual->getAbsolutePath())  . ' - sit tight.');
             $this->importer->importManual($manual);
         }
 
         $totalTime = $timer->stop('importer');
         $this->io->title('importing took ' . $this->formatMilliseconds($totalTime->getDuration()));
+    }
+
+    private function getManuals(InputInterface $input): array
+    {
+        if ($input->getArgument('packagePath') !== null) {
+            return [$this->importer->findManual(
+                $input->getOption('rootPath'),
+                $input->getArgument('packagePath')
+            )];
+        }
+
+        return $this->importer->findManuals($input->getOption('rootPath'));
     }
 
     private function makePathRelative(string $base, string $path)

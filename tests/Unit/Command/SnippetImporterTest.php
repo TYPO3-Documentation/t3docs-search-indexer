@@ -74,4 +74,29 @@ class SnippetImporterTest extends TestCase
         $commandTester = new CommandTester($command);
         $commandTester->execute([]);
     }
+
+    /**
+     * @test
+     */
+    public function importsOnlyProvidedPackage()
+    {
+        $importer = $this->getMockBuilder(ImportManualHTMLService::class)->disableOriginalConstructor()->getMock();
+        $dispatcher = $this->getMockBuilder(EventDispatcherInterface::class)->getMock();
+
+        $manualMock = $this->getMockBuilder(Manual::class)->disableOriginalConstructor()->getMock();
+        $manualMock->expects($this->any())->method('getTitle')->willReturn('typo3/manual-1');
+
+        $importer->expects($this->once())->method('findManual')
+            ->with('_docsDefault', 'c/typo3/cms-core/master/en-us')
+            ->willReturn($manualMock);
+        $importer->expects($this->once())->method('importManual')->withConsecutive(
+            $this->callback(function (Manual $manual) {
+                return $manual->getTitle() === 'typo3/cms-core';
+            })
+        );
+
+        $command = new SnippetImporter('_docsDefault', $importer, $dispatcher);
+        $commandTester = new CommandTester($command);
+        $commandTester->execute(['packagePath' => 'c/typo3/cms-core/master/en-us']);
+    }
 }

@@ -59,9 +59,8 @@ class ParseDocumentationHTMLServiceTest extends TestCase
                 ],
             ],
         ]);
-        $folders = $subject->findFolders($rootDir->url());
 
-        $this->assertCount(6, $folders);
+        $this->assertCount(6, $subject->findFolders($rootDir->url()));
     }
 
     /**

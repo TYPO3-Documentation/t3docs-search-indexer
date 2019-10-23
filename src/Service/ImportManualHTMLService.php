@@ -16,6 +16,7 @@ class ImportManualHTMLService
      * @var ElasticRepository
      */
     private $elasticRepository;
+
     /**
      * @var ParseDocumentationHTMLService
      */
@@ -44,6 +45,13 @@ class ImportManualHTMLService
             $manuals[] = $this->parser->createFromFolder($rootPath, $folder);
         }
         return $manuals;
+    }
+
+    public function findManual(string $rootPath, string $manualPath): Manual
+    {
+        $folder = new SplFileInfo($rootPath . '/' . $manualPath, '', '');
+
+        return $this->parser->createFromFolder($rootPath, $folder);
     }
 
     public function importManual(Manual $manual)

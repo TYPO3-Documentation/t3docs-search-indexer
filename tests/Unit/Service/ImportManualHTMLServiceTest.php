@@ -53,6 +53,38 @@ class ImportManualHTMLServiceTest extends TestCase
     /**
      * @test
      */
+    public function findsManual()
+    {
+        $parser = $this->getMockBuilder(ParseDocumentationHTMLService::class)->getMock();
+        $subject = new ImportManualHTMLService(
+            $this->getMockBuilder(ElasticRepository::class)->getMock(),
+            $parser,
+            $this->getMockBuilder(EventDispatcherInterface::class)->getMock()
+        );
+
+        $folder = $this->getMockBuilder(SplFileInfo::class)->disableOriginalConstructor()->getMock();
+
+        $finder = $this->getMockBuilder(Finder::class)->getMock();
+        $finder->expects($this->any())
+            ->method('getIterator')
+            ->willReturn(new \ArrayObject([$folder]));
+
+        $manual = $this->getMockBuilder(Manual::class)->disableOriginalConstructor()->getMock();
+
+        $parser->expects($this->once())
+            ->method('createFromFolder')
+            ->with()
+            ->willReturn($manual);
+
+        $returnedManual = $subject->findManual('_docsFolder', 'c/typo3/cms-core/master/en-us');
+
+        $this->assertInstanceOf(Manual::class, $manual);
+        $this->assertSame($manual, $returnedManual);
+    }
+
+    /**
+     * @test
+     */
     public function existingManualIsDeletedByMetaDataduringImport()
     {
         $manual = $this->getMockBuilder(Manual::class)->disableOriginalConstructor()->getMock();
