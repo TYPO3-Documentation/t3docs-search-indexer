@@ -187,15 +187,15 @@ class ElasticRepository
         $trackerAggregation = new Terms('Document');
         $trackerAggregation->setField('manual_title');
         $catAggregation->addAggregation($trackerAggregation);
-//
+
 //        $status = new Terms('Status');
 //        $status->setField('status.name');
 //        $elasticaQuery->addAggregation($status);
-//
+
 //        $priority = new Terms('Priority');
 //        $priority->setField('priority.name');
 //        $elasticaQuery->addAggregation($priority);
-//
+
         $language = new Terms('Language');
         $language->setField('manual_language');
         $elasticaQuery->addAggregation($language);
@@ -203,11 +203,12 @@ class ElasticRepository
         $t3ver = new Terms('Version');
         $t3ver->setField('manual_version');
         $elasticaQuery->addAggregation($t3ver);
+
 //
 //        $targetver = new Terms('Target Version');
 //        $targetver->setField('fixed_version.name');
 //        $elasticaQuery->addAggregation($targetver);
-//
+
 //        $phpVer = new Terms('PHP Version');
 //        $phpVer->setField('php_version');
 //        $elasticaQuery->addAggregation($phpVer);
