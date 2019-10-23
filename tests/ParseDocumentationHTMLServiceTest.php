@@ -42,9 +42,9 @@ class ParseDocumentationHTMLServiceTest extends TestCase
                 ',
                 'expected' => [
                     [
-                        'book_name' => 'blog',
-                        'book-type' => 'Extension Manual',
-                        'book-version' => '8.7.0',
+                        'manual_name' => 'blog',
+                        'manual-type' => 'Extension Manual',
+                        'manual-version' => '8.7.0',
                         'id' => 'first-section',
                         'headline' => 'Headline 1',
                         'content' => 'Content 1'
@@ -117,57 +117,57 @@ class ParseDocumentationHTMLServiceTest extends TestCase
                     </div>',
                 'expected' => [
                     [
-                        'book_name' => 'blog',
-                        'book-type' => 'Extension Manual',
-                        'book-version' => '8.7.0',
+                        'manual_name' => 'blog',
+                        'manual-type' => 'Extension Manual',
+                        'manual-version' => '8.7.0',
                         'id' => 'features-and-basic-concept',
                         'headline' => 'Features and Basic Concept',
                         'content' => 'The main goal for this blog extension was to use TYPO3s core concepts and elements to provide a full-blown blog that users of TYPO3 can instantly understand and use.'
                     ],
                     [
-                        'book_name' => 'blog',
-                        'book-type' => 'Extension Manual',
-                        'book-version' => '8.7.0',
+                        'manual_name' => 'blog',
+                        'manual-type' => 'Extension Manual',
+                        'manual-version' => '8.7.0',
                         'id' => 'pages-as-blog-entries',
                         'headline' => 'Pages as blog entries',
                         'content' => 'Blog entries are simply pages with a special page type blog entry and can be created and edited via the well-known page module. Creating new entries is as simple as dragging a new entry into the page tree.'
                     ],
                     [
-                        'book_name' => 'blog',
-                        'book-type' => 'Extension Manual',
-                        'book-version' => '8.7.0',
+                        'manual_name' => 'blog',
+                        'manual-type' => 'Extension Manual',
+                        'manual-version' => '8.7.0',
                         'id' => 'use-all-your-content-elements',
                         'headline' => 'Use all your content elements',
                         'content' => 'All your existing elements can be used on the blog pages - including backend layouts, custom content elements or plugins.'
                     ],
                     [
-                        'book_name' => 'blog',
-                        'book-type' => 'Extension Manual',
-                        'book-version' => '8.7.0',
+                        'manual_name' => 'blog',
+                        'manual-type' => 'Extension Manual',
+                        'manual-version' => '8.7.0',
                         'id' => 'flexible-positioning',
                         'headline' => 'Flexible positioning',
                         'content' => 'All parts of your new blog are usable on their own, so you can just use the elements you want. The different elements include for example the comments and comment form, a sidebar or the list of blog posts. All these elements can be used as separate content elements and therefor be positioned and used wherever you want.'
                     ],
                     [
-                        'book_name' => 'blog',
-                        'book-type' => 'Extension Manual',
-                        'book-version' => '8.7.0',
+                        'manual_name' => 'blog',
+                        'manual-type' => 'Extension Manual',
+                        'manual-version' => '8.7.0',
                         'id' => 'customizable-templates',
                         'headline' => 'Customizable Templates',
                         'content' => 'Templating is done via Fluid templates. If you want your blog to have a custom look and feel just replace the templates and styles with your own. If you just want a quick blog installation, use the templates provided by the extension and just add your stylesheets.'
                     ],
                     [
-                        'book_name' => 'blog',
-                        'book-type' => 'Extension Manual',
-                        'book-version' => '8.7.0',
+                        'manual_name' => 'blog',
+                        'manual-type' => 'Extension Manual',
+                        'manual-version' => '8.7.0',
                         'id' => 'categorizing-and-tagging',
                         'headline' => 'Categorizing and Tagging',
                         'content' => 'Use categories and tags to add meta information to your blog posts. Let your users explore your posts based on their interests navigating via tags or categories to find similar entries. Add posts from the same category to your posts to get your readers to read even more.'
                     ],
                     [
-                        'book_name' => 'blog',
-                        'book-type' => 'Extension Manual',
-                        'book-version' => '8.7.0',
+                        'manual_name' => 'blog',
+                        'manual-type' => 'Extension Manual',
+                        'manual-version' => '8.7.0',
                         'id' => 'be-social-share-your-posts',
                         'headline' => 'Be social - share your posts',
                         'content' => 'Enable sharing in the commonly used social networks by enabling a single checkbox.'
@@ -199,17 +199,17 @@ class ParseDocumentationHTMLServiceTest extends TestCase
                     </div>',
                 'expected' => [
                     [
-                        'book_name' => 'blog',
-                        'book-type' => 'Extension Manual',
-                        'book-version' => '8.7.0',
+                        'manual_name' => 'blog',
+                        'manual-type' => 'Extension Manual',
+                        'manual-version' => '8.7.0',
                         'id' => 'features-and-basic-concept',
                         'headline' => 'Features and Basic Concept',
                         'content' => 'The main goal for this blog extension was to use TYPO3s core concepts and elements to provide a full-blown blog that users of TYPO3 can instantly understand and use.'
                     ],
                     [
-                        'book_name' => 'blog',
-                        'book-type' => 'Extension Manual',
-                        'book-version' => '8.7.0',
+                        'manual_name' => 'blog',
+                        'manual-type' => 'Extension Manual',
+                        'manual-version' => '8.7.0',
                         'id' => 'pages-as-blog-entries',
                         'headline' => 'Pages as blog entries',
                         'content' => 'Blog entries are simply pages with a special page type blog entry and can be created and edited via the well-known page module. Creating new entries is as simple as dragging a new entry into the page tree.'
@@ -285,9 +285,9 @@ class ParseDocumentationHTMLServiceTest extends TestCase
 //           </div>',
 //                'expected' => [
 //                    [
-//                        'book_name' => 'blog',
-//                        'book-type' => 'Extension Manual',
-//                        'book-version' => '8.7.0',
+//                        'manual_name' => 'blog',
+//                        'manual-type' => 'Extension Manual',
+//                        'manual-version' => '8.7.0',
 //                        'id' => 'first-section',
 //                        'headline' => 'TYPO3 Blog Extension',
 //                        'content' => 'Content 1'

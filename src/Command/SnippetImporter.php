@@ -54,25 +54,25 @@ class SnippetImporter extends ContainerAwareCommand
 //        if (is_numeric($input->getArgument('package'))) {
 //
 //        }
-        $io->section('Looking for books to import');
-        $booksToImport = $this->findDocumentationFolders();
-        $io->writeln('Found ' . $booksToImport->count()  . ' books.');
-        foreach ($booksToImport as $bookFolder) {
-            $io->section('Importing ' . $bookFolder->getRelativePathname()  . ' - sit tight.');
-            $metaData = $this->getBookMetaData($bookFolder->getRelativePathname());
-            $this->elasticRepository->deleteByBookAnVersion(
-                $metaData['bookType'],
-                $metaData['bookName'],
-                $metaData['bookVersion'],
-                $metaData['bookLanguage']
+        $io->section('Looking for manuals to import');
+        $manualsToImport = $this->findDocumentationFolders();
+        $io->writeln('Found ' . $manualsToImport->count()  . ' manuals.');
+        foreach ($manualsToImport as $manualFolder) {
+            $io->section('Importing ' . $manualFolder->getRelativePathname()  . ' - sit tight.');
+            $metaData = $this->getmanualMetaData($manualFolder->getRelativePathname());
+            $this->elasticRepository->deleteByManualAnVersion(
+                $metaData['manualType'],
+                $metaData['manualName'],
+                $metaData['manualVersion'],
+                $metaData['manualLanguage']
             );
             $parser = new ParseDocumentationHTMLService();
-            $parser->setBookType($metaData['bookType']);
-            $parser->setBookName($metaData['bookName']);
-            $parser->setBookVersion($metaData['bookVersion']);
-            $parser->setBookLAnguage($metaData['bookLanguage']);
-            $parser->setBookSlug($bookFolder->getRelativePathname());
-            $this->parseFolder($this->rootPath . '/' . $bookFolder->getRelativePathname() . '', $io, $parser);
+            $parser->setManualType($metaData['manualType']);
+            $parser->setManualName($metaData['manualName']);
+            $parser->setManualVersion($metaData['manualVersion']);
+            $parser->setManualLAnguage($metaData['manualLanguage']);
+            $parser->setManualSlug($manualFolder->getRelativePathname());
+            $this->parseFolder($this->rootPath . '/' . $manualFolder->getRelativePathname() . '', $io, $parser);
         }
         $totalTime = $timer->stop('importer');
         $io->title('importing took '. $this->formatMilliseconds($totalTime->getDuration()));
@@ -131,15 +131,15 @@ class SnippetImporter extends ContainerAwareCommand
         return $finder;
     }
 
-    private function getBookMetaData(string $folderName): array
+    private function getManualMetaData(string $folderName): array
     {
-        list($bookType, $vendor, $name, $version, $language) = explode('/', $folderName);
+        list($manualType, $vendor, $name, $version, $language) = explode('/', $folderName);
 
         return [
-            'bookName' => implode('/', [$vendor, $name]),
-            'bookType' => $bookType ,
-            'bookVersion' => $version,
-            'bookLanguage' => $language,
+            'manualName' => implode('/', [$vendor, $name]),
+            'manualType' => $manualType ,
+            'manualVersion' => $version,
+            'manualLanguage' => $language,
         ];
     }
 

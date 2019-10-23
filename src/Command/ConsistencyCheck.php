@@ -48,11 +48,11 @@ class ConsistencyCheck extends ContainerAwareCommand
 //        if (is_numeric($input->getArgument('package'))) {
 //
 //        }
-        $io->section('Looking for books to import');
-        $booksToImport = $this->findDocumentationFolders();
-        $io->writeln('Found ' . $booksToImport->count()  . ' books.');
-        foreach ($booksToImport as $bookFolder) {
-            $io->section('Importing ' . $bookFolder->getRelativePathname()  . ' - sit tight.');
+        $io->section('Looking for manuals to import');
+        $manualsToImport = $this->findDocumentationFolders();
+        $io->writeln('Found ' . $manualsToImport->count()  . ' manuals.');
+        foreach ($manualsToImport as $manualFolder) {
+            $io->section('Importing ' . $manualFolder->getRelativePathname()  . ' - sit tight.');
         }
     }
 

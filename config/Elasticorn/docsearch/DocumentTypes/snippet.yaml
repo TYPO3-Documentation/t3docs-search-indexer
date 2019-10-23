@@ -1,12 +1,12 @@
 snippet_id:
   type: keyword
-book_title:
+manual_title:
   type: keyword
-book_type:
+manual_type:
   type: keyword
-book_version:
+manual_version:
   type: keyword
-book_language:
+manual_language:
   type: keyword
 page_title:
   type: text

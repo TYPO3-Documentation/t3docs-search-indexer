@@ -72,14 +72,14 @@ class ElasticRepository
     public function addOrUpdateDocument(array $snippet): void
     {
         // Generate id
-        $urlFragment = str_replace('/', '-', $snippet['book_slug'] . '-' . $snippet['relative_url']);
+        $urlFragment = str_replace('/', '-', $snippet['manual_slug'] . '-' . $snippet['relative_url']);
         $document = new Document($urlFragment . '-' . $snippet['fragment']);
         $document->setData($snippet);
         $snippetType = $this->elasticIndex->getType('snippet');
         $snippetType->addDocument($document);
     }
 
-    public function deleteByBookAnVersion(string $type, string $bookName, string $version, string $language): void
+    public function deleteByManualAnVersion(string $type, string $manualName, string $version, string $language): void
     {
         $snippets = $this->elasticIndex->getType('snippet');
         $query = [
@@ -88,22 +88,22 @@ class ElasticRepository
                     'must' => [
                         [
                             'term' => [
-                                'book_title' => $bookName,
+                                'manual_title' => $manualName,
                             ],
                         ],
                         [
                             'term' => [
-                                'book_version' => $version,
+                                'manual_version' => $version,
                             ],
                         ],
                         [
                             'term' => [
-                                'book_type' => $type,
+                                'manual_type' => $type,
                             ],
                         ],
                         [
                             'term' => [
-                                'book_language' => $language,
+                                'manual_language' => $language,
                             ],
                         ],
                     ],
@@ -181,11 +181,11 @@ class ElasticRepository
     private function addAggregations(Query $elasticaQuery): void
     {
         $catAggregation = new Terms('Document Type');
-        $catAggregation->setField('book_type');
+        $catAggregation->setField('manual_type');
         $elasticaQuery->addAggregation($catAggregation);
 
         $trackerAggregation = new Terms('Document');
-        $trackerAggregation->setField('book_title');
+        $trackerAggregation->setField('manual_title');
         $catAggregation->addAggregation($trackerAggregation);
 //
 //        $status = new Terms('Status');
@@ -197,11 +197,11 @@ class ElasticRepository
 //        $elasticaQuery->addAggregation($priority);
 //
         $language = new Terms('Language');
-        $language->setField('book_language');
+        $language->setField('manual_language');
         $elasticaQuery->addAggregation($language);
 
         $t3ver = new Terms('Version');
-        $t3ver->setField('book_version');
+        $t3ver->setField('manual_version');
         $elasticaQuery->addAggregation($t3ver);
 //
 //        $targetver = new Terms('Target Version');

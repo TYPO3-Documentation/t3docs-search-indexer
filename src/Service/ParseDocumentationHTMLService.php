@@ -13,40 +13,40 @@ use Symfony\Component\CssSelector\CssSelectorConverter;
 
 class ParseDocumentationHTMLService
 {
-    private $bookMetaData = [
-        'book_title' => 'TBD',
-        'book_type' => 'TBD',
-        'book_version' => 'TBD',
-        'book_language' => 'TBD',
-        'book_slug' => 'TBD'
+    private $manualMetaData = [
+        'manual_title' => 'TBD',
+        'manual_type' => 'TBD',
+        'manual_version' => 'TBD',
+        'manual_language' => 'TBD',
+        'manual_slug' => 'TBD'
     ];
 
-    public function setBookName(string $bookName): void
+    public function setManualName(string $manualName): void
     {
-        $this->bookMetaData['book_title'] = $bookName;
+        $this->manualMetaData['manual_title'] = $manualName;
     }
 
     /**
-     * @throws \InvalidArgumentException On unkown book type.
+     * @throws \InvalidArgumentException On unkown manual type.
      */
-    public function setBookType(string $bookType): void
+    public function setManualType(string $manualType): void
     {
-        $this->bookMetaData['book_type'] = $bookType;
+        $this->manualMetaData['manual_type'] = $manualType;
     }
 
-    public function setBookVersion(string $bookVersion): void
+    public function setManualVersion(string $manualVersion): void
     {
-        $this->bookMetaData['book_version'] = $bookVersion;
+        $this->manualMetaData['manual_version'] = $manualVersion;
     }
 
-    public function setBookLanguage(string $bookLanguage): void
+    public function setManualLanguage(string $manualLanguage): void
     {
-        $this->bookMetaData['book_language'] = $bookLanguage;
+        $this->manualMetaData['manual_language'] = $manualLanguage;
     }
 
-    public function setBookSlug(string $bookSlug): void
+    public function setManualSlug(string $manualSlug): void
     {
-        $this->bookMetaData['book_slug'] = $bookSlug;
+        $this->manualMetaData['manual_slug'] = $manualSlug;
     }
 
     /**
@@ -57,7 +57,7 @@ class ParseDocumentationHTMLService
     public function parseContent(string $content, string $relativeFileName):array
     {
         // Set currentFileName
-        $this->bookMetaData['relative_url'] = $relativeFileName;
+        $this->manualMetaData['relative_url'] = $relativeFileName;
         libxml_use_internal_errors(true);
         $document = new \DOMDocument();
         $document->loadHTML($content);
@@ -74,7 +74,7 @@ class ParseDocumentationHTMLService
 
     private function getAllSections(string $markup): array
     {
-        $bookMetaData = $this->bookMetaData;
+        $manualMetaData = $this->manualMetaData;
 
         $sectionPieces = [];
         $document = new \DOMDocument();
@@ -89,7 +89,7 @@ class ParseDocumentationHTMLService
         foreach ($sections as $index => $section) {
             $foundHeadline = $this->findHeadline($section, $xpath);
             if ($foundHeadline !== []) {
-                $sectionPiece = $bookMetaData;
+                $sectionPiece = $manualMetaData;
                 $sectionPiece['fragment'] = $section->getAttribute('id');
                 $sectionPiece['snippet_title'] = $foundHeadline['headlineText'];
                 $section->removeChild($foundHeadline['node']);
