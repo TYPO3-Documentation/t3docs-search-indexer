@@ -60,11 +60,17 @@ class SnippetImporter extends ContainerAwareCommand
         foreach ($booksToImport as $bookFolder) {
             $io->section('Importing ' . $bookFolder->getRelativePathname()  . ' - sit tight.');
             $metaData = $this->getBookMetaData($bookFolder->getRelativePathname());
-            $this->elasticRepository->deleteByBookAnVersion($metaData['bookType'], $metaData['bookName'], $metaData['bookVersion']);
+            $this->elasticRepository->deleteByBookAnVersion(
+                $metaData['bookType'],
+                $metaData['bookName'],
+                $metaData['bookVersion'],
+                $metaData['bookLanguage']
+            );
             $parser = new ParseDocumentationHTMLService();
             $parser->setBookType($metaData['bookType']);
             $parser->setBookName($metaData['bookName']);
             $parser->setBookVersion($metaData['bookVersion']);
+            $parser->setBookLAnguage($metaData['bookLanguage']);
             $parser->setBookSlug($bookFolder->getRelativePathname());
             $this->parseFolder($this->rootPath . '/' . $bookFolder->getRelativePathname() . '', $io, $parser);
         }
@@ -112,7 +118,6 @@ class SnippetImporter extends ContainerAwareCommand
             ->notPath('_static')
             ->notPath('singlehtml');
         return $finder;
-
     }
 
     /**
@@ -134,6 +139,7 @@ class SnippetImporter extends ContainerAwareCommand
             'bookName' => implode('/', [$vendor, $name]),
             'bookType' => $bookType ,
             'bookVersion' => $version,
+            'bookLanguage' => $language,
         ];
     }
 

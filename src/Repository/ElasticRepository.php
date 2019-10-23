@@ -79,7 +79,7 @@ class ElasticRepository
         $snippetType->addDocument($document);
     }
 
-    public function deleteByBookAnVersion(string $type, string $bookName, string $version): void
+    public function deleteByBookAnVersion(string $type, string $bookName, string $version, string $language): void
     {
         $snippets = $this->elasticIndex->getType('snippet');
         $query = [
@@ -101,13 +101,17 @@ class ElasticRepository
                                 'book_type' => $type,
                             ],
                         ],
+                        [
+                            'term' => [
+                                'book_language' => $language,
+                            ],
+                        ],
                     ],
                 ],
             ],
         ];
         $deleteQuery = new Query($query);
-        $response = $snippets->deleteByQuery($deleteQuery);
-        $foo = '';
+        $snippets->deleteByQuery($deleteQuery);
     }
 
     /**
@@ -192,9 +196,13 @@ class ElasticRepository
 //        $priority->setField('priority.name');
 //        $elasticaQuery->addAggregation($priority);
 //
-//        $t3ver = new Terms('TYPO3 Version');
-//        $t3ver->setField('typo3_version');
-//        $elasticaQuery->addAggregation($t3ver);
+        $language = new Terms('Language');
+        $language->setField('book_language');
+        $elasticaQuery->addAggregation($language);
+
+        $t3ver = new Terms('Version');
+        $t3ver->setField('book_version');
+        $elasticaQuery->addAggregation($t3ver);
 //
 //        $targetver = new Terms('Target Version');
 //        $targetver->setField('fixed_version.name');

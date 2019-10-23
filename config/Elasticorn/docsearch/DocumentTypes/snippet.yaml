@@ -6,6 +6,8 @@ book_type:
   type: keyword
 book_version:
   type: keyword
+book_language:
+  type: keyword
 page_title:
   type: text
 rootline:
