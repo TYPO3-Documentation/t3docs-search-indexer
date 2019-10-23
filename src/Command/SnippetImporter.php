@@ -28,11 +28,6 @@ class SnippetImporter extends Command
      */
     private $importer;
 
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $dispatcher;
-
     public function __construct(
         string $defaultRootPath,
         ImportManualHTMLService $importer,
