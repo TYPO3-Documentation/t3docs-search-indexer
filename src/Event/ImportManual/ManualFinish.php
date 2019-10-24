@@ -2,8 +2,8 @@
 
 namespace App\Event\ImportManual;
 
-use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\Finder\Finder;
+use Symfony\Contracts\EventDispatcher\Event;
 
 class ManualFinish extends Event
 {

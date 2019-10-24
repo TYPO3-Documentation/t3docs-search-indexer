@@ -8,18 +8,6 @@
             "ref": "cb4152ebcadbe620ea2261da1a1c5a9b8cea7672"
         }
     },
-    "doctrine/cache": {
-        "version": "v1.7.1"
-    },
-    "doctrine/collections": {
-        "version": "v1.5.0"
-    },
-    "doctrine/common": {
-        "version": "v2.8.1"
-    },
-    "doctrine/inflector": {
-        "version": "v1.3.0"
-    },
     "doctrine/lexer": {
         "version": "v1.0.1"
     },
@@ -44,9 +32,6 @@
     "psr/log": {
         "version": "1.0.2"
     },
-    "psr/simple-cache": {
-        "version": "1.0.0"
-    },
     "react/promise": {
         "version": "v2.5.1"
     },
@@ -64,6 +49,9 @@
     },
     "symfony/cache": {
         "version": "v4.0.3"
+    },
+    "symfony/cache-contracts": {
+        "version": "v1.1.7"
     },
     "symfony/config": {
         "version": "v4.0.3"
@@ -94,6 +82,9 @@
     },
     "symfony/event-dispatcher": {
         "version": "v4.0.3"
+    },
+    "symfony/event-dispatcher-contracts": {
+        "version": "v1.1.7"
     },
     "symfony/filesystem": {
         "version": "v4.0.3"
@@ -128,6 +119,9 @@
     "symfony/lts": {
         "version": "4-dev"
     },
+    "symfony/mime": {
+        "version": "v4.3.5"
+    },
     "symfony/phpunit-bridge": {
         "version": "3.3",
         "recipe": {
@@ -140,8 +134,17 @@
     "symfony/polyfill-ctype": {
         "version": "v1.12.0"
     },
+    "symfony/polyfill-intl-idn": {
+        "version": "v1.12.0"
+    },
     "symfony/polyfill-mbstring": {
         "version": "v1.6.0"
+    },
+    "symfony/polyfill-php72": {
+        "version": "v1.12.0"
+    },
+    "symfony/polyfill-php73": {
+        "version": "v1.12.0"
     },
     "symfony/routing": {
         "version": "4.0",
@@ -152,26 +155,17 @@
             "ref": "cda8b550123383d25827705d05a42acf6819fe4e"
         }
     },
+    "symfony/service-contracts": {
+        "version": "v1.1.7"
+    },
     "symfony/stopwatch": {
         "version": "v4.0.3"
     },
-    "symfony/twig-bridge": {
-        "version": "v4.0.3"
-    },
-    "symfony/twig-bundle": {
-        "version": "3.3",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "master",
-            "version": "3.3",
-            "ref": "f75ac166398e107796ca94cc57fa1edaa06ec47f"
-        }
+    "symfony/var-exporter": {
+        "version": "v4.3.5"
     },
     "symfony/yaml": {
         "version": "v4.0.3"
-    },
-    "twig/twig": {
-        "version": "v2.4.4"
     },
     "typo3fluid/fluid": {
         "version": "2.4.0"

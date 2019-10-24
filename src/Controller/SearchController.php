@@ -12,11 +12,11 @@ namespace App\Controller;
 use App\Repository\ElasticRepository;
 use App\Traits\TYPO3FluidTrait;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class SearchController extends Controller
+class SearchController extends AbstractController
 {
     use TYPO3FluidTrait;
 

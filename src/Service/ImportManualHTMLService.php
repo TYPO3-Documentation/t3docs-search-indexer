@@ -64,14 +64,14 @@ class ImportManualHTMLService
     {
         $files = $this->parser->getFilesWithSections($manual);
 
-        $this->dispatcher->dispatch(ManualStart::NAME, new ManualStart($files));
+        $this->dispatcher->dispatch(new ManualStart($files), ManualStart::NAME);
 
         foreach ($files as $file) {
             $this->importSectionsFromFile($file, $manual);
-            $this->dispatcher->dispatch(ManualAdvance::NAME, new ManualAdvance());
+            $this->dispatcher->dispatch(new ManualAdvance(), ManualAdvance::NAME);
         }
 
-        $this->dispatcher->dispatch(ManualFinish::NAME, new ManualFinish());
+        $this->dispatcher->dispatch(new ManualFinish(), ManualFinish::NAME);
     }
 
     private function importSectionsFromFile(SplFileInfo $file, Manual $manual)
