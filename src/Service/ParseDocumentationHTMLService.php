@@ -11,6 +11,7 @@ namespace App\Service;
 
 use App\Dto\Manual;
 use Symfony\Component\CssSelector\CssSelectorConverter;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -66,83 +67,74 @@ class ParseDocumentationHTMLService
         return $this->getSections($file->getContents());
     }
 
-    private function getSections(string $content): array
+    private function getSections(string $html): array
     {
-        libxml_use_internal_errors(true);
-        $document = new \DOMDocument();
-        $document->loadHTML($content);
-        $xpath = new \DOMXPath($document);
-        $converter = new CssSelectorConverter();
-        $mainContentQuery = $converter->toXPath('div.toBeIndexed');
-        $query = $xpath->query($mainContentQuery);
-        if ($query->length > 0) {
-            $mainSection = $query->item(0)->C14N();
-            return $this->getAllSections($mainSection);
+        $crawler = new Crawler($html);
+        $sections = $crawler->filter('div.toBeIndexed');
+
+        if ($sections->count() === 0) {
+            return [];
         }
 
-        return [];
+        return $this->getAllSections($sections);
     }
 
-    private function getAllSections(string $markup): array
+    private function getAllSections(Crawler $sections): array
     {
         $sectionPieces = [];
-        $document = new \DOMDocument();
-        $document->loadHTML($markup);
-        $xpath = new \DOMXPath($document);
-        $converter = new CssSelectorConverter();
-        $sections = $xpath->query($converter->toXPath('div.section'));
-        /**
-         * @var int $index
-         * @var \DOMElement $section
-         */
-        foreach ($sections as $index => $section) {
-            $foundHeadline = $this->findHeadline($section, $xpath);
-            if ($foundHeadline !== []) {
-                $sectionPiece = [
-                    'fragment' => $section->getAttribute('id'),
-                    'snippet_title' => $foundHeadline['headlineText'],
-                ];
-
-                $section->removeChild($foundHeadline['node']);
-                $sectionPiece['snippet_content'] = $this->sanitizeString(
-                    $this->stripSubSectionsIfAny($section, $xpath)
-                );
-                $sectionPieces[] = $sectionPiece;
+        foreach ($sections->filter('div.section') as $section) {
+            $foundHeadline = $this->findHeadline($section);
+            if ($foundHeadline === []) {
+                continue;
             }
+
+            $sectionPiece = [
+                'fragment' => $section->getAttribute('id'),
+                'snippet_title' => $foundHeadline['headlineText'],
+            ];
+
+            $section->removeChild($foundHeadline['node']);
+            $sectionPiece['snippet_content'] = $this->sanitizeString(
+                $this->stripSubSectionsIfAny($section)
+            );
+            $sectionPieces[] = $sectionPiece;
         }
 
         return $sectionPieces;
     }
 
-    private function stripSubSectionsIfAny(\DOMElement $section, \DOMXPath $xpath): string
+    private function findHeadline(\DOMElement $section): array
     {
-        $converter = new CssSelectorConverter();
-        $subSections = $xpath->query($converter->toXPath('div.section div.section'), $section);
-        if ($subSections->length === 0) {
-            return $section->textContent;
+        $crawler = new Crawler($section);
+        $headline = $crawler->filter('h1, h2, h3, h4, h5, h6')->getNode(0);
+
+        if (($headline instanceof \DOMElement) === false) {
+            return [];
         }
-        foreach ($subSections as $index => $subSection) {
-            try {
-                $section->removeChild($subSection);
-            } catch (\Exception $e) {
-            }
-        }
-        return $section->C14N();
+
+        return [
+            'headlineText' => filter_var($headline->textContent, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH),
+            'node' => $headline,
+        ];
     }
 
-    private function findHeadline(\DOMElement $section, \DOMXPath $xpath): array
+    private function stripSubSectionsIfAny(\DOMElement $section): string
     {
-        $result = $xpath->query('*[starts-with(name(), \'h\')]', $section);
-        $element = $result->item(0);
-        try {
-            return [
-                'headlineText' => filter_var($element->textContent, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH),
-                'node' => $element
-            ];
-        } catch (\Exception $e) {
-            $foo = '';
+        $crawler = new Crawler($section);
+        $subSections = $crawler->filter('div.section div.section');
+        if ($subSections->count() === 0) {
+            return $section->textContent;
         }
-        return [];
+
+        foreach ($subSections as $subSection) {
+            try {
+                $section->removeChild($subSection);
+            } catch (\DOMException $e) {
+                continue;
+            }
+        }
+
+        return $section->textContent;
     }
 
     private function sanitizeString(string $input): string
@@ -150,7 +142,7 @@ class ParseDocumentationHTMLService
         $pattern = [
             '/\s\s+/',
         ];
-        $regexBuildName = preg_replace($pattern, ' ', strip_tags($input));
+        $regexBuildName = preg_replace($pattern, ' ', $input);
         return trim($regexBuildName);
     }
 }

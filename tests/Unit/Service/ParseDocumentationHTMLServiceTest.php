@@ -120,12 +120,16 @@ class ParseDocumentationHTMLServiceTest extends TestCase
      * @test
      * @dataProvider documentationDataProvider
      */
-    public function returnsSectionsFromFile(string $fileContent, string $relativeFileName, array $expectedResult, bool $incomplete = false)
+    public function returnsSectionsFromFile(string $relativeFileName, array $expectedResult)
     {
-        if ($incomplete) {
-            $this->markTestIncomplete('Need to fix encoding issue');
-        }
-
+        $fixtureFile = implode(DIRECTORY_SEPARATOR, [
+            __DIR__,
+            'Fixtures',
+            'ParseDocumentationHTMLServiceTest',
+            'ReturnsSectionsFromFile',
+            ucfirst($this->dataName()) . '.html',
+        ]);
+        $fileContent = file_get_contents($fixtureFile);
         $file = $this->getMockBuilder(SplFileInfo::class)->disableOriginalConstructor()->getMock();
         $file->expects($this->any())->method('getContents')->willReturn($fileContent);
         $subject = new ParseDocumentationHTMLService();
@@ -142,16 +146,6 @@ class ParseDocumentationHTMLServiceTest extends TestCase
     {
         return [
             'simpleMarkup' => [
-                'fileContent' => '
-                    <html>
-                        <div class="toBeIndexed">
-                            <div id="first-section" class="section">
-                                <h1>Headline 1</h1>
-                                <p>Content 1</p>
-                            </div>
-                        </div>
-                    </html>
-                ',
                 'relativeFileName' => 'p/docsearch/blog/8.7/en-us',
                 'expectedResult' => [
                     [
@@ -161,61 +155,30 @@ class ParseDocumentationHTMLServiceTest extends TestCase
                     ]
                 ]
             ],
-            'multi_byte_markup' => [
-                'fileContent' => '
-                    <html>
-                        <div class="toBeIndexed">
-                            <div id="first-section" class="section">
-                                <h1>Headline 1</h1>
-                                <p>This creates a new page titled “The page title” as the first page inside page id 45:</p>
-                            </div>
-                        </div>
-                    </html>
-                ',
+            'multiByteMarkupWithFullLayout' => [
                 'relativeFileName' => 'p/docsearch/blog/8.7/en-us',
                 'expectedResult' => [
                     [
-                        'fragment' => 'first-section',
-                        'snippet_title' => 'Headline 1',
-                        'snippet_content' => 'This creates a new page titled “The page title” as the first page inside page id 45:',
-                    ]
+                        'fragment' => 'feature-69572-page-module-notice-content-is-also-shown-on',
+                        'snippet_title' => 'Feature: #69572 - Page module Notice Content is also shown on:',
+                        'snippet_content' => 'See Issue #69572',
+                    ],
+                    [
+                        'fragment' => 'description',
+                        'snippet_title' => 'Description',
+                        'snippet_content' => implode("\n", [
+                            'When page content is inherited from a different page via “Show content from page” there is a notice displayed on the page that is pulling in content from a different page.',
+                            'As of now, the page whose content is used on other pages gets an info box that indicates which other pages use these contents.',
+                        ]),
+                    ],
+                    [
+                        'fragment' => 'impact',
+                        'snippet_title' => 'Impact',
+                        'snippet_content' => 'On pages that are inherited elsewhere you see a notice which links to the pages where the content is inherited.',
+                    ],
                 ],
-                'incomplete' => true,
             ],
             'markupWithSubSections' => [
-                'fileContent' => '<div itemprop="articleBody" class="toBeIndexed">
-
-  <div class="section" id="deprecation-88839-cli-lowlevel-request-handlers">
-<h1>Deprecation: #88839 - CLI lowlevel request handlers<a class="headerlink" href="#deprecation-88839-cli-lowlevel-request-handlers" title="Permalink to this headline">¶</a></h1>
-<p>See <a class="reference external" href="https://forge.typo3.org/issues/88839">Issue #88839</a></p>
-<div class="section" id="description">
-<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>The interface <code class="code php docutils literal notranslate"><span class="pre">\TYPO3\CMS\Core\Console\RequestHandlerInterface</span></code>
-and the class <code class="code php docutils literal notranslate"><span class="pre">\TYPO3\CMS\Core\Console\CommandRequestHandler</span></code> have been introduced in TYPO3 v7 to streamline
-various entry points for CLI-related functionality. Back then, there were Extbase command requests and
-<code class="code docutils literal notranslate"><span class="pre">CommandLineController</span></code> entry points.</p>
-<p>With TYPO3 v10, the only way to handle CLI commands is via the <code class="code php docutils literal notranslate"><span class="pre">\TYPO3\CMS\Core\Console\CommandApplication</span></code> class which is
-a wrapper around Symfony Console. All logic is now located in the Application, and thus, the interface and
-the class have been marked as deprecated.</p>
-</div>
-<div class="section" id="impact">
-<h2>Impact<a class="headerlink" href="#impact" title="Permalink to this headline">¶</a></h2>
-<p>When instantiating the CLI <code class="code php docutils literal notranslate"><span class="pre">\TYPO3\CMS\Core\Console\RequestHandler</span></code> class,
-a PHP <code class="code php docutils literal notranslate"><span class="pre">E_USER_DEPRECATED</span></code> error will be triggered.</p>
-</div>
-<div class="section" id="affected-installations">
-<h2>Affected Installations<a class="headerlink" href="#affected-installations" title="Permalink to this headline">¶</a></h2>
-<p>Any TYPO3 installation having custom CLI request handlers wrapped via the interface or extending the
-CLI request handler class.</p>
-</div>
-<div class="section" id="migration">
-<h2>Migration<a class="headerlink" href="#migration" title="Permalink to this headline">¶</a></h2>
-<p>Switch to a Symfony Command or provide a custom CLI entry point.</p>
-<span class="target" id="index-0"></span></div>
-</div>
-
-
-           </div>',
                 'relativeFileName' => 'p/docsearch/blog/8.7/en-us',
                 'expected' => [
                     [
@@ -260,28 +223,6 @@ CLI request handler class.</p>
                 ]
             ],
             'markupWithSubSectionsSmall' => [
-                'fileContent' => '<div itemprop="articleBody" class="toBeIndexed">
-
-                        <div class="section" id="features-and-basic-concept">
-                            <h1>Features and Basic Concept<a class="headerlink" href="#features-and-basic-concept"
-                                                             title="Permalink to this headline">¶</a></h1>
-                            <p>The main goal for this blog extension was to use TYPO3s core concepts and elements to
-                                provide a
-                                full-blown blog that
-                                users of TYPO3 can instantly understand and use.</p>
-                            <div class="section" id="pages-as-blog-entries">
-                                <h2>Pages as blog entries<a class="headerlink" href="#pages-as-blog-entries"
-                                                            title="Permalink to this headline">¶</a></h2>
-                                <p>Blog entries are simply pages with a special page type blog entry and can be created
-                                    and
-                                    edited via the well-known page
-                                    module. Creating new entries is as simple as dragging a new entry into the page
-                                    tree.</p>
-                            </div>
-                        </div>
-
-
-                    </div>',
                 'relativeFileName' => 'p/docsearch/blog/8.7/en-us',
                 'expected' => [
                     [
