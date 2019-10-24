@@ -39,9 +39,10 @@ class SearchController extends Controller
     {
         $elasticRepository = new ElasticRepository();
         $query = $request->query->get('q');
-        $this->view->assign('q', $query);
-        $searchResults = $elasticRepository->findByQuery($query);
-        $this->view->assign('results', $searchResults);
-        return $this->render('search');
+
+        return $this->render('search', [
+            'q' => $query,
+            'results' => $elasticRepository->findByQuery($query),
+        ]);
     }
 }
