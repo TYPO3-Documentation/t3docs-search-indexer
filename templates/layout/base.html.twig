@@ -2,11 +2,11 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title><f:render section="title" /></title>
+    <title>{% block title %}TYPO3 Documentation Search{% endblock %}</title>
     <link rel="stylesheet" href="https://docs.typo3.org/_static/css/theme.css">
     <link rel="stylesheet" href="https://docs.typo3.org/_static/jquery-ui/jquery-ui.min.css">
     <link rel="stylesheet" href="https://docs.typo3.org/_static/css/t3more.css">
-    <f:render section="Stylesheets" optional="1" />
+    {% block stylesheets %}{% endblock %}
 </head>
 <body>
 <div class="wy-grid-for-nav">
@@ -23,7 +23,7 @@
                 <li class="nolink search">
                     <div role="search">
                         <form id="rtd-search-form" class="wy-form" action="/index.php/search" method="get">
-                            <input type="text" name="q" placeholder="Search this project" id="searchinput" value="<f:render section="searchQuery" optional="1"/>">
+                            <input type="text" name="q" placeholder="Search this project" id="searchinput" value="{% block searchQuery %}{% endblock %}">
                             <input type="hidden" name="check_keywords" value="yes">
                             <input type="hidden" name="area" value="default">
                         </form>
@@ -32,7 +32,7 @@
             </ul>
         </div>
         <div class="wy-menuXX wy-menu-verticalXX" data-spy="affix" role="navigation" aria-label="main navigation">
-            <f:render section="Sidebar" optional="1"/>
+            {% block sidebar %}{% endblock %}
         </div>
         &nbsp;
     </nav>
@@ -42,7 +42,7 @@
             <a href="#">Welcome!</a>
         </nav>
         <div class="wy-nav-content">
-            <f:render section="Content" />
+            {% block body %}{% endblock %}
         </div>
     </section>
 </div>

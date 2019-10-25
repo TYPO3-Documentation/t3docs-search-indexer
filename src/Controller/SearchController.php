@@ -10,7 +10,6 @@
 namespace App\Controller;
 
 use App\Repository\ElasticRepository;
-use App\Traits\TYPO3FluidTrait;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,15 +17,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SearchController extends AbstractController
 {
-    use TYPO3FluidTrait;
-
     /**
      * @Route("/", name="index")
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function indexAction(): Response
     {
-        return $this->render('index');
+        return $this->render('search/index.html.twig');
     }
 
     /**
@@ -40,7 +37,7 @@ class SearchController extends AbstractController
         $elasticRepository = new ElasticRepository();
         $query = $request->query->get('q');
 
-        return $this->render('search', [
+        return $this->render('search/search.html.twig', [
             'q' => $query,
             'results' => $elasticRepository->findByQuery($query),
         ]);

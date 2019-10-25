@@ -4,26 +4,45 @@ namespace App\Tests\Unit\Controller;
 
 use App\Controller\SearchController;
 use App\Repository\ElasticRepository;
-use App\Service\FluidRenderingContext;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
+use Prophecy\Prophecy\ObjectProphecy;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
-use TYPO3Fluid\Fluid\Core\ViewHelper\ViewHelperResolver;
-use TYPO3Fluid\Fluid\View\TemplatePaths;
-use TYPO3Fluid\Fluid\View\TemplateView;
+use Twig\Environment;
 
 class SearchControllerTest extends TestCase
 {
+    /**
+     * @var ObjectProphecy
+     */
+    private $view;
+
+    /**
+     * @var ObjectProphecy
+     */
+    private $container;
+
+    public function setUp()
+    {
+        $this->view = $this->prophesize(Environment::class);
+
+        $this->container = $this->prophesize(ContainerInterface::class);
+        $this->container->has('templating')->willReturn(false);
+        $this->container->has('twig')->willReturn(true);
+        $this->container->get('twig')->willReturn($this->view->reveal());
+    }
+
     /**
      * @test
      */
     public function indexActionRendersIndexTemplate()
     {
         $subject = new SearchController();
-        $view = $this->getMockedView();
-        $this->setProperty($subject, 'view', $view);
+        $this->setProperty($subject, 'container', $this->container->reveal());
 
-        $view->expects($this->once())->method('render')->with('index');
+        $this->view->render('search/index.html.twig', [])->shouldBeCalledTimes(1);
 
         $subject->indexAction();
     }
@@ -34,20 +53,21 @@ class SearchControllerTest extends TestCase
     public function searchActionAssignsQueryToTemplate()
     {
         $subject = new SearchController();
-        $view = $this->getMockedView();
-        $this->setProperty($subject, 'view', $view);
+        $this->setProperty($subject, 'container', $this->container->reveal());
 
-        $request = $this->getMockBuilder(Request::class)->getMock();
-        $request->query = $this->getMockBuilder(ParameterBag::class)->getMock();
-        $request->query->expects($this->any())->method('get')->with('q')->willReturn('searchTerm');
+        $query = $this->prophesize(ParameterBag::class);
+        $query->get('q')->willReturn('searchTerm');
 
-        $view->expects($this->once())->method('assignMultiple')->with($this->callback(function (array $variables) {
+        $request = $this->prophesize(Request::class);
+        $request->query = $query->reveal();
+
+        $this->view->render(Argument::any(), Argument::that(function (array $variables) {
             return isset($variables['q'])
                 && $variables['q'] === 'searchTerm'
                 ;
-        }));
+        }))->shouldBeCalledTimes(1);
 
-        $subject->searchAction($request);
+        $subject->searchAction($request->reveal());
     }
 
     /**
@@ -89,34 +109,17 @@ class SearchControllerTest extends TestCase
     public function searchActionRendersSearchTemplate()
     {
         $subject = new SearchController();
-        $view = $this->getMockedView();
-        $this->setProperty($subject, 'view', $view);
+        $this->setProperty($subject, 'container', $this->container->reveal());
 
-        $request = $this->getMockBuilder(Request::class)->getMock();
-        $request->query = $this->getMockBuilder(ParameterBag::class)->getMock();
-        $request->query->expects($this->any())->method('get')->with('q')->willReturn('searchTerm');
+        $query = $this->prophesize(ParameterBag::class);
+        $query->get('q')->willReturn('searchTerm');
 
+        $request = $this->prophesize(Request::class);
+        $request->query = $query->reveal();
 
-        $view->expects($this->once())->method('render')->with('search');
+        $this->view->render('search/search.html.twig', Argument::any())->shouldBeCalledTimes(1);
 
-        $subject->searchAction($request);
-    }
-
-    private function getMockedView()
-    {
-        $view = $this->getMockBuilder(TemplateView::class)->getMock();
-
-        $renderingMock = $this->getMockBuilder(FluidRenderingContext::class)->disableOriginalConstructor()->getMock();
-        $renderingMock->expects($this->any())->method('getTemplatePaths')->willReturn(
-            $this->getMockBuilder(TemplatePaths::class)->disableOriginalConstructor()->getMock()
-        );
-        $view->expects($this->any())->method('getRenderingContext')->willReturn($renderingMock);
-
-        $view->expects($this->any())->method('getViewHelperResolver')->willReturn(
-            $this->getMockBuilder(ViewHelperResolver::class)->disableOriginalConstructor()->getMock()
-        );
-
-        return $view;
+        $subject->searchAction($request->reveal());
     }
 
     private function setProperty($instance, string $property, $value)

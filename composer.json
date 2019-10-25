@@ -14,8 +14,8 @@
         "symfony/flex": "^1.4",
         "symfony/framework-bundle": "^4.3",
         "symfony/stopwatch": "^4.3",
-        "symfony/yaml": "^4.3",
-        "typo3fluid/fluid": "^2.3.0"
+        "symfony/twig-bundle": "^4.3",
+        "symfony/yaml": "^4.3"
     },
     "require-dev": {
         "mikey179/vfsstream": "^1.6",
