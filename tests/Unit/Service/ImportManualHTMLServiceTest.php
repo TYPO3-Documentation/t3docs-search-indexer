@@ -7,6 +7,7 @@ use App\Repository\ElasticRepository;
 use App\Service\ImportManualHTMLService;
 use App\Service\ParseDocumentationHTMLService;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
@@ -18,30 +19,29 @@ class ImportManualHTMLServiceTest extends TestCase
      */
     public function findsManuals()
     {
-        $parser = $this->getMockBuilder(ParseDocumentationHTMLService::class)->getMock();
+        $parser = $this->prophesize(ParseDocumentationHTMLService::class);
         $subject = new ImportManualHTMLService(
-            $this->getMockBuilder(ElasticRepository::class)->getMock(),
-            $parser,
-            $this->getMockBuilder(EventDispatcherInterface::class)->getMock()
+            $this->prophesize(ElasticRepository::class)->reveal(),
+            $parser->reveal(),
+            $this->prophesize(EventDispatcherInterface::class)->reveal()
         );
 
-        $folder1 = $this->getMockBuilder(SplFileInfo::class)->disableOriginalConstructor()->getMock();
-        $folder2 = $this->getMockBuilder(SplFileInfo::class)->disableOriginalConstructor()->getMock();
+        $folder1 = $this->prophesize(SplFileInfo::class);
+        $folder2 = $this->prophesize(SplFileInfo::class);
 
-        $finder = $this->getMockBuilder(Finder::class)->getMock();
-        $finder->expects($this->any())
-            ->method('getIterator')
-            ->willReturn(new \ArrayObject([$folder1, $folder2]));
+        $finder = $this->prophesize(Finder::class);
+        $finder->getIterator()->willReturn(new \ArrayObject([$folder1->reveal(), $folder2->reveal()]));
 
-        $manual1 = $this->getMockBuilder(Manual::class)->disableOriginalConstructor()->getMock();
-        $manual2 = $this->getMockBuilder(Manual::class)->disableOriginalConstructor()->getMock();
+        $manual1 = $this->prophesize(Manual::class)->reveal();
+        $manual2 = $this->prophesize(Manual::class)->reveal();
 
-        $parser->expects($this->once())
-            ->method('findFolders')
-            ->willReturn($finder);
-        $parser->expects($this->exactly(2))
-            ->method('createFromFolder')
-            ->will($this->onConsecutiveCalls($manual1, $manual2));
+        $parser->findFolders('_docsFolder')->willReturn($finder->reveal())->shouldBeCalledTimes(1);
+        $parser->createFromFolder('_docsFolder', Argument::is($folder1->reveal()))
+               ->willReturn($manual1)
+               ->shouldBeCalledTimes(1);
+        $parser->createFromFolder('_docsFolder', Argument::is($folder2->reveal()))
+               ->willReturn($manual2)
+               ->shouldBeCalledTimes(1);
 
         $manuals = $subject->findManuals('_docsFolder');
 
@@ -55,26 +55,24 @@ class ImportManualHTMLServiceTest extends TestCase
      */
     public function findsManual()
     {
-        $parser = $this->getMockBuilder(ParseDocumentationHTMLService::class)->getMock();
+        $parser = $this->prophesize(ParseDocumentationHTMLService::class);
         $subject = new ImportManualHTMLService(
-            $this->getMockBuilder(ElasticRepository::class)->getMock(),
-            $parser,
-            $this->getMockBuilder(EventDispatcherInterface::class)->getMock()
+            $this->prophesize(ElasticRepository::class)->reveal(),
+            $parser->reveal(),
+            $this->prophesize(EventDispatcherInterface::class)->reveal()
         );
 
-        $folder = $this->getMockBuilder(SplFileInfo::class)->disableOriginalConstructor()->getMock();
+        $folder = $this->prophesize(SplFileInfo::class)->reveal();
 
-        $finder = $this->getMockBuilder(Finder::class)->getMock();
-        $finder->expects($this->any())
-            ->method('getIterator')
-            ->willReturn(new \ArrayObject([$folder]));
+        $finder = $this->prophesize(Finder::class);
+        $finder->getIterator()->willReturn(new \ArrayObject([$folder]));
 
-        $manual = $this->getMockBuilder(Manual::class)->disableOriginalConstructor()->getMock();
+        $manual = $this->prophesize(Manual::class)->reveal();
 
-        $parser->expects($this->once())
-            ->method('createFromFolder')
-            ->with()
-            ->willReturn($manual);
+        $parser->createFromFolder(
+            '_docsFolder',
+            Argument::which('__toString', '_docsFolder/c/typo3/cms-core/master/en-us')
+        )->willReturn($manual);
 
         $returnedManual = $subject->findManual('_docsFolder', 'c/typo3/cms-core/master/en-us');
 
@@ -85,41 +83,41 @@ class ImportManualHTMLServiceTest extends TestCase
     /**
      * @test
      */
-    public function existingManualIsDeletedByMetaDataduringImport()
+    public function allowsToDeleteManual()
     {
-        $manual = $this->getMockBuilder(Manual::class)->disableOriginalConstructor()->getMock();
-        $repoMock = $this->getMockBuilder(ElasticRepository::class)->getMock();
-        $parserMock = $this->getMockBuilder(ParseDocumentationHTMLService::class)->getMock();
-        $finderMock = $this->getMockBuilder(Finder::class)->getMock();
+        $manual = $this->prophesize(Manual::class)->reveal();
+        $repo = $this->prophesize(ElasticRepository::class);
 
-        $parserMock->expects($this->any())->method('getFilesWithSections')->willReturn($finderMock);
-        $finderMock->expects($this->any())->method('getIterator')->willReturn(new \ArrayObject());
+        $subject = new ImportManualHTMLService(
+            $repo->reveal(),
+            $this->prophesize(ParseDocumentationHTMLService::class)->reveal(),
+            $this->prophesize(EventDispatcherInterface::class)->reveal()
+        );
 
-        $subject = new ImportManualHTMLService($repoMock, $parserMock, $this->getMockBuilder(EventDispatcherInterface::class)->getMock());
+        $repo->deleteByManual($manual)->shouldBeCalledTimes(1);
 
-        $repoMock->expects($this->once())
-            ->method('deleteByManual')
-            ->with($manual);
-
-        $subject->importManual($manual);
+        $subject->deleteManual($manual);
     }
 
     /**
      * @test
      */
-    public function sectionsAreSendToElasticsearch()
+    public function allowsImportOfManual()
     {
-        $manual = $this->getMockBuilder(Manual::class)->disableOriginalConstructor()->getMock();
-        $manual->expects($this->any())->method('getTitle')->willReturn('typo3/cms-core');
-        $manual->expects($this->any())->method('getType')->willReturn('c');
-        $manual->expects($this->any())->method('getVersion')->willReturn('master');
-        $manual->expects($this->any())->method('getLanguage')->willReturn('en-us');
-        $manual->expects($this->any())->method('getSlug')->willReturn('slug');
-        $repoMock = $this->getMockBuilder(ElasticRepository::class)->getMock();
-        $parserMock = $this->getMockBuilder(ParseDocumentationHTMLService::class)->getMock();
-        $finderMock = $this->getMockBuilder(Finder::class)->getMock();
-        $fileMock = $this->getMockBuilder(SplFileInfo::class)->disableOriginalConstructor()->getMock();
-        $fileMock->expects($this->any())->method('getRelativePathname')->willReturn('c/typo3/cms-core/master/en-us');
+        $manual = $this->prophesize(Manual::class);
+        $manual->getTitle()->willReturn('typo3/cms-core');
+        $manual->getType()->willReturn('c');
+        $manual->getVersion()->willReturn('master');
+        $manual->getLanguage()->willReturn('en-us');
+        $manual->getSlug()->willReturn('slug');
+        $manualRevealed = $manual->reveal();
+
+        $repo = $this->prophesize(ElasticRepository::class);
+        $parser = $this->prophesize(ParseDocumentationHTMLService::class);
+        $finder = $this->prophesize(Finder::class);
+        $file = $this->prophesize(SplFileInfo::class);
+        $file->getRelativePathname()->willReturn('c/typo3/cms-core/master/en-us');
+        $fileRevealed = $file->reveal();
 
         $section1 = [
             'fragment' => 'features-and-basic-concept',
@@ -132,40 +130,35 @@ class ImportManualHTMLServiceTest extends TestCase
             'snippet_content' => 'Blog entries are simply pages with a special page type blog entry and can be created and edited via the well-known page module. Creating new entries is as simple as dragging a new entry into the page tree.'
         ];
 
-        $parserMock->expects($this->any())->method('getFilesWithSections')->willReturn($finderMock);
-        $parserMock->expects($this->any())->method('getSectionsFromFile')->willReturn([$section1, $section2]);
-        $finderMock->expects($this->any())->method('getIterator')->willReturn(new \ArrayObject([$fileMock]));
+        $parser->getFilesWithSections($manualRevealed)->willReturn($finder->reveal());
+        $parser->getSectionsFromFile($fileRevealed)->willReturn([$section1, $section2]);
+        $finder->getIterator()->willReturn(new \ArrayObject([$fileRevealed]));
 
-        $subject = new ImportManualHTMLService($repoMock, $parserMock, $this->getMockBuilder(EventDispatcherInterface::class)->getMock());
+        $subject = new ImportManualHTMLService($repo->reveal(), $parser->reveal(), $this->prophesize(EventDispatcherInterface::class)->reveal());
 
-        $repoMock->expects($this->exactly(2))
-            ->method('addOrUpdateDocument')
-            ->withConsecutive([
-                [
-                    'manual_title' => 'typo3/cms-core',
-                    'manual_type' => 'c',
-                    'manual_version' => 'master',
-                    'manual_language' => 'en-us',
-                    'manual_slug' => 'slug',
-                    'relative_url' => 'c/typo3/cms-core/master/en-us',
-                    'fragment' => 'features-and-basic-concept',
-                    'snippet_title' => 'Features and Basic Concept',
-                    'snippet_content' => 'The main goal for this blog extension was to use TYPO3s core concepts and elements to provide a full-blown blog that users of TYPO3 can instantly understand and use.'
-                ]
-            ], [
-                [
-                    'manual_title' => 'typo3/cms-core',
-                    'manual_type' => 'c',
-                    'manual_version' => 'master',
-                    'manual_language' => 'en-us',
-                    'manual_slug' => 'slug',
-                    'relative_url' => 'c/typo3/cms-core/master/en-us',
-                    'fragment' => 'pages-as-blog-entries',
-                    'snippet_title' => 'Pages as blog entries',
-                    'snippet_content' => 'Blog entries are simply pages with a special page type blog entry and can be created and edited via the well-known page module. Creating new entries is as simple as dragging a new entry into the page tree.'
-                ]
-            ]);
+        $repo->addOrUpdateDocument([
+            'manual_title' => 'typo3/cms-core',
+            'manual_type' => 'c',
+            'manual_version' => 'master',
+            'manual_language' => 'en-us',
+            'manual_slug' => 'slug',
+            'relative_url' => 'c/typo3/cms-core/master/en-us',
+            'fragment' => 'features-and-basic-concept',
+            'snippet_title' => 'Features and Basic Concept',
+            'snippet_content' => 'The main goal for this blog extension was to use TYPO3s core concepts and elements to provide a full-blown blog that users of TYPO3 can instantly understand and use.'
+        ])->shouldBeCalledTimes(1);
+        $repo->addOrUpdateDocument([
+            'manual_title' => 'typo3/cms-core',
+            'manual_type' => 'c',
+            'manual_version' => 'master',
+            'manual_language' => 'en-us',
+            'manual_slug' => 'slug',
+            'relative_url' => 'c/typo3/cms-core/master/en-us',
+            'fragment' => 'pages-as-blog-entries',
+            'snippet_title' => 'Pages as blog entries',
+            'snippet_content' => 'Blog entries are simply pages with a special page type blog entry and can be created and edited via the well-known page module. Creating new entries is as simple as dragging a new entry into the page tree.'
+        ])->shouldBeCalledTimes(1);
 
-        $subject->importManual($manual);
+        $subject->importManual($manualRevealed);
     }
 }

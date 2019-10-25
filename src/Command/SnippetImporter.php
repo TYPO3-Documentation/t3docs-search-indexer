@@ -79,6 +79,7 @@ class SnippetImporter extends Command
         foreach ($manualsToImport as $manual) {
             /* @var Manual $manual */
             $this->io->section('Importing ' . $this->makePathRelative($input->getOption('rootPath'), $manual->getAbsolutePath())  . ' - sit tight.');
+            $this->importer->deleteManual($manual);
             $this->importer->importManual($manual);
         }
 

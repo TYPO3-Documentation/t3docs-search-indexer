@@ -70,13 +70,10 @@ class ParseDocumentationHTMLServiceTest extends TestCase
     {
         $subject = new ParseDocumentationHTMLService();
 
-        $folder = $this->getMockBuilder(SplFileInfo::class)->disableOriginalConstructor()->getMock();
+        $folder = $this->prophesize(SplFileInfo::class);
+        $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/master/en-us/');
 
-        $folder->expects($this->any())
-            ->method('__toString')
-            ->willReturn('_docsFolder/c/typo3/cms-core/master/en-us/');
-
-        $manual = $subject->createFromFolder('_docsFolder', $folder);
+        $manual = $subject->createFromFolder('_docsFolder', $folder->reveal());
 
         $this->assertSame('_docsFolder/c/typo3/cms-core/master/en-us/', $manual->getAbsolutePath());
         $this->assertSame('typo3/cms-core', $manual->getTitle());
@@ -98,11 +95,11 @@ class ParseDocumentationHTMLServiceTest extends TestCase
             'ReturnsFilesWithSectionsForManual',
             'manual',
         ]);
-        $manual = $this->getMockBuilder(Manual::class)->disableOriginalConstructor()->getMock();
-        $manual->expects($this->any())->method('getAbsolutePath')->willReturn($filesRoot);
+        $manual = $this->prophesize(Manual::class);
+        $manual->getAbsolutePath()->willReturn($filesRoot);
 
         $subject = new ParseDocumentationHTMLService();
-        $files = $subject->getFilesWithSections($manual);
+        $files = $subject->getFilesWithSections($manual->reveal());
 
         $this->assertCount(3, $files);
         $expectedFiles = [
@@ -130,10 +127,10 @@ class ParseDocumentationHTMLServiceTest extends TestCase
             ucfirst($this->dataName()) . '.html',
         ]);
         $fileContent = file_get_contents($fixtureFile);
-        $file = $this->getMockBuilder(SplFileInfo::class)->disableOriginalConstructor()->getMock();
-        $file->expects($this->any())->method('getContents')->willReturn($fileContent);
+        $file = $this->prophesize(SplFileInfo::class);
+        $file->getContents()->willReturn($fileContent);
         $subject = new ParseDocumentationHTMLService();
-        $receivedSection = $subject->getSectionsFromFile($file);
+        $receivedSection = $subject->getSectionsFromFile($file->reveal());
 
         foreach ($expectedResult as $sectionIndex => $expectedSection) {
             $this->assertSame($receivedSection[$sectionIndex], $expectedSection, 'Section with index ' . $sectionIndex . ' did not match.');

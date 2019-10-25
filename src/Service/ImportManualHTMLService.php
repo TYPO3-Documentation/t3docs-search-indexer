@@ -54,9 +54,13 @@ class ImportManualHTMLService
         return $this->parser->createFromFolder($rootPath, $folder);
     }
 
-    public function importManual(Manual $manual)
+    public function deleteManual(Manual $manual)
     {
         $this->elasticRepository->deleteByManual($manual);
+    }
+
+    public function importManual(Manual $manual)
+    {
         $this->importSectionsFromManual($manual);
     }
 

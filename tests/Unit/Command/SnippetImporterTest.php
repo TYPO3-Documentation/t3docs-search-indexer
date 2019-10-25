@@ -6,6 +6,7 @@ use App\Command\SnippetImporter;
 use App\Dto\Manual;
 use App\Service\ImportManualHTMLService;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Symfony\Component\Console\Formatter\OutputFormatterInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -19,12 +20,12 @@ class SnippetImporterTest extends TestCase
      */
     public function rootPathIsUsedFromConfiguration()
     {
-        $importer = $this->getMockBuilder(ImportManualHTMLService::class)->disableOriginalConstructor()->getMock();
-        $dispatcher = $this->getMockBuilder(EventDispatcherInterface::class)->getMock();
+        $importer = $this->prophesize(ImportManualHTMLService::class);
+        $dispatcher = $this->prophesize(EventDispatcherInterface::class);
 
-        $importer->expects($this->once())->method('findManuals')->with('_docsDefault');
+        $importer->findManuals('_docsDefault')->shouldBeCalledTimes(1);
 
-        $command = new SnippetImporter('_docsDefault', $importer, $dispatcher);
+        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal());
         $commandTester = new CommandTester($command);
         $commandTester->execute([]);
     }
@@ -34,12 +35,12 @@ class SnippetImporterTest extends TestCase
      */
     public function rootPathCanBeDefinedViaOption()
     {
-        $importer = $this->getMockBuilder(ImportManualHTMLService::class)->disableOriginalConstructor()->getMock();
-        $dispatcher = $this->getMockBuilder(EventDispatcherInterface::class)->getMock();
+        $importer = $this->prophesize(ImportManualHTMLService::class);
+        $dispatcher = $this->prophesize(EventDispatcherInterface::class);
 
-        $importer->expects($this->once())->method('findManuals')->with('_docsCustom');
+        $importer->findManuals('_docsCustom')->shouldBeCalledTimes(1);
 
-        $command = new SnippetImporter('_docsDefault', $importer, $dispatcher);
+        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal());
         $commandTester = new CommandTester($command);
         $commandTester->execute(['--rootPath' => '_docsCustom']);
     }
@@ -47,30 +48,28 @@ class SnippetImporterTest extends TestCase
     /**
      * @test
      */
-    public function callsImportManualForAllReturnedManuals()
+    public function callsImportProcedureManualForAllReturnedManuals()
     {
-        $importer = $this->getMockBuilder(ImportManualHTMLService::class)->disableOriginalConstructor()->getMock();
-        $dispatcher = $this->getMockBuilder(EventDispatcherInterface::class)->getMock();
+        $importer = $this->prophesize(ImportManualHTMLService::class);
+        $dispatcher = $this->prophesize(EventDispatcherInterface::class);
 
-        $manualMock1 = $this->getMockBuilder(Manual::class)->disableOriginalConstructor()->getMock();
-        $manualMock1->expects($this->any())->method('getTitle')->willReturn('typo3/manual-1');
-        $manualMock2 = $this->getMockBuilder(Manual::class)->disableOriginalConstructor()->getMock();
-        $manualMock2->expects($this->any())->method('getTitle')->willReturn('typo3/manual-2');
+        $manual1 = $this->prophesize(Manual::class);
+        $manual1->getTitle()->willReturn('typo3/manual-1');
+        $manual1->getAbsolutePath()->willReturn('');
+        $manual2 = $this->prophesize(Manual::class);
+        $manual2->getTitle()->willReturn('typo3/manual-2');
+        $manual2->getAbsolutePath()->willReturn('');
 
-        $importer->expects($this->once())->method('findManuals')->willReturn([
-            $manualMock1,
-            $manualMock2,
+        $importer->findManuals(Argument::any())->willReturn([
+            $manual1->reveal(),
+            $manual2->reveal(),
         ]);
-        $importer->expects($this->exactly(2))->method('importManual')->withConsecutive(
-            $this->callback(function (Manual $manual) {
-                return $manual->getTitle() === 'typo3/manual-1';
-            }),
-            $this->callback(function (Manual $manual) {
-                return $manual->getTitle() === 'typo3/manual-2';
-            })
-        );
+        $importer->importManual(Argument::which('getTitle', 'typo3/manual-1'))->shouldBeCalledTimes(1);
+        $importer->deleteManual(Argument::which('getTitle', 'typo3/manual-1'))->shouldBeCalledTimes(1);
+        $importer->importManual(Argument::which('getTitle', 'typo3/manual-2'))->shouldBeCalledTimes(1);
+        $importer->deleteManual(Argument::which('getTitle', 'typo3/manual-2'))->shouldBeCalledTimes(1);
 
-        $command = new SnippetImporter('_docsDefault', $importer, $dispatcher);
+        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal());
         $commandTester = new CommandTester($command);
         $commandTester->execute([]);
     }
@@ -80,22 +79,20 @@ class SnippetImporterTest extends TestCase
      */
     public function importsOnlyProvidedPackage()
     {
-        $importer = $this->getMockBuilder(ImportManualHTMLService::class)->disableOriginalConstructor()->getMock();
-        $dispatcher = $this->getMockBuilder(EventDispatcherInterface::class)->getMock();
+        $importer = $this->prophesize(ImportManualHTMLService::class);
+        $dispatcher = $this->prophesize(EventDispatcherInterface::class);
 
-        $manualMock = $this->getMockBuilder(Manual::class)->disableOriginalConstructor()->getMock();
-        $manualMock->expects($this->any())->method('getTitle')->willReturn('typo3/manual-1');
+        $manual = $this->prophesize(Manual::class);
+        $manual->getTitle()->willReturn('typo3/cms-core');
+        $manual->getAbsolutePath()->willReturn('');
 
-        $importer->expects($this->once())->method('findManual')
-            ->with('_docsDefault', 'c/typo3/cms-core/master/en-us')
-            ->willReturn($manualMock);
-        $importer->expects($this->once())->method('importManual')->withConsecutive(
-            $this->callback(function (Manual $manual) {
-                return $manual->getTitle() === 'typo3/cms-core';
-            })
-        );
+        $importer->findManual('_docsDefault', 'c/typo3/cms-core/master/en-us')
+            ->willReturn($manual->reveal())
+            ->shouldBeCalledTimes(1);
+        $importer->deleteManual(Argument::which('getTitle', 'typo3/cms-core'))->shouldBeCalledTimes(1);
+        $importer->importManual(Argument::which('getTitle', 'typo3/cms-core'))->shouldBeCalledTimes(1);
 
-        $command = new SnippetImporter('_docsDefault', $importer, $dispatcher);
+        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal());
         $commandTester = new CommandTester($command);
         $commandTester->execute(['packagePath' => 'c/typo3/cms-core/master/en-us']);
     }
