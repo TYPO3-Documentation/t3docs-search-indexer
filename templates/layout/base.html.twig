@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}TYPO3 Documentation Search{% endblock %}</title>
-    <link rel="stylesheet" href="https://docs.typo3.org/_static/css/theme.css">
-    <link rel="stylesheet" href="https://docs.typo3.org/_static/jquery-ui/jquery-ui.min.css">
-    <link rel="stylesheet" href="https://docs.typo3.org/_static/css/t3more.css">
+    <link rel="stylesheet" href="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/css/theme.css">
+    <link rel="stylesheet" href="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/css/webfonts.css">
+    <link rel="stylesheet" href="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/css/fontawesome.css">
     {% block stylesheets %}{% endblock %}
 </head>
 <body>
@@ -14,7 +14,7 @@
         <div class="wy-side-nav-search">
             <ul class="sidebartop">
                 <li class="docsite">
-                    <a href="https://docs.typo3.org"><img src="https://docs.typo3.org/_static/img/typo3-documentation.png" class="logo"></a>
+                    <a href="https://docs.typo3.org"><img src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/img/typo3-logo.svg" class="logo"></a>
                 </li>
                 <li class="project">
                     <a href="#">
@@ -46,12 +46,24 @@
         </div>
     </section>
 </div>
+<div aria-label="main navigation" class="toc" role="navigation">
+</div>
 <f:render section="Javascripts" optional="1"/>
-<script type="text/javascript" src="https://docs.typo3.org/_static/jquery.js"></script>
-<script type="text/javascript" src="https://docs.typo3.org/_static/underscore.js"></script>
-<script type="text/javascript" src="https://docs.typo3.org/_static/doctools.js"></script>
-<script type="text/javascript" src="https://docs.typo3.org/_static/jquery-ui/jquery-ui.min.js"></script>
-<script type="text/javascript" src="https://docs.typo3.org/_static/js/theme.js"></script>
-<script type="text/javascript" src="https://docs.typo3.org/_static/js/t3autocomplete.js"></script>
+<script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT: './',
+            VERSION: 'master',
+            COLLAPSE_INDEX: false,
+            FILE_SUFFIX: '.html',
+            HAS_SOURCE: true
+        };
+    </script>
+<script type="text/javascript" src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/jquery.min.js"></script>
+<script type="text/javascript" src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/underscore.min.js"></script>
+<script type="text/javascript" src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/doctools.min.js"></script>
+<script type="text/javascript" src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/popper.min.js"></script>
+<script type="text/javascript" src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/theme.min.js"></script>
+<script type="text/javascript" src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/autocomplete.min.js"></script>
 </body>
 </html>
