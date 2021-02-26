@@ -1,0 +1,21 @@
+<div class="page-header">
+    <div class="page-header-inner">
+        <div class="row">
+            <div class="col-6">
+                <a class="logo" href="{{ path('index') }}" title="TYPO3 Documentation">
+                    <img alt="TYPO3 Logo" class="logo-image"
+                         height="130" src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/img/typo3-logo.svg" width="484"/>
+                </a>
+            </div>
+            <div class="col-6">
+                <div role="search">
+                    <form id="rtd-search-form" class="wy-form" action="/index.php/search" method="get">
+                        <input type="text" class="form-control mt-3" name="q" placeholder="Search this project" id="searchinput" value="{% block searchQuery %}{% endblock %}">
+                        <input type="hidden" name="check_keywords" value="yes">
+                        <input type="hidden" name="area" value="default">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

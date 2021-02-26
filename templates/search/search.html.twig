@@ -44,7 +44,7 @@
     </style>
 {% endblock %}
 
-{% block body %}
+{% block page_content %}
     <div class="container">
         <h4>Showing hits <strong>{{ results.startingAtItem }} </strong>to <strong>{{ results.endingAtItem }}</strong> of <strong>{{ results.totalResults }}</strong></h4>
         {% include '/partial/paginator.html.twig' with {'result':results, 'q': q} %}
@@ -65,19 +65,20 @@
         {% endfor %}
         {% include '/partial/paginator.html.twig' with {'result':results, 'q': q} %}
     </div>
-{% endblock %}
 
-{% block sidebar %}
-    <ul class="aggregations">
-    {% for aggName, aggs in results.aggs %}
-        <li class="aggregation-bucket-name">{{ aggName }}
-            <ul class="aggregation-buckets">
-                {% for bucket in aggs.buckets %}
-                    <li class="aggregation-bucket">{{ bucket.key }} ({{ bucket.doc_count }})</li>
-                {% endfor %}
-            </ul>
-        </li>
-
-    {% endfor %}
-    </ul>
+    <div class="wy-menuXX wy-menu-verticalXX" data-spy="affix" role="navigation" aria-label="main navigation">
+        <ul class="aggregations">
+            {% for aggName, aggs in results.aggs %}
+                <li class="aggregation-bucket-name">{{ aggName }}
+                    <ul class="aggregation-buckets">
+                        {% for bucket in aggs.buckets %}
+                            <li class="aggregation-bucket">
+                                {{ bucket.key }} ({{ bucket.doc_count }})
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

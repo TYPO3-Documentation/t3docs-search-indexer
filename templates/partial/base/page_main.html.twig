@@ -1,0 +1,13 @@
+<div class="page-main">
+    <div class="page-main-inner">
+        {% block navigation %}
+            {% include 'partial/page_main/navigation.html.twig' %}
+        {% endblock %}
+
+        <div class="page-main-content">
+            <div class="rst-content">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</div>

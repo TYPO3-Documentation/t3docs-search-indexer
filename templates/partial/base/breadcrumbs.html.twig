@@ -1,0 +1,21 @@
+{#TODO: Replace hardcoded breadcrumbs with custom twig-function for generating breadcrumbs#}
+<div aria-label="breadcrumbs navigation" class="breadcrumb-bar" role="navigation">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Start</a></li>
+        <li aria-current="page" class="breadcrumb-item active">
+            {% if breadcrumb_title is defined %}{{ breadcrumb_title }}{% endif %}
+        </li>
+    </ol>
+    <div class="breadcrumb-additions">
+        <a class="btn btn-sm btn-primary"
+           href="https://github.com/TYPO3-Documentation/DocsTypo3Org-Homepage/edit/master/Documentation/Index.rst"
+           rel="nofollow noopener" target="_blank">
+            <span class="btn-icon"><span class="fab fa-github"></span></span>
+            <span class="btn-text">Edit on GitHub</span>
+        </a>
+        <a class="btn btn-sm btn-light" href="_sources/Index.rst.txt" rel="nofollow">
+            <span class="btn-icon"><span class="fas fa-code"></span></span>
+            <span class="btn-text">View source</span>
+        </a>
+    </div>
+</div>
