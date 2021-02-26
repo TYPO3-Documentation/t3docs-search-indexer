@@ -74,11 +74,17 @@
     "symfony/dependency-injection": {
         "version": "v4.0.3"
     },
+    "symfony/deprecation-contracts": {
+        "version": "v2.2.0"
+    },
     "symfony/dom-crawler": {
         "version": "v4.3.5"
     },
     "symfony/dotenv": {
         "version": "v4.0.3"
+    },
+    "symfony/error-handler": {
+        "version": "v4.4.19"
     },
     "symfony/event-dispatcher": {
         "version": "v4.0.3"
@@ -109,6 +115,9 @@
             "version": "3.3",
             "ref": "137a14eeb6b3f5370e7147af8aff6518504f50c7"
         }
+    },
+    "symfony/http-client-contracts": {
+        "version": "v2.3.1"
     },
     "symfony/http-foundation": {
         "version": "v4.0.3"
@@ -146,6 +155,9 @@
     "symfony/polyfill-php73": {
         "version": "v1.12.0"
     },
+    "symfony/polyfill-php80": {
+        "version": "v1.22.1"
+    },
     "symfony/routing": {
         "version": "4.0",
         "recipe": {
@@ -180,6 +192,9 @@
             "config/routes/dev/twig.yaml",
             "templates/base.html.twig"
         ]
+    },
+    "symfony/var-dumper": {
+        "version": "v5.2.3"
     },
     "symfony/var-exporter": {
         "version": "v4.3.5"

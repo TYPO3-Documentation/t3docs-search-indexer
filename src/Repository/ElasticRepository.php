@@ -15,9 +15,20 @@ use Elastica\Client;
 use Elastica\Document;
 use Elastica\Index;
 use Elastica\Query;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 class ElasticRepository
 {
+    private const ELASTICA_DEFAULT_CONFIGURATION = [
+        'host' => 'localhost',
+        'port' => '9200',
+        'path' => '',
+        'transport' => 'Http',
+        'index' => 'docsearch',
+        'username' => '',
+        'password' => '',
+    ];
+
     /**
      * @var Index
      */
@@ -36,13 +47,8 @@ class ElasticRepository
 
     public function __construct()
     {
-        $elasticConfig = [
-            'host' => 'localhost',
-            'port' => '9200',
-            'path' =>  '',
-            'transport' => 'Http',
-            'index' => 'docsearch',
-        ];
+        $elasticConfig = $this->getElasticSearchConfig();
+
         if (!empty($elasticConfig['username']) && !empty($elasticConfig['password'])) {
             $elasticConfig['headers'] = [
                 'Authorization' => 'Basic ' .
@@ -137,7 +143,7 @@ class ElasticRepository
             ],
         ];
         if (array_key_exists('page', $_GET)) {
-            $this->currentPage = (int) $_GET['page'];
+            $this->currentPage = (int)$_GET['page'];
         }
         #$usedFilters = $this->addFilters();
         #if (count($usedFilters) > 0) {
@@ -170,7 +176,7 @@ class ElasticRepository
             'maxScore' => $maxScore,
             'aggs' => $aggs,
         ];
-        if ($this->totalHits <= (int) $out['endingAtItem']) {
+        if ($this->totalHits <= (int)$out['endingAtItem']) {
             $out['endingAtItem'] = $this->totalHits;
         }
         return $out;
@@ -244,7 +250,7 @@ class ElasticRepository
 
         $out = [];
         while ($i < $numPages) {
-            $out[(int) $i] = ($i + 1);
+            $out[(int)$i] = ($i + 1);
             ++$i;
         }
 
@@ -268,5 +274,18 @@ class ElasticRepository
         $escapedString = str_replace('/', '\/', $escapedString);
 
         return $escapedString;
+    }
+
+    private function getElasticSearchConfig(): array
+    {
+        $config['host'] = $_ENV['ELASTICA_HOST'] ?? self::ELASTICA_DEFAULT_CONFIGURATION['host'];
+        $config['port'] = $_ENV['ELASTICA_PORT'] ?? self::ELASTICA_DEFAULT_CONFIGURATION['port'];
+        $config['path'] = $_ENV['ELASTICA_PATH'] ?? self::ELASTICA_DEFAULT_CONFIGURATION['path'];
+        $config['transport'] = $_ENV['ELASTICA_TRANSPORT'] ?? self::ELASTICA_DEFAULT_CONFIGURATION['transport'];
+        $config['index'] = $_ENV['ELASTICA_INDEX'] ?? self::ELASTICA_DEFAULT_CONFIGURATION['index'];
+        $config['username'] = $_ENV['ELASTICA_USERNAME'] ?? self::ELASTICA_DEFAULT_CONFIGURATION['username'];
+        $config['password'] = $_ENV['ELASTICA_PASSWORD'] ?? self::ELASTICA_DEFAULT_CONFIGURATION['password'];
+
+        return $config;
     }
 }
