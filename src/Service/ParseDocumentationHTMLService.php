@@ -1,29 +1,35 @@
 <?php
 
-/**
- * Created by PhpStorm.
- * User: mathiasschreiber
- * Date: 15.01.18
- * Time: 19:34
- */
-
 namespace App\Service;
 
 use App\Dto\Manual;
-use Symfony\Component\CssSelector\CssSelectorConverter;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class ParseDocumentationHTMLService
 {
+    /** @var KernelInterface */
+    private $kernel;
+
+    /**
+     * ParseDocumentationHTMLService constructor.
+     * @param KernelInterface $kernel
+     */
+    public function __construct(KernelInterface $kernel)
+    {
+        $this->kernel = $kernel;
+    }
+
     /**
      * @throws \InvalidArgumentException
      */
     public function findFolders(string $rootPath): Finder
     {
+        $docSearchParameters = $this->kernel->getContainer()->getParameter('docsearch');
         $finder = new Finder();
-        $finder->directories()->in($rootPath)->depth('== 4');
+        $finder->directories()->in($rootPath)->depth('== 4')->exclude($docSearchParameters['indexer']['exclude']);
 
         return $finder;
     }
