@@ -10,7 +10,12 @@
             <div class="col-6">
                 <div role="search">
                     <form id="rtd-search-form" class="wy-form" action="/index.php/search" method="get">
-                        <input type="text" class="form-control mt-3" name="q" placeholder="Search this project" id="searchinput" value="{% block searchQuery %}{% endblock %}">
+                        <div class="input-group mt-3">
+                            <input type="text" class="form-control shadow-none" name="q" placeholder="Search in TYPO3 documentation" id="searchinput" value="{% block searchQuery %}{% endblock %}">
+                            <div class="input-group-append">
+                                <button class="btn btn-sm btn-primary" type="submit"><i class="fa fa-search"></i>&nbsp;Search</button>
+                            </div>
+                        </div>
                         <input type="hidden" name="check_keywords" value="yes">
                         <input type="hidden" name="area" value="default">
                     </form>
