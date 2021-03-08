@@ -29,7 +29,7 @@ class ParseDocumentationHTMLService
     {
         $docSearchParameters = $this->kernel->getContainer()->getParameter('docsearch');
         $finder = new Finder();
-        $finder->directories()->in($rootPath)->depth('== 4')->exclude($docSearchParameters['indexer']['exclude']);
+        $finder->directories()->in($rootPath)->depth('== 4')->exclude($docSearchParameters['indexer']['excluded_directories']);
 
         return $finder;
     }

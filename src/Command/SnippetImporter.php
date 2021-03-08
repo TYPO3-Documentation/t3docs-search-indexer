@@ -6,6 +6,7 @@ use App\Dto\Manual;
 use App\Event\ImportManual\ManualAdvance;
 use App\Event\ImportManual\ManualFinish;
 use App\Event\ImportManual\ManualStart;
+use App\Service\DirectoryFinderService;
 use App\Service\ImportManualHTMLService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -14,6 +15,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Contracts\EventDispatcher\Event;
 
@@ -29,20 +33,30 @@ class SnippetImporter extends Command
      */
     private $importer;
 
+    private $kernel;
+
+    private $finder;
+
+    private $directoryFinder;
+
     public function __construct(
         string $defaultRootPath,
         ImportManualHTMLService $importer,
-        EventDispatcherInterface $dispatcher
+        EventDispatcherInterface $dispatcher,
+        KernelInterface $kernel,
+        DirectoryFinderService $directoryFinder
     ) {
         $this->defaultRootPath = $defaultRootPath;
         $this->importer = $importer;
+        $this->kernel = $kernel;
+        $this->finder = new Finder();
+        $this->directoryFinder = $directoryFinder;
 
-        $dispatcher = $dispatcher;
         $dispatcher->addListener(ManualStart::NAME, [$this, 'startProgress']);
         $dispatcher->addListener(ManualAdvance::NAME, [$this, 'advanceProgress']);
         $dispatcher->addListener(ManualFinish::NAME, [$this, 'finishProgress']);
 
-        parent::__construct(null);
+        parent::__construct();
     }
 
     /**
@@ -73,7 +87,7 @@ class SnippetImporter extends Command
         $this->io->title('Starting import');
 
         $this->io->section('Looking for manuals to import');
-        $manualsToImport = $this->getManuals($input);
+        $manualsToImport = $this->getManuals($input, $output);
         $this->io->writeln('Found ' . count($manualsToImport) . ' manuals.');
 
         foreach ($manualsToImport as $manual) {
@@ -87,16 +101,30 @@ class SnippetImporter extends Command
         $this->io->title('importing took ' . $this->formatMilliseconds($totalTime->getDuration()));
     }
 
-    private function getManuals(InputInterface $input): array
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return array|int
+     */
+    private function getManuals(InputInterface $input, OutputInterface $output)
     {
-        if ($input->getArgument('packagePath') !== null) {
-            return [$this->importer->findManual(
-                $input->getOption('rootPath'),
-                $input->getArgument('packagePath')
-            )];
+        $rootPath = $input->getOption('rootPath');
+        $directoryFinder = $this->directoryFinder->findAllowedDirectoriesForDocSearch($rootPath);
+        $manuals = [];
+
+        if (empty($directoryFinder['manualsPath'])) {
+            $output->writeln($directoryFinder['message']);
+
+            return 0;
         }
 
-        return $this->importer->findManuals($input->getOption('rootPath'));
+        $output->writeln($directoryFinder['message']);
+
+        foreach ($directoryFinder['manualsPath'] as $manualPath) {
+            $manuals = array_merge($manuals, $this->importer->findManuals($manualPath));
+        }
+
+        return $manuals;
     }
 
     private function makePathRelative(string $base, string $path)

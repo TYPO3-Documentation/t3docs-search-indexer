@@ -3,9 +3,14 @@
 parameters:
     docsearch:
         indexer:
-            exclude:
-                - 'other'
-                - 'draft'
+            allowed_directories:
+                - m
+                - c
+                - foo
+            excluded_directories:
+                - other
+                - draft
+                - typo3cms/extensions
 
 services:
     # default configuration for services in *this* file
