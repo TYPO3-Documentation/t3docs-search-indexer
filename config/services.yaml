@@ -38,3 +38,8 @@ services:
     App\Command\SnippetImporter:
         arguments:
             $defaultRootPath: '%env(DOCS_ROOT_PATH)%'
+
+    App\Command\SingleManualImporter:
+        arguments:
+            $defaultRootPath: '%env(DOCS_ROOT_PATH)%'
+            $appRootDir: '%kernel.project_dir%'

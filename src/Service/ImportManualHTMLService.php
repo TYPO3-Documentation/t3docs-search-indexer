@@ -50,7 +50,6 @@ class ImportManualHTMLService
     public function findManual(string $rootPath, string $manualPath): Manual
     {
         $folder = new SplFileInfo($rootPath . '/' . $manualPath, '', '');
-
         return $this->parser->createFromFolder($rootPath, $folder);
     }
 
