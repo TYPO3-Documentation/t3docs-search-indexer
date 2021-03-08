@@ -1,4 +1,10 @@
 {
+    "composer/semver": {
+        "version": "3.2.4"
+    },
+    "composer/xdebug-handler": {
+        "version": "1.4.5"
+    },
     "doctrine/annotations": {
         "version": "1.0",
         "recipe": {
@@ -14,6 +20,18 @@
     "elasticsearch/elasticsearch": {
         "version": "v5.3.0"
     },
+    "friendsofphp/php-cs-fixer": {
+        "version": "2.16",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "2.16",
+            "ref": "c1947bad147704aeaf0285745f0baae927a58959"
+        },
+        "files": [
+            ".php_cs.dist"
+        ]
+    },
     "guzzlehttp/ringphp": {
         "version": "1.1.0"
     },
@@ -22,6 +40,9 @@
     },
     "mikey179/vfsstream": {
         "version": "v1.6.7"
+    },
+    "php-cs-fixer/diff": {
+        "version": "v1.3.1"
     },
     "psr/cache": {
         "version": "1.0.1"
@@ -131,6 +152,9 @@
     "symfony/mime": {
         "version": "v4.3.5"
     },
+    "symfony/options-resolver": {
+        "version": "v5.2.4"
+    },
     "symfony/phpunit-bridge": {
         "version": "3.3",
         "recipe": {
@@ -157,6 +181,9 @@
     },
     "symfony/polyfill-php80": {
         "version": "v1.22.1"
+    },
+    "symfony/process": {
+        "version": "v5.2.4"
     },
     "symfony/routing": {
         "version": "4.0",

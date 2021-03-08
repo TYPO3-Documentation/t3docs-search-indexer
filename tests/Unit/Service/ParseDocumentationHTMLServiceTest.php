@@ -4,9 +4,9 @@ namespace App\Tests\Unit\Service;
 
 use App\Dto\Manual;
 use App\Service\ParseDocumentationHTMLService;
+use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Finder\SplFileInfo;
-use org\bovigo\vfs\vfsStream;
 
 class ParseDocumentationHTMLServiceTest extends TestCase
 {
@@ -60,7 +60,7 @@ class ParseDocumentationHTMLServiceTest extends TestCase
             ],
         ]);
 
-        $this->assertCount(6, $subject->findFolders($rootDir->url()));
+        self::assertCount(6, $subject->findFolders($rootDir->url()));
     }
 
     /**
@@ -75,12 +75,12 @@ class ParseDocumentationHTMLServiceTest extends TestCase
 
         $manual = $subject->createFromFolder('_docsFolder', $folder->reveal());
 
-        $this->assertSame('_docsFolder/c/typo3/cms-core/master/en-us/', $manual->getAbsolutePath());
-        $this->assertSame('typo3/cms-core', $manual->getTitle());
-        $this->assertSame('c', $manual->getType());
-        $this->assertSame('master', $manual->getVersion());
-        $this->assertSame('en-us', $manual->getLanguage());
-        $this->assertSame('c/typo3/cms-core/master/en-us/', $manual->getSlug());
+        self::assertSame('_docsFolder/c/typo3/cms-core/master/en-us/', $manual->getAbsolutePath());
+        self::assertSame('typo3/cms-core', $manual->getTitle());
+        self::assertSame('c', $manual->getType());
+        self::assertSame('master', $manual->getVersion());
+        self::assertSame('en-us', $manual->getLanguage());
+        self::assertSame('c/typo3/cms-core/master/en-us/', $manual->getSlug());
     }
 
     /**
@@ -101,7 +101,7 @@ class ParseDocumentationHTMLServiceTest extends TestCase
         $subject = new ParseDocumentationHTMLService();
         $files = $subject->getFilesWithSections($manual->reveal());
 
-        $this->assertCount(3, $files);
+        self::assertCount(3, $files);
         $expectedFiles = [
             $filesRoot . '/index.html',
             $filesRoot . '/another.html',
@@ -109,7 +109,7 @@ class ParseDocumentationHTMLServiceTest extends TestCase
         ];
         foreach ($files as $file) {
             /* @var $file SplFileInfo */
-            $this->assertTrue(in_array((string) $file, $expectedFiles), 'Unexpected file: ' . $file);
+            self::assertTrue(in_array((string)$file, $expectedFiles), 'Unexpected file: ' . $file);
         }
     }
 
@@ -133,10 +133,10 @@ class ParseDocumentationHTMLServiceTest extends TestCase
         $receivedSection = $subject->getSectionsFromFile($file->reveal());
 
         foreach ($expectedResult as $sectionIndex => $expectedSection) {
-            $this->assertSame($receivedSection[$sectionIndex], $expectedSection, 'Section with index ' . $sectionIndex . ' did not match.');
+            self::assertSame($receivedSection[$sectionIndex], $expectedSection, 'Section with index ' . $sectionIndex . ' did not match.');
         }
 
-        $this->assertCount(count($expectedResult), $receivedSection, 'Did not receive expected number of sections.');
+        self::assertCount(count($expectedResult), $receivedSection, 'Did not receive expected number of sections.');
     }
 
     public function documentationDataProvider()

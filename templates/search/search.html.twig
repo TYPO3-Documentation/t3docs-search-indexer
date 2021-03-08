@@ -46,39 +46,44 @@
 
 {% block page_content %}
     <div class="container">
-        <h4>Showing hits <strong>{{ results.startingAtItem }} </strong>to <strong>{{ results.endingAtItem }}</strong> of <strong>{{ results.totalResults }}</strong></h4>
-        {% include '/partial/paginator.html.twig' with {'result':results, 'q': q} %}
-        {% for hit in results.results %}
-            <div class="hit">
-                <h4>
-                    {{ hit.data.snippet_title }}
-                    <small class="text-muted">{{ hit.data.manual_title }}</small>
-                    <span class="badge badge-secondary">{{ hit.data.manual_type }}</span>
-                </h4>
-                <p class="url">
-                    <a href="https://docs.typo3.org/{{ hit.data.manual_slug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">
-                        https://docs.typo3.org/{{ hit.data.manual_slug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}
-                    </a>
-                    </p>
-                <p class="summary">{{ hit.data.snippet_content|slice(0, 18000) }}...</p>
+        <div class="row">
+            <div class="col-9">
+                <h4>Showing hits <strong>{{ results.startingAtItem }} </strong>to <strong>{{ results.endingAtItem }}</strong> of <strong>{{ results.totalResults }}</strong></h4>
+                {% include '/partial/paginator.html.twig' with {'result':results, 'q': q} %}
+                {% for hit in results.results %}
+                    <div class="hit">
+                        <h4>
+                            {{ hit.data.snippet_title }}
+                            <small class="text-muted">{{ hit.data.manual_title }}</small>
+                            <span class="badge badge-secondary">{{ hit.data.manual_type }}</span>
+                        </h4>
+                        <p class="url">
+                            <a href="https://docs.typo3.org/{{ hit.data.manual_slug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">
+                                https://docs.typo3.org/{{ hit.data.manual_slug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}
+                            </a>
+                        </p>
+                        <p class="summary">{{ hit.data.snippet_content|slice(0, 18000) }}...</p>
+                    </div>
+                {% endfor %}
+                {% include '/partial/paginator.html.twig' with {'result':results, 'q': q} %}
             </div>
-        {% endfor %}
-        {% include '/partial/paginator.html.twig' with {'result':results, 'q': q} %}
-    </div>
-
-    <div class="wy-menuXX wy-menu-verticalXX" data-spy="affix" role="navigation" aria-label="main navigation">
-        <ul class="aggregations">
-            {% for aggName, aggs in results.aggs %}
-                <li class="aggregation-bucket-name">{{ aggName }}
-                    <ul class="aggregation-buckets">
-                        {% for bucket in aggs.buckets %}
-                            <li class="aggregation-bucket">
-                                {{ bucket.key }} ({{ bucket.doc_count }})
+            <div class="col-3">
+                <div class="wy-menuXX wy-menu-verticalXX" data-spy="affix" role="navigation" aria-label="main navigation">
+                    <ul class="aggregations">
+                        {% for aggName, aggs in results.aggs %}
+                            <li class="aggregation-bucket-name">{{ aggName }}
+                                <ul class="aggregation-buckets">
+                                    {% for bucket in aggs.buckets %}
+                                        <li class="aggregation-bucket">
+                                            {{ bucket.key }} ({{ bucket.doc_count }})
+                                        </li>
+                                    {% endfor %}
+                                </ul>
                             </li>
                         {% endfor %}
                     </ul>
-                </li>
-            {% endfor %}
-        </ul>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}

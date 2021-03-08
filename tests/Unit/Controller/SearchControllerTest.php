@@ -75,7 +75,7 @@ class SearchControllerTest extends TestCase
      */
     public function searchActionAssignsResultsToTemplate()
     {
-        $this->markTestIncomplete('Need to move repository to DI and replace by mock');
+        self::markTestIncomplete('Need to move repository to DI and replace by mock');
 
         $subject = new SearchController();
         $view = $this->getMockedView();
@@ -83,15 +83,15 @@ class SearchControllerTest extends TestCase
 
         $request = $this->getMockBuilder(Request::class)->getMock();
         $request->query = $this->getMockBuilder(ParameterBag::class)->getMock();
-        $request->query->expects($this->any())->method('get')->with('q')->willReturn('searchTerm');
+        $request->query->expects(self::any())->method('get')->with('q')->willReturn('searchTerm');
 
         $repository = $this->getMockBuilder(ElasticRepository::class)->disableOriginalConstructor()->getMock();
-        $repository->expects($this->once())->method('findByQuery')->with('searchTerm')->willReturn([
+        $repository->expects(self::once())->method('findByQuery')->with('searchTerm')->willReturn([
             'resultItem1' => 'something',
             'resultItem2' => 'something',
         ]);
 
-        $view->expects($this->once())->method('assignMultiple')->with($this->callback(function (array $variables) {
+        $view->expects(self::once())->method('assignMultiple')->with(self::callback(function (array $variables) {
             return isset($variables['results'])
                 && $variables['results'] === [
                     'resultItem1' => 'something',

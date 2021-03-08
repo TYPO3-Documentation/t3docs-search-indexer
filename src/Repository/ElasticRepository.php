@@ -6,7 +6,6 @@
  * Date: 15.01.18
  * Time: 20:53
  */
-
 namespace App\Repository;
 
 use App\Dto\Manual;
@@ -15,7 +14,6 @@ use Elastica\Client;
 use Elastica\Document;
 use Elastica\Index;
 use Elastica\Query;
-use Symfony\Component\Config\Definition\Exception\Exception;
 
 class ElasticRepository
 {
@@ -145,10 +143,10 @@ class ElasticRepository
         if (array_key_exists('page', $_GET)) {
             $this->currentPage = (int)$_GET['page'];
         }
-        #$usedFilters = $this->addFilters();
-        #if (count($usedFilters) > 0) {
-        #    $query['post_filter'] = $usedFilters;
-        #}
+        //$usedFilters = $this->addFilters();
+        //if (count($usedFilters) > 0) {
+        //    $query['post_filter'] = $usedFilters;
+        //}
 
         $search = $this->elasticIndex->createSearch($query);
         $search->addType('snippet');

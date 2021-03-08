@@ -20,7 +20,8 @@
     "require-dev": {
         "mikey179/vfsstream": "^1.6",
         "symfony/dotenv": "^4.3",
-        "symfony/phpunit-bridge": "^4.3"
+        "symfony/phpunit-bridge": "^4.3",
+        "friendsofphp/php-cs-fixer": ">=v2.18.2"
     },
     "config": {
         "preferred-install": {

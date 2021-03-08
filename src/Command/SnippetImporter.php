@@ -73,7 +73,7 @@ class SnippetImporter extends Command
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return int|null|void
+     * @return int|void|null
      * @throws \LogicException
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
@@ -92,7 +92,7 @@ class SnippetImporter extends Command
 
         foreach ($manualsToImport as $manual) {
             /* @var Manual $manual */
-            $this->io->section('Importing ' . $this->makePathRelative($input->getOption('rootPath'), $manual->getAbsolutePath())  . ' - sit tight.');
+            $this->io->section('Importing ' . $this->makePathRelative($input->getOption('rootPath'), $manual->getAbsolutePath()) . ' - sit tight.');
             $this->importer->deleteManual($manual);
             $this->importer->importManual($manual);
         }
@@ -145,7 +145,7 @@ class SnippetImporter extends Command
 
     public function advanceProgress(Event $event)
     {
-         $this->io->progressAdvance();
+        $this->io->progressAdvance();
     }
 
     public function finishProgress(Event $event)

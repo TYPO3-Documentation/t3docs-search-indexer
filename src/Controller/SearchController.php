@@ -6,7 +6,6 @@
  * Date: 16.01.18
  * Time: 09:07
  */
-
 namespace App\Controller;
 
 use App\Repository\ElasticRepository;

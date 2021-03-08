@@ -45,9 +45,9 @@ class ImportManualHTMLServiceTest extends TestCase
 
         $manuals = $subject->findManuals('_docsFolder');
 
-        $this->assertCount(2, $manuals);
-        $this->assertSame($manual1, $manuals[0]);
-        $this->assertSame($manual2, $manuals[1]);
+        self::assertCount(2, $manuals);
+        self::assertSame($manual1, $manuals[0]);
+        self::assertSame($manual2, $manuals[1]);
     }
 
     /**
@@ -76,8 +76,8 @@ class ImportManualHTMLServiceTest extends TestCase
 
         $returnedManual = $subject->findManual('_docsFolder', 'c/typo3/cms-core/master/en-us');
 
-        $this->assertInstanceOf(Manual::class, $manual);
-        $this->assertSame($manual, $returnedManual);
+        self::assertInstanceOf(Manual::class, $manual);
+        self::assertSame($manual, $returnedManual);
     }
 
     /**
