@@ -11,13 +11,13 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\Stopwatch\Stopwatch;
 
 class SingleManualImporter extends Command
 {
-    private const INDEX_FOLDERS = ['c', 'm', 'p'];
     private const FOLDER_DEPTH = 4;
     /**
      * @var string $defaultRootPath
@@ -47,17 +47,21 @@ class SingleManualImporter extends Command
 
     private $incrementor;
 
+    private $parameterBag;
+
     /**
      * SingleManualImporter constructor.
      * @param string $defaultRootPath
      * @param string $appRootDir
      * @param ImportManualHTMLService $importer
+     * @param ParameterBagInterface $parameterBag
      */
-    public function __construct(string $defaultRootPath, string $appRootDir, ImportManualHTMLService $importer)
+    public function __construct(string $defaultRootPath, string $appRootDir, ImportManualHTMLService $importer, ParameterBagInterface $parameterBag)
     {
         $this->defaultRootPath = $defaultRootPath;
         $this->appRootDir = $appRootDir;
         $this->importer = $importer;
+        $this->parameterBag = $parameterBag;
         $this->finder = new Finder();
         $this->incrementor = 0;
 
@@ -98,9 +102,9 @@ class SingleManualImporter extends Command
     private function selectIndexFolder(InputInterface $input, OutputInterface $output): self
     {
         $finderPathFormat = $this->defaultRootPath . '/%s';
-
+        $indexFolders = $this->getIndexDirectories();
         $question = new ChoiceQuestion(
-            'Select folder', self::INDEX_FOLDERS
+            'Select folder', $indexFolders['allowed_directories']
         );
         $question->setErrorMessage('Can not index folder \'%s\'');
         $folder = $this->getQuestionHelper()->ask($input, $output, $question);
@@ -166,6 +170,13 @@ class SingleManualImporter extends Command
     {
         $t = round($milliseconds / 1000);
         return sprintf('%02d:%02d:%02d', ($t / 3600), ($t / 60 % 60), $t % 60);
+    }
+
+    private function getIndexDirectories(): array
+    {
+        $docsearchConfig = $this->parameterBag->get('docsearch');
+
+        return $docsearchConfig['indexer'];
     }
 
 }
