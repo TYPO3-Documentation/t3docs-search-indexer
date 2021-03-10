@@ -1,0 +1,7 @@
+{% if isLocalAsset == true %}
+    {% set assetLink = asset(assetUrl) %}
+{% else %}
+    {% set assetLink = assetUrl %}
+{% endif %}
+{% if assetType == 'css' %}<link href="{{ assetLink }}" rel="stylesheet" type="text/css"/>{% endif %}
+{% if assetType == 'js' %}<script src="{{ assetLink }}" type="text/javascript"></script>{% endif %}

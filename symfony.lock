@@ -68,6 +68,9 @@
             "ref": "aaddfdf43cdecd4cf91f992052d76c2cadc04543"
         }
     },
+    "symfony/asset": {
+        "version": "v4.4.20"
+    },
     "symfony/cache": {
         "version": "v4.0.3"
     },
@@ -172,9 +175,6 @@
     },
     "symfony/polyfill-mbstring": {
         "version": "v1.6.0"
-    },
-    "symfony/polyfill-php72": {
-        "version": "v1.12.0"
     },
     "symfony/polyfill-php73": {
         "version": "v1.12.0"

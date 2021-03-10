@@ -5,21 +5,14 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>{% block title %}{% endblock %}</title>
-    <link href="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/css/theme.css" rel="stylesheet" type="text/css"/>
-    <link href="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/css/webfonts.css" rel="stylesheet" type="text/css"/>
-    <link href="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/css/fontawesome.css" rel="stylesheet" type="text/css"/>
-    <link href="_static/graphviz.css" rel="stylesheet" type="text/css"/>
-    <!-- linktags -->
+
+    {{ render_assets('css', 'header') | raw }}
+    {{ render_assets('js', 'header') | raw }}
+
     {% block link_tags %}
         {% include 'partial/base/linktags.html.twig' %}
     {% endblock %}
-    <!-- /linktags -->
-    <!-- extrahead --><!-- /extrahead -->
-    <script src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/modernizr.min.js"></script>
-    <!-- UNIVERSE BAR START -->
-    <script src="https://typo3.azureedge.net/typo3infrastructure/universe/dist/webcomponents-loader.js"></script>
-    <script src="https://typo3.azureedge.net/typo3infrastructure/universe/dist/typo3-universe.js" type="module"></script>
-    <!-- UNIVERSE BAR END -->
+
 </head>
 <body>
 <div class="page">
@@ -50,8 +43,6 @@
                             {% block page_content %}{% endblock %}
                         </div>
                     </div>
-
-                    {#TODO: Implement paginator#}
                 </div>
             </div>
         </div>
@@ -61,8 +52,9 @@
         {% include 'partial/base/page_footer.html.twig' %}
     {% endblock %}
 </div>
+
 <script type="text/javascript">
-    var DOCUMENTATION_OPTIONS = {
+    let DOCUMENTATION_OPTIONS = {
         URL_ROOT: './',
         VERSION: 'master',
         COLLAPSE_INDEX: false,
@@ -70,23 +62,16 @@
         HAS_SOURCE: true
     };
 </script>
-<script src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/jquery.min.js" type="text/javascript"></script>
-<script src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/underscore.min.js" type="text/javascript"></script>
-<script src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/doctools.min.js" type="text/javascript"></script>
-<script src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/popper.min.js" type="text/javascript"></script>
-<script src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/bootstrap.min.js" type="text/javascript"></script>
-<script src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/theme.min.js" type="text/javascript"></script>
-<script src="_static/language_data.js" type="text/javascript"></script>
-<script src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/searchtools.min.js" type="text/javascript"></script>
-<script src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/autocomplete.min.js" type="text/javascript"></script>
-<script type="text/javascript">
-    jQuery(function() { Search.loadIndex("searchindex.js"); });
+
+{{ render_assets('js', 'footer') | raw }}
+
+<script type="text/javascript" id="searchindexpath" data-path="{{ asset('assets/js/searchindex.js') }}">
+    jQuery(function () {
+        let searchindexpath = $('#searchindexpath').data('path');
+        Search.loadIndex(searchindexpath);
+    });
 </script>
 <script id="searchindexloader" type="text/javascript"></script>
-<!-- scripts2 --><!-- /scripts2 -->
-<!-- footer2 --><!-- /footer2 -->
-<script id="R9wBKTwzv" src="https://app.usercentrics.eu/latest/main.js" type="application/javascript"></script>
-<script data-usercentrics="Matomo" src="js/piwik.js" type="text/plain"></script>
 </body>
 
 </html>

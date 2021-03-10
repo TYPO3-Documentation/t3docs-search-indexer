@@ -20,6 +20,18 @@ docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e "xpack.s
 
 * Copy ``.env.dist`` to ``.env``
 
+Configuration
+-------
+
+Configure assets
+^^^^^^^^^^
+
+* Assets configuration is located in ``services.yml`` file in ``assets`` section
+
+* For rendering assets in template use Twig function ``{{ render_assets($assetType, $assetLocation) | raw }}`` where $assetType is ``js`` or ``css``
+and ``$assetLocation`` is ``header`` or ``footer``
+
+* You can define assets for ``header`` and ``footer`` parts of templates in in ``services.yml`` file in ``assets``
 
 Usage
 -----

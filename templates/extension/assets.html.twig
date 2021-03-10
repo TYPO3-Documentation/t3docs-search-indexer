@@ -1,0 +1,3 @@
+{% for asset in assets %}
+    {{ render_single_asset(asset, assetType) | raw }}
+{% endfor %}
