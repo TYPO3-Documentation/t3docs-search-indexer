@@ -76,7 +76,7 @@ class ParseDocumentationHTMLService
     private function getSections(string $html): array
     {
         $crawler = new Crawler($html);
-        $sections = $crawler->filter('div.toBeIndexed');
+        $sections = $crawler->filter('div[itemprop="articleBody"]');
 
         if ($sections->count() === 0) {
             return [];
