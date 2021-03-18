@@ -20,8 +20,7 @@ parameters:
         js:
             header:
                 - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/modernizr.min.js'
-                - 'https://typo3.azureedge.net/typo3infrastructure/universe/dist/webcomponents-loader.js'
-                - 'https://typo3.azureedge.net/typo3infrastructure/universe/dist/typo3-universe.js'
+
             footer:
                 - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/jquery.min.js'
                 - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/underscore.min.js'
@@ -31,7 +30,6 @@ parameters:
                 - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/searchtools.min.js'
                 - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/autocomplete.min.js'
                 - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.4.3/js/theme.min.js'
-                - 'https://app.usercentrics.eu/latest/main.js'
 
 services:
     # default configuration for services in *this* file

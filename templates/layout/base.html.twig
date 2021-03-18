@@ -9,6 +9,11 @@
     {{ render_assets('css', 'header') | raw }}
     {{ render_assets('js', 'header') | raw }}
 
+    <!-- UNIVERSE BAR START -->
+    <script src="https://typo3.azureedge.net/typo3infrastructure/universe/dist/webcomponents-loader.js"></script>
+    <script src="https://typo3.azureedge.net/typo3infrastructure/universe/dist/typo3-universe.js" type="module"></script>
+    <!-- UNIVERSE BAR END -->
+
     {% block link_tags %}
         {% include 'partial/base/linktags.html.twig' %}
     {% endblock %}
@@ -64,6 +69,9 @@
 </script>
 
 {{ render_assets('js', 'footer') | raw }}
+
+<script id="R9wBKTwzv" src="https://app.usercentrics.eu/latest/main.js" type="application/javascript"></script>
+<script data-usercentrics="Matomo" src="/js/piwik.js" type="text/plain"></script>
 
 <script type="text/javascript" id="searchindexpath" data-path="{{ asset('assets/js/searchindex.js') }}">
     jQuery(function () {
