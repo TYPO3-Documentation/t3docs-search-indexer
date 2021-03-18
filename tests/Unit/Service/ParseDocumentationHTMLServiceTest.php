@@ -18,12 +18,12 @@ class ParseDocumentationHTMLServiceTest extends TestCase
         $subject = new ParseDocumentationHTMLService();
 
         $folder = $this->prophesize(SplFileInfo::class);
-        $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/master/en-us/');
-        $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/master/en-us/');
+        $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/master/en-us');
+        $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/master/en-us');
 
         $manual = $subject->createFromFolder($folder->reveal());
 
-        self::assertSame('_docsFolder/c/typo3/cms-core/master/en-us/', $manual->getAbsolutePath());
+        self::assertSame('_docsFolder/c/typo3/cms-core/master/en-us', $manual->getAbsolutePath());
         self::assertSame('typo3/cms-core', $manual->getTitle());
         self::assertSame('c', $manual->getType());
         self::assertSame('master', $manual->getVersion());

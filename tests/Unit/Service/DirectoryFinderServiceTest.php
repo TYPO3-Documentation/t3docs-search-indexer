@@ -15,8 +15,7 @@ class DirectoryFinderServiceTest extends TestCase
      */
     public function returnsManualsFromFolder()
     {
-        $kernel = $this->prophesize(Kernel::class);
-        $subject = new DirectoryFinderService($kernel->reveal());
+        $subject = new DirectoryFinderService(['^m/', '^c/', '^p/'], ['other', 'draft', 'typo3cms/extensions']);
 
         $rootDir = vfsStream::setup('_docsFolder', null, [
             'c' => [
