@@ -1,12 +1,13 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
+    docs_root_path: '%env(DOCS_ROOT_PATH)%'
     docsearch:
         indexer:
-            allowed_directories:
-                - m
-                - c
-                - foo
+            allowed_paths:
+                - ^m/
+                - ^c/
+                - ^p/
             excluded_directories:
                 - other
                 - draft

@@ -9,6 +9,9 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class SnippetImporterTest extends TestCase
 {
@@ -19,10 +22,11 @@ class SnippetImporterTest extends TestCase
     {
         $importer = $this->prophesize(ImportManualHTMLService::class);
         $dispatcher = $this->prophesize(EventDispatcherInterface::class);
+        $directoryFinder = $this->prophesize(DirectoryFinderService::class);
 
-        $importer->findManuals('_docsDefault')->shouldBeCalledTimes(1);
+        $directoryFinder->getAllManualDirectories('_docsDefault')->shouldBeCalledTimes(1);
 
-        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal());
+        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal(), $directoryFinder->reveal());
         $commandTester = new CommandTester($command);
         $commandTester->execute([]);
     }
@@ -34,10 +38,11 @@ class SnippetImporterTest extends TestCase
     {
         $importer = $this->prophesize(ImportManualHTMLService::class);
         $dispatcher = $this->prophesize(EventDispatcherInterface::class);
+        $directoryFinder = $this->prophesize(DirectoryFinderService::class);
 
-        $importer->findManuals('_docsCustom')->shouldBeCalledTimes(1);
+        $directoryFinder->getAllManualDirectories('_docsCustom')->shouldBeCalledTimes(1);
 
-        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal());
+        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal(), $directoryFinder->reveal());
         $commandTester = new CommandTester($command);
         $commandTester->execute(['--rootPath' => '_docsCustom']);
     }

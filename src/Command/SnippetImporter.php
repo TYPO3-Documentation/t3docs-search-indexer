@@ -2,7 +2,6 @@
 
 namespace App\Command;
 
-use App\Dto\Manual;
 use App\Event\ImportManual\ManualAdvance;
 use App\Event\ImportManual\ManualFinish;
 use App\Event\ImportManual\ManualStart;
@@ -16,8 +15,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Finder\SplFileInfo;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Contracts\EventDispatcher\Event;
 
@@ -33,8 +30,6 @@ class SnippetImporter extends Command
      */
     private $importer;
 
-    private $kernel;
-
     private $finder;
 
     private $directoryFinder;
@@ -43,12 +38,10 @@ class SnippetImporter extends Command
         string $defaultRootPath,
         ImportManualHTMLService $importer,
         EventDispatcherInterface $dispatcher,
-        KernelInterface $kernel,
         DirectoryFinderService $directoryFinder
     ) {
         $this->defaultRootPath = $defaultRootPath;
         $this->importer = $importer;
-        $this->kernel = $kernel;
         $this->finder = new Finder();
         $this->directoryFinder = $directoryFinder;
 
@@ -87,44 +80,46 @@ class SnippetImporter extends Command
         $this->io->title('Starting import');
 
         $this->io->section('Looking for manuals to import');
-        $manualsToImport = $this->getManuals($input, $output);
-        $this->io->writeln('Found ' . count($manualsToImport) . ' manuals.');
+        $manualsFolders = $this->getManuals($input, $output);
 
-        foreach ($manualsToImport as $manual) {
-            /* @var Manual $manual */
-            $this->io->section('Importing ' . $this->makePathRelative($input->getOption('rootPath'), $manual->getAbsolutePath()) . ' - sit tight.');
-            $this->importer->deleteManual($manual);
-            $this->importer->importManual($manual);
+        $processed = 0;
+        if ($manualsFolders->hasResults()) {
+            foreach ($manualsFolders as $folder) {
+                $manual = $this->importer->findManual($folder);
+                $this->io->section('Importing ' . $this->makePathRelative($input->getOption('rootPath'),
+                        $manual->getAbsolutePath()) . ' - sit tight.');
+                $this->importer->deleteManual($manual);
+
+                $this->importer->importManual($manual);
+                $processed++;
+            }
         }
 
         $totalTime = $timer->stop('importer');
-        $this->io->title('importing took ' . $this->formatMilliseconds($totalTime->getDuration()));
+        $this->io->title('importing ' . $processed . ' manuals took ' . $this->formatMilliseconds($totalTime->getDuration()));
     }
 
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return array|int
+     * @return Finder
      */
-    private function getManuals(InputInterface $input, OutputInterface $output)
+    private function getManuals(InputInterface $input, OutputInterface $output): Finder
     {
-        $rootPath = $input->getOption('rootPath');
-        $directoryFinder = $this->directoryFinder->findAllowedDirectoriesForDocSearch($rootPath);
-        $manuals = [];
+        $rootPath = rtrim($input->getOption('rootPath'), '/');
+        $packagePath = rtrim($input->getArgument('packagePath'), '/');
 
-        if (empty($directoryFinder['manualsPath'])) {
-            $output->writeln($directoryFinder['message']);
-
-            return 0;
+        if (empty($packagePath)) {
+            $folders = $this->directoryFinder->getAllManualDirectories($rootPath);
+        } else {
+            $folders = $this->directoryFinder->getDirectoriesByPath($rootPath . '/' . $packagePath);
         }
 
-        $output->writeln($directoryFinder['message']);
-
-        foreach ($directoryFinder['manualsPath'] as $manualPath) {
-            $manuals = array_merge($manuals, $this->importer->findManuals($manualPath));
+        if (!$folders->hasResults()) {
+            $message = '<error>Root path should contain at last one of the allowed directories. Please, check configuration</error>';
+            $output->writeln($message);
         }
-
-        return $manuals;
+        return $folders;
     }
 
     private function makePathRelative(string $base, string $path)

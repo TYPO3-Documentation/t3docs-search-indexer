@@ -5,113 +5,86 @@ namespace App\Service;
 
 
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Finder\SplFileInfo;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 class DirectoryFinderService
 {
-    /** @var Finder */
-    private $finder;
-    /** @var KernelInterface */
+    /**
+     * @var KernelInterface
+     */
     private $kernel;
 
     public function __construct(KernelInterface $kernel)
     {
-        $this->finder = new Finder();
         $this->kernel = $kernel;
     }
 
     /**
+     * Finds all directories containing documentation under rootPath (DOCS_ROOT_PATH)
+     * taking into account 'allowed_paths' and 'excluded_directories'
+     *
      * @param string $rootPath
-     * @return array
-     */
-    public function findAllowedDirectoriesForDocSearch(string $rootPath): array
-    {
-        return $this->getAllowedDirectories($rootPath);
-    }
-
-    /**
      * @return Finder
      */
-    public function getFinder(): Finder
+    public function getAllManualDirectories(string $rootPath): Finder
     {
-        return $this->finder;
-    }
-
-    /**
-     * @return KernelInterface
-     */
-    public function getKernel(): KernelInterface
-    {
-        return $this->kernel;
-    }
-
-    /**
-     * @param $rootPath
-     * @return array
-     */
-    private function getAllowedDirectories($rootPath): array
-    {
-        $projectDir = $this->kernel->getProjectDir();
         $docSearchParameters = $this->kernel->getContainer()->getParameter('docsearch');
-        $indexerParameters = $docSearchParameters['indexer'];
-        $allowedDirectories = $indexerParameters['allowed_directories'];
-        $foundDirectories = [];
-        $manualsPathCollection = [];
-        $response['message'] = '';
-        $response['manualsPath'] = [];
+        $allowedPaths = $docSearchParameters['indexer']['allowed_paths'];
+        $allowedPathsRegexs = $this->wrapValuesWithPregDelimiters($allowedPaths);
 
-        $folders = $this->finder
-            ->directories()
-            ->name($allowedDirectories)
-            ->in($projectDir . DIRECTORY_SEPARATOR . $rootPath)
-        ;
+        $finder = $this->getDirectoriesByPath($rootPath);
+        $folders = $finder->path($allowedPathsRegexs);
 
-        /** @var SplFileInfo $folder */
-        foreach ($folders->getIterator() as $folder) {
-            $foundDirectories[] = $folder->getBasename();
-        }
-
-        $missingDirectories = array_diff($allowedDirectories, $foundDirectories);
-
-        if (count($missingDirectories) === count($allowedDirectories)) {
-            $messagePattern = '<error>Directories %s was not found in root directory %s. Please, check configuration</error>';
-            $message = sprintf($messagePattern, implode(', ', $missingDirectories), $rootPath);
-
-            return $this->createResponse($message, $manualsPathCollection);
-        }
-
-        if (count($missingDirectories) < count($allowedDirectories)) {
-            $messagePattern = '<info>Directories %s was not found in root directory %s.</info>';
-            $message = sprintf($messagePattern, implode(', ', $missingDirectories), $rootPath);
-
-            foreach ($foundDirectories as $foundDirectory) {
-                $manualsPathCollection[] = $rootPath . DIRECTORY_SEPARATOR . $foundDirectory;
-            }
-
-            return $this->createResponse($message, $manualsPathCollection);
-        }
-
-        $messagePattern = '<info>All directories %s was not found in root directory %s.</info>';
-        $message = sprintf($messagePattern, implode(', ', $foundDirectories), $rootPath);
-
-        foreach ($foundDirectories as $foundDirectory) {
-            $manualsPathCollection[] = $rootPath . DIRECTORY_SEPARATOR . $foundDirectory;
-        }
-
-        return $this->createResponse($message, $manualsPathCollection);
+        return $folders;
     }
 
     /**
-     * @param string $message
-     * @param array $manualLinks
+     * Finds all directories containing documentation under rootPath
+     * taking into account 'excluded_directories'
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function getDirectoriesByPath(string $rootPath): Finder
+    {
+        $docRootPath = $this->kernel->getContainer()->getParameter('docs_root_path');
+
+        // checks if given path is already a manual, as finder only checks subfolders
+        if ($rootPath !== $docRootPath && \file_exists($rootPath . '/objects.inv.json')) {
+            $finder = new Finder();
+            $finder->append([$rootPath]);
+            return $finder;
+        }
+        $docSearchParameters = $this->kernel->getContainer()->getParameter('docsearch');
+        $finder = new Finder();
+        $finder->directories()
+            ->in($rootPath)
+            ->exclude($docSearchParameters['indexer']['excluded_directories'])
+            ->filter($this->getFolderFilter());
+
+        return $finder;
+    }
+
+    private function getFolderFilter()
+    {
+        return function (\SplFileInfo $file) {
+            if (\file_exists($file->getPathname() . '/objects.inv.json')) {
+                return true;
+            }
+            return false;
+        };
+    }
+
+    /**
+     * Wraps array values with regular expression delimiters
+     *
+     * @param array $regexs
      * @return array
      */
-    private function createResponse(string $message, array $manualLinks): array
+    private function wrapValuesWithPregDelimiters(array $regexs): array
     {
-        return [
-            'message' => $message,
-            'manualsPath' => $manualLinks
-        ];
+        array_walk($regexs, function (&$value, $key) {
+            $value = '#' . $value . '#';
+        });
+        return $regexs;
     }
 }

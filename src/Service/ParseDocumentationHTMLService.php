@@ -6,41 +6,14 @@ use App\Dto\Manual;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
-use Symfony\Component\HttpKernel\KernelInterface;
 
 class ParseDocumentationHTMLService
 {
-    /** @var KernelInterface */
-    private $kernel;
-
-    /**
-     * ParseDocumentationHTMLService constructor.
-     * @param KernelInterface $kernel
-     */
-    public function __construct(KernelInterface $kernel)
+    public function createFromFolder(\SplFileInfo $folder): Manual
     {
-        $this->kernel = $kernel;
-    }
-
-    /**
-     * @throws \InvalidArgumentException
-     */
-    public function findFolders(string $rootPath): Finder
-    {
-        $docSearchParameters = $this->kernel->getContainer()->getParameter('docsearch');
-        $finder = new Finder();
-        $finder->directories()->in($rootPath)->depth('== 4')->exclude($docSearchParameters['indexer']['excluded_directories']);
-
-        return $finder;
-    }
-
-    public function createFromFolder(string $prefixFolder, SplFileInfo $folder): Manual
-    {
-        $prefixFolder = rtrim($prefixFolder, '/') . '/';
-        $folderPath = (string)$folder;
-
-        $relativeFolderPath = str_replace($prefixFolder, '', $folderPath);
-        list($type, $vendor, $name, $version, $language) = explode('/', $relativeFolderPath);
+        $values = explode('/', $folder->getPathname());
+        $values = array_slice($values, -5, 5);
+        list($type, $vendor, $name, $version, $language) = $values;
 
         return new Manual(
             $folder,
@@ -48,7 +21,7 @@ class ParseDocumentationHTMLService
             $type,
             $version,
             $language,
-            $relativeFolderPath
+            implode('/', $values)
         );
     }
 

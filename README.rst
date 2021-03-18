@@ -42,7 +42,7 @@ Common instructions for docsearch indexer
 
 * You can configure 2 kinds of directories:
 
-    * allowed_directories - directories which should be indexed by Indexer
+    * allowed_paths - regular expressions for paths which should be indexed by Indexer
 
     * excluded_directories - directories which should be ignored by Indexer
 
@@ -51,8 +51,9 @@ Index docs
 
 * Start elasticsearch.
 
-* Run ``./bin/console docsearch:import`` to index all documentations from ``_docs``
-  folder.
+* Run ``./bin/console docsearch:import`` to index all documentations from configured
+  root path (DOCS_ROOT_PATH) folder (taking into account configured ``allowed_paths``
+  and ``excluded_directories``).
 
 * Open ``http://localhost:9200/docsearch_english_a/_search?q=*:*`` to see indexed
   documentations.
@@ -60,12 +61,15 @@ Index docs
 * php -S 127.0.0.1:8081 -t ./public
 
 Index single manual
-^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 
 * Start elasticsearch.
 
-* Run ``./bin/console docsearch:import:single-manual`` and, following the instructions on screen, select
-manual which should be indexed (selected from the docsearch configuration)
+* Run ``./bin/console docsearch:import <packagePath>`` where ``packagePath`` is
+   a path to manual (or manuals) you want to import, relative to ``DOCS_ROOT_PATH``.
+   This command doesn't check ``allowed_paths``, to ease usage when indexing single
+   documentation folder from custom location (so you don't have to recreate folder
+   structure from docs server).
 
 * Open ``http://localhost:9200/docsearch_english_a/_search?q=*:*`` to see indexed
   documentations.

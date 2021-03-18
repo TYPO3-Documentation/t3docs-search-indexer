@@ -37,20 +37,9 @@ class ImportManualHTMLService
         $this->dispatcher = $dispatcher;
     }
 
-    public function findManuals(string $rootPath): array
+    public function findManual(\SplFileInfo $folder): Manual
     {
-        $manuals = [];
-        foreach ($this->parser->findFolders($rootPath) as $folder) {
-            /* @var $folder SplFileInfo */
-            $manuals[] = $this->parser->createFromFolder($rootPath, $folder);
-        }
-        return $manuals;
-    }
-
-    public function findManual(string $rootPath, string $manualPath): Manual
-    {
-        $folder = new SplFileInfo($rootPath . '/' . $manualPath, '', '');
-        return $this->parser->createFromFolder($rootPath, $folder);
+        return $this->parser->createFromFolder($folder);
     }
 
     public function deleteManual(Manual $manual)
