@@ -73,8 +73,11 @@ class ParseDocumentationHTMLService
             ];
 
             $section->removeChild($foundHeadline['node']);
+            $section = $this->stripSubSectionsIfAny($section);
+            $section = $this->stripCodeExamples($section);
+
             $sectionPiece['snippet_content'] = $this->sanitizeString(
-                $this->stripSubSectionsIfAny($section)
+                $section->textContent
             );
             $sectionPieces[] = $sectionPiece;
         }
@@ -97,12 +100,12 @@ class ParseDocumentationHTMLService
         ];
     }
 
-    private function stripSubSectionsIfAny(\DOMElement $section): string
+    private function stripSubSectionsIfAny(\DOMElement $section): \DOMElement
     {
         $crawler = new Crawler($section);
         $subSections = $crawler->filter('div.section div.section');
         if ($subSections->count() === 0) {
-            return $section->textContent;
+            return $section;
         }
 
         foreach ($subSections as $subSection) {
@@ -112,8 +115,26 @@ class ParseDocumentationHTMLService
                 continue;
             }
         }
+        return $section;
+    }
 
-        return $section->textContent;
+    private function stripCodeExamples(\DOMElement $section): \DOMElement
+    {
+        $crawler = new Crawler($section);
+
+        $preTags = $crawler->filter('pre');
+        if ($preTags->count() === 0) {
+            return $section;
+        }
+
+        foreach ($preTags as $tag) {
+            try {
+                $tag->parentNode->removeChild($tag);
+            } catch (\DOMException $e) {
+                continue;
+            }
+        }
+        return $section;
     }
 
     private function sanitizeString(string $input): string
