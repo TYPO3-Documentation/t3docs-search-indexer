@@ -12,7 +12,7 @@ class ParseDocumentationHTMLService
     public function createFromFolder(\SplFileInfo $folder): Manual
     {
         $values = explode('/', $folder->getPathname());
-        $values = array_slice($values, -5, 5);
+        $values = array_slice($values, -6, 5);
         list($type, $vendor, $name, $version, $language) = $values;
 
         return new Manual(

@@ -13,74 +13,22 @@ class ParseDocumentationHTMLServiceTest extends TestCase
     /**
      * @test
      */
-    public function returnsManualsFromFolder()
-    {
-        $subject = new ParseDocumentationHTMLService();
-
-        $rootDir = vfsStream::setup('_docsFolder', null, [
-            'c' => [
-                'typo3' => [
-                    'cms-core' => [
-                        'master' => [
-                            'en-us' => [
-                            ],
-                        ],
-                    ],
-                    'cms-form' => [
-                        'master' => [
-                            'en-us' => [
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-            'm' => [
-                'typo3' => [
-                    'book-extbasefluid' => [
-                        '9.5' => [
-                            'en-us' => [
-                            ],
-                        ],
-                        'master' => [
-                            'en-us' => [
-                            ],
-                        ],
-                    ],
-                    'reference-coreapi' => [
-                        '9.5' => [
-                            'en-us' => [
-                            ],
-                        ],
-                        'master' => [
-                            'en-us' => [
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ]);
-
-        self::assertCount(6, $subject->findFolders($rootDir->url()));
-    }
-
-    /**
-     * @test
-     */
     public function createsManualFromFolder()
     {
         $subject = new ParseDocumentationHTMLService();
 
         $folder = $this->prophesize(SplFileInfo::class);
+        $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/master/en-us/');
         $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/master/en-us/');
 
-        $manual = $subject->createFromFolder('_docsFolder', $folder->reveal());
+        $manual = $subject->createFromFolder($folder->reveal());
 
         self::assertSame('_docsFolder/c/typo3/cms-core/master/en-us/', $manual->getAbsolutePath());
         self::assertSame('typo3/cms-core', $manual->getTitle());
         self::assertSame('c', $manual->getType());
         self::assertSame('master', $manual->getVersion());
         self::assertSame('en-us', $manual->getLanguage());
-        self::assertSame('c/typo3/cms-core/master/en-us/', $manual->getSlug());
+        self::assertSame('c/typo3/cms-core/master/en-us', $manual->getSlug());
     }
 
     /**

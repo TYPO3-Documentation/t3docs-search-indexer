@@ -5,18 +5,17 @@ namespace App\Service;
 
 
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\HttpKernel\KernelInterface;
 
 class DirectoryFinderService
 {
-    /**
-     * @var KernelInterface
-     */
-    private $kernel;
+    private $allowedPaths;
 
-    public function __construct(KernelInterface $kernel)
+    private $excludedDirectories;
+
+    public function __construct(array $allowedPaths, array $excludedDirectories)
     {
-        $this->kernel = $kernel;
+        $this->allowedPaths = $allowedPaths;
+        $this->excludedDirectories = $excludedDirectories;
     }
 
     /**
@@ -28,9 +27,7 @@ class DirectoryFinderService
      */
     public function getAllManualDirectories(string $rootPath): Finder
     {
-        $docSearchParameters = $this->kernel->getContainer()->getParameter('docsearch');
-        $allowedPaths = $docSearchParameters['indexer']['allowed_paths'];
-        $allowedPathsRegexs = $this->wrapValuesWithPregDelimiters($allowedPaths);
+        $allowedPathsRegexs = $this->wrapValuesWithPregDelimiters($this->allowedPaths);
 
         $finder = $this->getDirectoriesByPath($rootPath);
         $folders = $finder->path($allowedPathsRegexs);
@@ -44,21 +41,20 @@ class DirectoryFinderService
      *
      * @throws \InvalidArgumentException
      */
-    public function getDirectoriesByPath(string $rootPath): Finder
+    public function getDirectoriesByPath(string $docRootPath, string $packagePath=''): Finder
     {
-        $docRootPath = $this->kernel->getContainer()->getParameter('docs_root_path');
+        $combinedPath = $docRootPath . ($packagePath ?  '/' . $packagePath : '');
 
         // checks if given path is already a manual, as finder only checks subfolders
-        if ($rootPath !== $docRootPath && \file_exists($rootPath . '/objects.inv.json')) {
+        if ($combinedPath !== $docRootPath && \file_exists($combinedPath . '/objects.inv.json')) {
             $finder = new Finder();
-            $finder->append([$rootPath]);
+            $finder->append([$combinedPath]);
             return $finder;
         }
-        $docSearchParameters = $this->kernel->getContainer()->getParameter('docsearch');
         $finder = new Finder();
         $finder->directories()
-            ->in($rootPath)
-            ->exclude($docSearchParameters['indexer']['excluded_directories'])
+            ->in($combinedPath)
+            ->exclude($this->excludedDirectories)
             ->filter($this->getFolderFilter());
 
         return $finder;

@@ -112,7 +112,7 @@ class SnippetImporter extends Command
         if (empty($packagePath)) {
             $folders = $this->directoryFinder->getAllManualDirectories($rootPath);
         } else {
-            $folders = $this->directoryFinder->getDirectoriesByPath($rootPath . '/' . $packagePath);
+            $folders = $this->directoryFinder->getDirectoriesByPath($rootPath, $packagePath);
         }
 
         if (!$folders->hasResults()) {

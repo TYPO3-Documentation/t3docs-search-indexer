@@ -2,13 +2,11 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     docs_root_path: '%env(DOCS_ROOT_PATH)%'
-    docsearch:
-        indexer:
-            allowed_paths:
+    docsearch.allowed_paths:
                 - ^m/
                 - ^c/
                 - ^p/
-            excluded_directories:
+    docsearch.excluded_directories:
                 - other
                 - draft
                 - typo3cms/extensions
@@ -61,3 +59,8 @@ services:
     App\Command\SnippetImporter:
         arguments:
             $defaultRootPath: '%env(DOCS_ROOT_PATH)%'
+
+    App\Service\DirectoryFinderService:
+        arguments:
+            $allowedPaths: "%docsearch.allowed_paths%"
+            $excludedDirectories: "%docsearch.excluded_directories%"
