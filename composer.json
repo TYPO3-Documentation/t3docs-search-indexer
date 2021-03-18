@@ -1,4 +1,6 @@
 {
+    "name": "typo3-documentation/search-indexer",
+    "description": "Provides indexing and search capabilities for docs.typo3.org",
     "type": "project",
     "license": "proprietary",
     "require": {
