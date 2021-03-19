@@ -13,27 +13,6 @@ class ParseDocumentationHTMLServiceTest extends TestCase
     /**
      * @test
      */
-    public function createsManualFromFolder()
-    {
-        $subject = new ParseDocumentationHTMLService();
-
-        $folder = $this->prophesize(SplFileInfo::class);
-        $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/master/en-us');
-        $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/master/en-us');
-
-        $manual = $subject->createFromFolder($folder->reveal());
-
-        self::assertSame('_docsFolder/c/typo3/cms-core/master/en-us', $manual->getAbsolutePath());
-        self::assertSame('typo3/cms-core', $manual->getTitle());
-        self::assertSame('c', $manual->getType());
-        self::assertSame('master', $manual->getVersion());
-        self::assertSame('en-us', $manual->getLanguage());
-        self::assertSame('c/typo3/cms-core/master/en-us', $manual->getSlug());
-    }
-
-    /**
-     * @test
-     */
     public function returnsFilesWithSectionsForManual()
     {
         $filesRoot = implode(DIRECTORY_SEPARATOR, [

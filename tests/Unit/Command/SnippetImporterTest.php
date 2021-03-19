@@ -3,15 +3,13 @@
 namespace Codappix\tests\Unit\Command;
 
 use App\Command\SnippetImporter;
-use App\Dto\Manual;
+use App\Service\DirectoryFinderService;
 use App\Service\ImportManualHTMLService;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Finder\SplFileInfo;
-use Symfony\Component\HttpKernel\KernelInterface;
 
 class SnippetImporterTest extends TestCase
 {
@@ -26,7 +24,8 @@ class SnippetImporterTest extends TestCase
 
         $directoryFinder->getAllManualDirectories('_docsDefault')->shouldBeCalledTimes(1);
 
-        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal(), $directoryFinder->reveal());
+        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal(),
+            $directoryFinder->reveal());
         $commandTester = new CommandTester($command);
         $commandTester->execute([]);
     }
@@ -42,7 +41,8 @@ class SnippetImporterTest extends TestCase
 
         $directoryFinder->getAllManualDirectories('_docsCustom')->shouldBeCalledTimes(1);
 
-        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal(), $directoryFinder->reveal());
+        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal(),
+            $directoryFinder->reveal());
         $commandTester = new CommandTester($command);
         $commandTester->execute(['--rootPath' => '_docsCustom']);
     }
@@ -55,23 +55,26 @@ class SnippetImporterTest extends TestCase
         $importer = $this->prophesize(ImportManualHTMLService::class);
         $dispatcher = $this->prophesize(EventDispatcherInterface::class);
 
-        $manual1 = $this->prophesize(Manual::class);
-        $manual1->getTitle()->willReturn('typo3/manual-1');
-        $manual1->getAbsolutePath()->willReturn('');
-        $manual2 = $this->prophesize(Manual::class);
-        $manual2->getTitle()->willReturn('typo3/manual-2');
-        $manual2->getAbsolutePath()->willReturn('');
+        $folder = $this->prophesize(\SplFileInfo::class);
+        $folder->getPathname()->willReturn('_docsFolder/c/typo3/manual-1/master/en-us');
+        $folder->__toString()->willReturn('_docsFolder/c/typo3/manual-1/master/en-us');
+        $folder2 = $this->prophesize(\SplFileInfo::class);
+        $folder2->getPathname()->willReturn('_docsFolder/c/typo3/manual-2/master/en-us');
+        $folder2->__toString()->willReturn('_docsFolder/c/typo3/manual-2/master/en-us');
 
-        $importer->findManuals(Argument::any())->willReturn([
-            $manual1->reveal(),
-            $manual2->reveal(),
-        ]);
+        $finder = new Finder();
+        $finder->Append([$folder->reveal(), $folder2->reveal()]);
+
         $importer->importManual(Argument::which('getTitle', 'typo3/manual-1'))->shouldBeCalledTimes(1);
         $importer->deleteManual(Argument::which('getTitle', 'typo3/manual-1'))->shouldBeCalledTimes(1);
         $importer->importManual(Argument::which('getTitle', 'typo3/manual-2'))->shouldBeCalledTimes(1);
         $importer->deleteManual(Argument::which('getTitle', 'typo3/manual-2'))->shouldBeCalledTimes(1);
 
-        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal());
+        $directoryFinder = $this->prophesize(DirectoryFinderService::class);
+        $directoryFinder->getAllManualDirectories(Argument::any())->willReturn($finder)->shouldBeCalledTimes(1);
+
+        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal(),
+            $directoryFinder->reveal());
         $commandTester = new CommandTester($command);
         $commandTester->execute([]);
     }
@@ -84,17 +87,23 @@ class SnippetImporterTest extends TestCase
         $importer = $this->prophesize(ImportManualHTMLService::class);
         $dispatcher = $this->prophesize(EventDispatcherInterface::class);
 
-        $manual = $this->prophesize(Manual::class);
-        $manual->getTitle()->willReturn('typo3/cms-core');
-        $manual->getAbsolutePath()->willReturn('');
+        $folder = $this->prophesize(\SplFileInfo::class);
+        $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/master/en-us');
+        $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/master/en-us');
 
-        $importer->findManual('_docsDefault', 'c/typo3/cms-core/master/en-us')
-            ->willReturn($manual->reveal())
-            ->shouldBeCalledTimes(1);
+        $finder = new Finder();
+        $finder->Append([$folder->reveal()]);
+
+
+        $directoryFinder = $this->prophesize(DirectoryFinderService::class);
+        $directoryFinder->getDirectoriesByPath('_docsDefault',
+            'c/typo3/cms-core/master/en-us')->willReturn($finder)->shouldBeCalledTimes(1);
+
         $importer->deleteManual(Argument::which('getTitle', 'typo3/cms-core'))->shouldBeCalledTimes(1);
         $importer->importManual(Argument::which('getTitle', 'typo3/cms-core'))->shouldBeCalledTimes(1);
 
-        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal());
+        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal(),
+            $directoryFinder->reveal());
         $commandTester = new CommandTester($command);
         $commandTester->execute(['packagePath' => 'c/typo3/cms-core/master/en-us']);
     }

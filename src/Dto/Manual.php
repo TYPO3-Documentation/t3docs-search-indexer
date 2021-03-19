@@ -50,6 +50,29 @@ class Manual
         $this->slug = $slug;
     }
 
+    public static function createFromFolder(\SplFileInfo $folder): Manual
+    {
+        $values = explode('/', $folder->getPathname());
+        $values = array_slice($values, -5, 5);
+        list($type, $vendor, $name, $version, $language) = $values;
+
+         $map = [
+            'c' => 'System extension',
+            'p' => 'Community extension',
+            'm' => 'TYPO3 manual'
+        ];
+        $type = $map[$type] ?? $type;
+
+        return new Manual(
+            $folder,
+            implode('/', [$vendor, $name]),
+            $type,
+            $version,
+            $language,
+            implode('/', $values)
+        );
+    }
+
     public function getAbsolutePath(): string
     {
         return $this->absolutePath;

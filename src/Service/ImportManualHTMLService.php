@@ -37,11 +37,6 @@ class ImportManualHTMLService
         $this->dispatcher = $dispatcher;
     }
 
-    public function findManual(\SplFileInfo $folder): Manual
-    {
-        return $this->parser->createFromFolder($folder);
-    }
-
     public function deleteManual(Manual $manual)
     {
         $this->elasticRepository->deleteByManual($manual);

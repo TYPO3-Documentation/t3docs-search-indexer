@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Dto\Manual;
 use App\Event\ImportManual\ManualAdvance;
 use App\Event\ImportManual\ManualFinish;
 use App\Event\ImportManual\ManualStart;
@@ -85,7 +86,7 @@ class SnippetImporter extends Command
         $processed = 0;
         if ($manualsFolders->hasResults()) {
             foreach ($manualsFolders as $folder) {
-                $manual = $this->importer->findManual($folder);
+                $manual = Manual::createFromFolder($folder);
                 $this->io->section('Importing ' . $this->makePathRelative($input->getOption('rootPath'),
                         $manual->getAbsolutePath()) . ' - sit tight.');
                 $this->importer->deleteManual($manual);
@@ -97,6 +98,7 @@ class SnippetImporter extends Command
 
         $totalTime = $timer->stop('importer');
         $this->io->title('importing ' . $processed . ' manuals took ' . $this->formatMilliseconds($totalTime->getDuration()));
+        return 0;
     }
 
     /**
