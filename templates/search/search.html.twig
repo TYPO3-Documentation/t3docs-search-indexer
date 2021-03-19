@@ -51,18 +51,18 @@
                 <h4>Showing hits <strong>{{ results.startingAtItem }} </strong>to <strong>{{ results.endingAtItem }}</strong> of <strong>{{ results.totalResults }}</strong></h4>
                 {% include '/partial/paginator.html.twig' with {'result':results, 'q': q} %}
                 {% for hit in results.results %}
+
                     <div class="hit">
-                        <h4>
-                            {{ hit.data.snippet_title }}
-                            <small class="text-muted">{{ hit.data.manual_title }}</small>
-                            <span class="badge badge-secondary">{{ hit.data.manual_type }}</span>
-                        </h4>
-                        <p class="url">
-                            <a href="https://docs.typo3.org/{{ hit.data.manual_slug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">
-                                https://docs.typo3.org/{{ hit.data.manual_slug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}
-                            </a>
-                        </p>
-                        <p class="summary">{{ hit.data.snippet_content|slice(0, 18000) }}...</p>
+                        <a class="text-reset " href="https://docs.typo3.org/{{ hit.data.manual_slug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">
+                            <h4 class="">
+                                {{ hit.data.snippet_title }}
+                                <small class="text-muted text-decoration-none">{{ hit.data.manual_title }}</small>
+                                <span class="badge badge-secondary text-decoration-none">{{ hit.data.manual_type }}</span>
+                                <span class="badge badge-primary text-decoration-none">{{ hit.data.manual_version }}</span>
+                            </h4>
+
+                            <p class="summary">{{ hit.data.snippet_content|slice(0, 400) }}...</p>
+                        </a>
                     </div>
                 {% endfor %}
                 {% include '/partial/paginator.html.twig' with {'result':results, 'q': q} %}
