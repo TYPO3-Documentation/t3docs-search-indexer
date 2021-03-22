@@ -125,7 +125,7 @@ class ElasticRepository
      * @return array
      * @throws \Elastica\Exception\InvalidException
      */
-    public function findByQuery(string $searchTerms): array
+    public function findByQuery(string $searchTerms, int $page=1): array
     {
         $searchTerms = Util::escapeTerm($searchTerms);
         $query = [
@@ -142,7 +142,7 @@ class ElasticRepository
             ],
         ];
         if (array_key_exists('page', $_GET)) {
-            $this->currentPage = (int)$_GET['page'];
+            $this->currentPage = $page;
         }
         //$usedFilters = $this->addFilters();
         //if (count($usedFilters) > 0) {

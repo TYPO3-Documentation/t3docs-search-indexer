@@ -30,10 +30,11 @@ class SearchController extends AbstractController
     {
         $elasticRepository = new ElasticRepository();
         $query = $request->query->get('q');
+        $page = (int)$request->query->get('page', 1);
 
         return $this->render('search/search.html.twig', [
             'q' => $query,
-            'results' => $elasticRepository->findByQuery($query),
+            'results' => $elasticRepository->findByQuery($query, $page),
         ]);
     }
 }
