@@ -14,6 +14,7 @@ use Elastica\Client;
 use Elastica\Document;
 use Elastica\Index;
 use Elastica\Query;
+use Elastica\Util;
 
 class ElasticRepository
 {
@@ -126,7 +127,7 @@ class ElasticRepository
      */
     public function findByQuery(string $searchTerms): array
     {
-        $searchTerms = $this->escape($searchTerms);
+        $searchTerms = Util::escapeTerm($searchTerms);
         $query = [
             'query' => [
                 'bool' => [
@@ -253,25 +254,6 @@ class ElasticRepository
         }
 
         return $out;
-    }
-
-    /**
-     * Escape a value for special query characters such as ':', '(', ')', '*', '?', etc.
-     * NOTE: inside a phrase fewer characters need escaped, use {@link Apache_Solr_Service::escapePhrase()} instead.
-     *
-     * @param string $value
-     *
-     * @return string
-     */
-    private function escape($value): string
-    {
-        //list taken from http://lucene.apache.org/java/docs/queryparsersyntax.html#Escaping%20Special%20Characters
-        $pattern = '/(\+|-|&&|\|\||!|\(|\)|\{|}|\[|]|\^|"|~|\*|\?|:|\\\)/';
-        $replace = '\\\$1';
-        $escapedString = preg_replace($pattern, $replace, $value);
-        $escapedString = str_replace('/', '\/', $escapedString);
-
-        return $escapedString;
     }
 
     private function getElasticSearchConfig(): array
