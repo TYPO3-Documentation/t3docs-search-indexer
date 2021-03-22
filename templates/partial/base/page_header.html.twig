@@ -9,7 +9,7 @@
             </div>
             <div class="col-6">
                 <div role="search">
-                    <form id="rtd-search-form" class="wy-form" action="/index.php/search" method="get">
+                    <form id="rtd-search-form" class="wy-form" action="{{ path('searchresult') }}" method="get">
                         <div class="input-group mt-3">
                             <input type="text" class="form-control shadow-none" name="q" placeholder="Search in TYPO3 documentation" id="searchinput" value="{% block searchQuery %}{% endblock %}">
                             <div class="input-group-append">
