@@ -125,7 +125,7 @@ class ElasticRepository
      * @return array
      * @throws \Elastica\Exception\InvalidException
      */
-    public function findByQuery(string $searchTerms, int $page=1): array
+    public function findByQuery(string $searchTerms, int $page=1, $filters=null): array
     {
         $searchTerms = Util::escapeTerm($searchTerms);
         $query = [
@@ -141,13 +141,20 @@ class ElasticRepository
                 ],
             ],
         ];
-        if (array_key_exists('page', $_GET)) {
-            $this->currentPage = $page;
+        if (!empty($filters)) {
+            foreach ($filters as $filter => $value) {
+                $filterMap = [
+                    'Document Type' => 'manual_type',
+                    'Language' => 'manual_language',
+                    'Version' => 'manual_version',
+                ];
+                if (!\array_key_exists($filter, $filterMap)) {
+                    continue;
+                }
+                $query['query']['bool']['filter']['term'][$filterMap[$filter]] = $value;
+            }
         }
-        //$usedFilters = $this->addFilters();
-        //if (count($usedFilters) > 0) {
-        //    $query['post_filter'] = $usedFilters;
-        //}
+
 
         $search = $this->elasticIndex->createSearch($query);
         $search->addType('snippet');

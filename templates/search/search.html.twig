@@ -75,7 +75,7 @@
                                 <ul class="aggregation-buckets">
                                     {% for bucket in aggs.buckets %}
                                         <li class="aggregation-bucket">
-                                            {{ bucket.key }} ({{ bucket.doc_count }})
+                                            <a href="{{ path('searchresult', {'q':q, 'filter': { (aggName): bucket.key } }) }}" >{{ bucket.key }} ({{ bucket.doc_count }})</a>
                                         </li>
                                     {% endfor %}
                                 </ul>
