@@ -1,0 +1,8 @@
+version: '3.6'
+services:
+  web:
+    environment:
+      - APP_ENV=dev
+      - APP_SECRET=ddf011a53a72d4f85e6fcfd4d1a72737
+      - DOCS_ROOT_PATH=../docs_server/docs.typo3.org/Web
+      - ELASTICA_HOST=elasticsearch

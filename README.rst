@@ -1,24 +1,25 @@
 TYPO3 Documentation Search
 ==========================
 
-Install
--------
+Install locally
+---------------
 
-* Run ``composer install`` to install all dependencies.
+* create `docs_server` folder (on the same level where cloned repository is)
+  and put some documents inside
 
-* Install elasticsearch version 5.3.x.
+* install DDEV
 
-docker pull docker.elastic.co/elasticsearch/elasticsearch:5.5.3
-docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e "xpack.security.enabled=false" docker.elastic.co/elasticsearch/elasticsearch:5.5.3
+* Run ``ddev start``
 
+* Run ``ddev exec composer install`` to install all dependencies.
 
-* Install elasticorn: http://elasticorn.net/
+* Run ``ddev exec composer global require t3g/elasticorn`` to install Elasticorn
 
-* Create elasticsearch index via elasticorn:
+* Create elasticsearch index via Elasticorn:
 
-  ``elasticorn.php index:init -c config/Elasticorn``
+  ``ddev exec  ~/.composer/vendor/bin/elasticorn.php index:init -c config/Elasticorn``
 
-* Copy ``.env.dist`` to ``.env``
+* Adapt ``DOCS_ROOT_PATH`` in your ``.env`` file if needed (see .env.dist for examples).
 
 Configuration
 -------
@@ -35,8 +36,9 @@ and ``$assetLocation`` is ``header`` or ``footer``
 
 Usage
 -----
+
 Common instructions for docsearch indexer
-^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Docsearch indexer configuration is keep in the `services.yml` file in `docsearch` section.
 
@@ -55,25 +57,19 @@ Index docs
   root path (DOCS_ROOT_PATH) folder (taking into account configured ``allowed_paths``
   and ``excluded_directories``).
 
-* Open ``http://localhost:9200/docsearch_english_a/_search?q=*:*`` to see indexed
-  documentations.
+* Open ``https://t3docs-search-indexer.ddev.site:9201/docsearch_english_a/_search?q=*:*`` to see indexed
+  documents.
 
-* php -S 127.0.0.1:8081 -t ./public
+* enter `https://t3docs-search-indexer.ddev.site` to see application
 
 Index single manual
 ^^^^^^^^^^^^^^^^^^^
 
-* Start elasticsearch.
-
-* Run ``./bin/console docsearch:import <packagePath>`` where ``packagePath`` is
+* Run ``ddev exec ./bin/console docsearch:import <packagePath>`` where ``packagePath`` is
    a path to manual (or manuals) you want to import, relative to ``DOCS_ROOT_PATH``.
    This command doesn't check ``allowed_paths``, to ease usage when indexing single
    documentation folder from custom location (so you don't have to recreate folder
    structure from docs server).
 
-* Open ``http://localhost:9200/docsearch_english_a/_search?q=*:*`` to see indexed
-  documentations.
-
-* php -S 127.0.0.1:8081 -t ./public
-
-
+* Open ``https://t3docs-search-indexer.ddev.site:9201/docsearch_english_a/_search?q=*:*`` to see indexed
+  documents.

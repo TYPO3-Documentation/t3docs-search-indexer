@@ -1,0 +1,7 @@
+version: '3.6'
+services:
+  web:
+    volumes:
+      - type: bind
+        source: ../../docs_server
+        target: /var/www/docs_server
