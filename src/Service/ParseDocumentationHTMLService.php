@@ -17,11 +17,8 @@ class ParseDocumentationHTMLService
             ->files()
             ->in($manual->getAbsolutePath())
             ->name('*.html')
-            ->notName('search.html')
-            ->notName('genindex.html')
-            ->notPath('_buildinfo')
-            ->notPath('_static')
-            ->notPath('singlehtml');
+            ->notName(['search.html', 'genindex.html', 'Targets.html', 'Quicklinks.html'])
+            ->notPath(['_buildinfo', '_static', '_images', '_sources', 'singlehtml', 'Sitemap']);
 
         return $finder;
     }
