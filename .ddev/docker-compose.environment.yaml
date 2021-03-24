@@ -6,3 +6,4 @@ services:
       - APP_SECRET=ddf011a53a72d4f85e6fcfd4d1a72737
       - DOCS_ROOT_PATH=../docs_server/docs.typo3.org/Web
       - ELASTICA_HOST=elasticsearch
+      - PHP_IDE_CONFIG=serverName=t3docs-search-indexer.ddev.site
