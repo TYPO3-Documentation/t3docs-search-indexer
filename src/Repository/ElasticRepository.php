@@ -1,14 +1,9 @@
 <?php
 
-/**
- * Created by PhpStorm.
- * User: mathiasschreiber
- * Date: 15.01.18
- * Time: 20:53
- */
 namespace App\Repository;
 
 use App\Dto\Manual;
+use App\Dto\SearchDemand;
 use Elastica\Aggregation\Terms;
 use Elastica\Client;
 use Elastica\Document;
@@ -32,8 +27,6 @@ class ElasticRepository
      * @var Index
      */
     private $elasticIndex;
-
-    private $currentPage = 1;
 
     private $perPage = 10;
 
@@ -125,9 +118,9 @@ class ElasticRepository
      * @return array
      * @throws \Elastica\Exception\InvalidException
      */
-    public function findByQuery(string $searchTerms, int $page=1, $filters=null): array
+    public function findByQuery(SearchDemand $searchDemand): array
     {
-        $searchTerms = Util::escapeTerm($searchTerms);
+        $searchTerms = Util::escapeTerm($searchDemand->getQuery());
         $query = [
             'query' => [
                 'bool' => [
@@ -141,25 +134,17 @@ class ElasticRepository
                 ],
             ],
         ];
+        $filters = $searchDemand->getFilters();
         if (!empty($filters)) {
-            foreach ($filters as $filter => $value) {
-                $filterMap = [
-                    'Document Type' => 'manual_type',
-                    'Language' => 'manual_language',
-                    'Version' => 'manual_version',
-                ];
-                if (!\array_key_exists($filter, $filterMap)) {
-                    continue;
-                }
-                $query['query']['bool']['filter']['term'][$filterMap[$filter]] = $value;
-            }
+            $query['post_filter']['terms'] = $searchDemand->getFilters();
         }
 
+        $currentPage = $searchDemand->getPage();
 
         $search = $this->elasticIndex->createSearch($query);
         $search->addType('snippet');
         $search->getQuery()->setSize($this->perPage);
-        $search->getQuery()->setFrom(($this->currentPage * $this->perPage) - $this->perPage);
+        $search->getQuery()->setFrom(($currentPage * $this->perPage) - $this->perPage);
 
         $this->addAggregations($search->getQuery());
 
@@ -171,13 +156,13 @@ class ElasticRepository
         $this->totalHits = $elasticaResultSet->getTotalHits();
 
         $out = [
-            'pagesToLinkTo' => $this->getPages(),
-            'currentPage' => $this->currentPage,
-            'prev' => $this->currentPage - 1,
-            'next' => $this->currentPage < ceil($this->totalHits / $this->perPage) ? $this->currentPage + 1 : 0,
+            'pagesToLinkTo' => $this->getPages($currentPage),
+            'currentPage' => $currentPage,
+            'prev' => $currentPage - 1,
+            'next' => $currentPage < ceil($this->totalHits / $this->perPage) ? $currentPage + 1 : 0,
             'totalResults' => $this->totalHits,
-            'startingAtItem' => ($this->currentPage * $this->perPage) - ($this->perPage - 1),
-            'endingAtItem' => $this->currentPage * $this->perPage,
+            'startingAtItem' => ($currentPage * $this->perPage) - ($this->perPage - 1),
+            'endingAtItem' => $currentPage * $this->perPage,
             'results' => $results,
             'maxScore' => $maxScore,
             'aggs' => $aggs,
@@ -230,7 +215,7 @@ class ElasticRepository
     /**
      * @return array
      */
-    protected function getPages(): array
+    protected function getPages($currentPage): array
     {
         $numPages = ceil($this->totalHits / $this->perPage);
         $i = 0;
@@ -238,12 +223,12 @@ class ElasticRepository
          *
          */
         $maxPages = $numPages;
-        if ($numPages > 15 && $this->currentPage <= 7) {
+        if ($numPages > 15 && $currentPage <= 7) {
             $numPages = 15;
         }
-        if ($this->currentPage > 7) {
-            $i = $this->currentPage - 7;
-            $numPages = $this->currentPage + 6;
+        if ($currentPage > 7) {
+            $i = $currentPage - 7;
+            $numPages = $currentPage + 6;
         }
         if ($numPages > $maxPages) {
             $numPages = $maxPages;

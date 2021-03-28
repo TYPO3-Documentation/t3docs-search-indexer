@@ -3,6 +3,7 @@
 
 namespace App\Controller;
 
+use App\Dto\SearchDemand;
 use App\Repository\ElasticRepository;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,13 +30,11 @@ class SearchController extends AbstractController
     public function searchAction(Request $request): Response
     {
         $elasticRepository = new ElasticRepository();
-        $query = $request->query->get('q');
-        $page = (int)$request->query->get('page', '1');
-        $filter = $request->query->get('filter');
+        $searchDemand = SearchDemand::createFromRequest($request);
 
         return $this->render('search/search.html.twig', [
-            'q' => $query,
-            'results' => $elasticRepository->findByQuery($query, $page, $filter),
+            'q' => $searchDemand->getQuery(),
+            'results' => $elasticRepository->findByQuery($searchDemand),
         ]);
     }
 }

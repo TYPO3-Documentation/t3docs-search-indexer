@@ -58,9 +58,11 @@ class SearchControllerTest extends TestCase
         $query = $this->prophesize(ParameterBag::class);
         $query->get('q')->willReturn('searchTerm');
         $query->get('page', 1)->willReturn(1);
+        $query->get('filters')->willReturn(null);
 
         $request = $this->prophesize(Request::class);
         $request->query = $query->reveal();
+
 
         $this->view->render(Argument::any(), Argument::that(function (array $variables) {
             return isset($variables['q'])
@@ -115,6 +117,8 @@ class SearchControllerTest extends TestCase
         $query = $this->prophesize(ParameterBag::class);
         $query->get('q')->willReturn('searchTerm');
         $query->get('page', 1)->willReturn(1);
+        $query->get('filters')->willReturn(null);
+
 
         $request = $this->prophesize(Request::class);
         $request->query = $query->reveal();

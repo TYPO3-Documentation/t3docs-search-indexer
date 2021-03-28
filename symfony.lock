@@ -5,6 +5,9 @@
     "composer/xdebug-handler": {
         "version": "1.4.5"
     },
+    "cweagans/composer-patches": {
+        "version": "1.7.0"
+    },
     "doctrine/annotations": {
         "version": "1.0",
         "recipe": {
@@ -40,6 +43,9 @@
     },
     "mikey179/vfsstream": {
         "version": "v1.6.7"
+    },
+    "php": {
+        "version": "7.4"
     },
     "php-cs-fixer/diff": {
         "version": "v1.3.1"
