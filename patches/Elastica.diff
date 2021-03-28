@@ -1,0 +1,16 @@
+Index: docs/lib/Elastica/Query.php
+
+<+>UTF-8
+===================================================================
+diff --git a/lib/Elastica/Query.php b/docs/lib/Elastica/Query.php
+--- a/docs/lib/Elastica/Query.php	(date 1567060461000)
++++ b/docs/lib/Elastica/Query.php	(date 1567060461000)
+@@ -330,7 +330,7 @@
+             $this->setQuery(new MatchAll());
+         }
+
+-        if (isset($this->_params['post_filter']) && 0 === count($this->_params['post_filter']->toArray())) {
++        if (isset($this->_params['post_filter']) && 0 === count($this->_params['post_filter'])) {
+             unset($this->_params['post_filter']);
+         }
+
