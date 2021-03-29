@@ -21,7 +21,7 @@
         <div class="row">
             <div class="col-9">
                 <h4>Showing hits <strong>{{ results.startingAtItem }} </strong>to <strong>{{ results.endingAtItem }}</strong> of <strong>{{ results.totalResults }}</strong></h4>
-                {% include '/partial/paginator.html.twig' with {'result':results, 'q': q} %}
+                {% include '/partial/paginator.html.twig' with {'result':results, 'arguments': {'q': q, 'filters': filters}} %}
                 {% for hit in results.results %}
 
                     <div class="hit">
@@ -37,7 +37,7 @@
                         </a>
                     </div>
                 {% endfor %}
-                {% include '/partial/paginator.html.twig' with {'result':results, 'q': q} %}
+                {% include '/partial/paginator.html.twig' with {'result':results, 'arguments': {'q': q, 'filters': filters}} %}
             </div>
             <div class="col-3">
                 <div class="wy-menuXX wy-menu-verticalXX" data-spy="affix" role="navigation" aria-label="main navigation">
