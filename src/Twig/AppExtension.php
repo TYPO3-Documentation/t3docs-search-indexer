@@ -66,8 +66,7 @@ class AppExtension extends AbstractExtension
     {
         $label = $bucket['key_as_string'] ?? $bucket['key'];
         $docCount = $bucket['doc_count'];
-        $category = $this->fixWording($category);
-        $key = $this->fixWording($bucket['key'], false);
+        $key = $bucket['key'];
 
         // check if checkbox has been set
         if (isset($_GET['filters'][$category][$key]) && $_GET['filters'][$category][$key] === 'true') {

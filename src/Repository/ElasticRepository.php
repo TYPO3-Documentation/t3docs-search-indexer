@@ -136,7 +136,9 @@ class ElasticRepository
         ];
         $filters = $searchDemand->getFilters();
         if (!empty($filters)) {
-            $query['post_filter']['terms'] = $searchDemand->getFilters();
+            foreach ($filters as $key => $value) {
+                $query['post_filter']['bool']['must'][] = ['terms' => [$key => $value]];
+            }
         }
 
         $currentPage = $searchDemand->getPage();

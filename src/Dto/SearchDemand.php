@@ -31,7 +31,7 @@ class SearchDemand
                 $filterMap = [
                     'Document Type' => 'manual_type',
                     'Language' => 'manual_language',
-                    'version' => 'manual_version',
+                    'Version' => 'manual_version',
                 ];
                 if (!\array_key_exists($filter, $filterMap)) {
                     continue;
