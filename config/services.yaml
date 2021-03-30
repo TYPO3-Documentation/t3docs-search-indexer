@@ -27,7 +27,6 @@ parameters:
                 - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/js/doctools.min.js'
                 - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/js/popper.min.js'
                 - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/js/bootstrap.min.js'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/js/searchtools.min.js'
                 - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/js/autocomplete.min.js'
                 - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/js/theme.min.js'
 
