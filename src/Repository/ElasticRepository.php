@@ -9,6 +9,8 @@ use Elastica\Client;
 use Elastica\Document;
 use Elastica\Index;
 use Elastica\Query;
+use Elastica\Script\AbstractScript;
+use Elastica\Script\Script;
 use Elastica\Util;
 
 class ElasticRepository
@@ -70,17 +72,23 @@ class ElasticRepository
 
     public function addOrUpdateDocument(array $snippet): void
     {
-        // Generate id
-        $urlFragment = str_replace('/', '-', $snippet['manual_slug'] . '-' . $snippet['relative_url']);
-        $document = new Document($urlFragment . '-' . $snippet['fragment']);
-        $document->setData($snippet);
-        $snippetType = $this->elasticIndex->getType('snippet');
-        $snippetType->addDocument($document);
+        // Generate id, without document version (snippet can be reused between versions)
+        $urlFragment = str_replace('/', '-', $snippet['manual_title'] . '-' . $snippet['relative_url'] . '-' . $snippet['content_hash']);
+        $documentId = $urlFragment . '-' . $snippet['fragment'];
+
+        $script = new Script('ctx._source.manual_version.add(params.manual_version)');
+        $script->setParam('manual_version', $snippet['manual_version']);
+        $snippet['manual_version'] = [$snippet['manual_version']];
+        $script->setUpsert($snippet);
+        $this->elasticIndex->getClient()->updateDocument($documentId, $script, $this->elasticIndex->getName());
     }
 
+    /**
+     * Removes manual_version from all snippets and if it's the last version, remove the whole snippet
+     * @param Manual $manual
+     */
     public function deleteByManual(Manual $manual): void
     {
-        $snippets = $this->elasticIndex->getType('snippet');
         $query = [
             'query' => [
                 'bool' => [
@@ -108,9 +116,31 @@ class ElasticRepository
                     ],
                 ],
             ],
+            'source' =>  $this->getDeleteQueryScript()
         ];
         $deleteQuery = new Query($query);
-        $snippets->deleteByQuery($deleteQuery);
+        $script = new Script($this->getDeleteQueryScript(), ['manual_version' => $manual->getVersion()], AbstractScript::LANG_PAINLESS);
+        $this->elasticIndex->updateByQuery($deleteQuery, $script);
+    }
+
+    /**
+     * Provide elasticsearch script which removes version (provided in params) from a snippet
+     * and if this is the last version assigned to snippet, it deletes the snippet from index (by setting ctx.op).
+     *
+     * @return string
+     */
+    protected function getDeleteQueryScript(): string
+    {
+        $script =<<<EOD
+if (ctx._source.manual_version.contains(params.manual_version)) {
+   ctx._source.manual_version.remove(ctx._source.manual_version.indexOf(params.manual_version));
+}
+if (ctx._source.manual_version.size() == 0) {
+    ctx.op = "delete";
+}
+EOD;
+        return \str_replace("\n", ' ', $script);
+
     }
 
     /**
@@ -144,7 +174,6 @@ class ElasticRepository
         $currentPage = $searchDemand->getPage();
 
         $search = $this->elasticIndex->createSearch($query);
-        $search->addType('snippet');
         $search->getQuery()->setSize($this->perPage);
         $search->getQuery()->setFrom(($currentPage * $this->perPage) - $this->perPage);
 

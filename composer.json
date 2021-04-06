@@ -8,7 +8,7 @@
         "ext-dom": "*",
         "ext-iconv": "*",
         "cweagans/composer-patches": "^1.7",
-        "ruflin/elastica": "5.*",
+        "ruflin/elastica": "^7.1",
         "sensio/framework-extra-bundle": "^5.5",
         "symfony/asset": "^4.3",
         "symfony/console": "^4.3",
@@ -68,11 +68,6 @@
         "symfony": {
             "id": "01C3GA9QV9DBZXQBG4MFTG7YCG",
             "allow-contrib": false
-        },
-        "patches": {
-            "ruflin/elastica": {
-                "Fix passing array for post_filters PR https://github.com/ruflin/Elastica/pull/1950": "patches/Elastica.diff"
-            }
         }
     }
 }

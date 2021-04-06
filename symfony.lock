@@ -23,6 +23,12 @@
     "elasticsearch/elasticsearch": {
         "version": "v5.3.0"
     },
+    "ezimuel/guzzlestreams": {
+        "version": "3.0.1"
+    },
+    "ezimuel/ringphp": {
+        "version": "1.1.2"
+    },
     "friendsofphp/php-cs-fixer": {
         "version": "2.16",
         "recipe": {
@@ -35,14 +41,11 @@
             ".php_cs.dist"
         ]
     },
-    "guzzlehttp/ringphp": {
-        "version": "1.1.0"
-    },
-    "guzzlehttp/streams": {
-        "version": "3.0.0"
-    },
     "mikey179/vfsstream": {
         "version": "v1.6.7"
+    },
+    "nyholm/dsn": {
+        "version": "2.0.0"
     },
     "php": {
         "version": "7.4"

@@ -18,3 +18,5 @@ snippet_title:
   type: text
 snippet_content:
   type: text
+content_hash:
+  type: keyword
