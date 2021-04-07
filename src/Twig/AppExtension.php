@@ -4,6 +4,7 @@
 namespace App\Twig;
 
 
+use App\Helper\VersionSorter;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
@@ -29,6 +30,7 @@ class AppExtension extends AbstractExtension
             new TwigFunction('render_assets', [$this, 'renderAssets']),
             new TwigFunction('render_single_asset', [$this, 'renderSingleAsset']),
             new TwigFunction('aggregationBucket', [$this, 'aggregationBucket'], ['is_safe' => ['html']]),
+            new TwigFunction('sortVersions', [VersionSorter::class, 'sortVersions']),
         ];
     }
 

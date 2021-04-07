@@ -33,7 +33,7 @@
                                 {{ hit.data.snippet_title }}
                                 <small class="text-muted text-decoration-none">{{ hit.data.manual_title }}</small>
                                 <span class="badge badge-secondary text-decoration-none">{{ hit.data.manual_type }}</span>
-                                {% for version in  hit.data.manual_version %}
+                                {% for version in  sortVersions(hit.data.manual_version) %}
                                 <span class="badge badge-primary text-decoration-none">{{ version }}</span>
                                 {% endfor %}
                             </h4>
