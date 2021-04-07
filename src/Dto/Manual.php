@@ -52,16 +52,26 @@ class Manual
         $this->slug = $slug;
     }
 
-    public static function createFromFolder(\SplFileInfo $folder): Manual
+    public static function createFromFolder(\SplFileInfo $folder, $changelog = false): Manual
     {
-        $values = explode('/', $folder->getPathname());
-        $values = array_slice($values, -5, 5);
-        list($type, $vendor, $name, $version, $language) = $values;
+        $pathArray = explode('/', $folder->getPathname());
+        if ($changelog) {
+            // e.g. c/typo3/cms-core/master/en-us/Changelog/9.4
+            $values = array_slice($pathArray, -7, 7);
+            list($_, $vendor, $name, $__, $language, $type, $version) = $values;
+            $type = \strtolower($type);
+            $name .= '-' . $type;
+        } else {
+            // e.g. "c/typo3/cms-workspaces/9.5/en-us"
+            $values = array_slice($pathArray, -5, 5);
+            list($type, $vendor, $name, $version, $language) = $values;
+        }
 
          $map = [
             'c' => 'System extension',
             'p' => 'Community extension',
-            'm' => 'TYPO3 manual'
+            'm' => 'TYPO3 manual',
+            'changelog' => 'Core changelog'
         ];
         $type = $map[$type] ?? $type;
 
@@ -85,7 +95,36 @@ class Manual
             ->notName(['search.html', 'genindex.html', 'Targets.html', 'Quicklinks.html'])
             ->notPath(['_buildinfo', '_static', '_images', '_sources', 'singlehtml', 'Sitemap']);
 
+        if ($this->getTitle() === 'typo3/cms-core') {
+            $finder->notPath('Changelog');
+        }
         return $finder;
+    }
+
+    /**
+     * TYPO3 Core Changelogs are treated as submanuals from typo3/cms-core manual
+     *
+     * @return array<Manual>
+     */
+    public function getSubManuals(): array
+    {
+        if ($this->getTitle() !== 'typo3/cms-core') {
+            return [];
+        }
+        if ($this->getVersion() !== 'master') {
+            return [];
+        }
+        $finder = new Finder();
+        $finder
+            ->directories()
+            ->in($this->getAbsolutePath() . '/Changelog')
+            ->depth(0);
+
+        $subManuals = [];
+        foreach ($finder as $changelogFolder) {
+            $subManuals[] = self::createFromFolder($changelogFolder, true);
+        }
+        return $subManuals;
     }
 
     public function getAbsolutePath(): string

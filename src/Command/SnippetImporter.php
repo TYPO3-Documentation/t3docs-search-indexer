@@ -85,13 +85,17 @@ class SnippetImporter extends Command
 
         $processed = 0;
         if ($manualsFolders->hasResults()) {
+
             foreach ($manualsFolders as $folder) {
                 $manual = Manual::createFromFolder($folder);
-                $this->io->section('Importing ' . $this->makePathRelative($input->getOption('rootPath'),
-                        $manual->getAbsolutePath()) . ' - sit tight.');
-                $this->importer->deleteManual($manual);
-
-                $this->importer->importManual($manual);
+                $this->importManual($manual, $input);
+                $subManuals = $manual->getSubManuals();
+                if (!empty($subManuals)) {
+                    foreach ($subManuals as $subManual) {
+                        $this->importManual($subManual, $input);
+                        $processed++;
+                    }
+                }
                 $processed++;
             }
         }
@@ -99,6 +103,15 @@ class SnippetImporter extends Command
         $totalTime = $timer->stop('importer');
         $this->io->title('importing ' . $processed . ' manuals took ' . $this->formatMilliseconds($totalTime->getDuration()));
         return 0;
+    }
+
+    protected function importManual($manual, $input)
+    {
+        $this->io->section('Importing ' . $this->makePathRelative($input->getOption('rootPath'),
+                $manual->getAbsolutePath()) . ' - sit tight.');
+        $this->importer->deleteManual($manual);
+
+        $this->importer->importManual($manual);
     }
 
     /**
