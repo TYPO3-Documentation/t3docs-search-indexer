@@ -10,6 +10,26 @@
     {{ render_assets('js', 'header') | raw }}
 
     {% block stylesheets %}{% endblock %}
+    <style>
+        .autocomplete {
+            z-index: 2;
+            overflow: auto;
+        }
+        .autocomplete .group {
+            border-bottom: 1px solid darkgrey;
+            font-size: 1.1rem;
+        }
+        .autocomplete .suggest-item-title {
+            font-weight: bold;
+        }
+        .autocomplete .suggest-item-content {
+            font-size: 0.9rem;
+        }
+        .autocomplete a, .autocomplete span {
+            display: block;
+        }
+    </style>
+
     <!-- UNIVERSE BAR START -->
     <script src="https://typo3.azureedge.net/typo3infrastructure/universe/dist/webcomponents-loader.js"></script>
     <script src="https://typo3.azureedge.net/typo3infrastructure/universe/dist/typo3-universe.js" type="module"></script>
@@ -59,6 +79,8 @@
     {% endblock %}
 </div>
 
+{{ render_assets('js', 'footer') | raw }}
+
 <script type="text/javascript">
     let DOCUMENTATION_OPTIONS = {
         URL_ROOT: './',
@@ -67,9 +89,61 @@
         FILE_SUFFIX: '.html',
         HAS_SOURCE: true
     };
+
+    var input = document.getElementById("searchinput");
+
+    autocomplete({
+        input: input,
+        fetch: function(text, update) {
+            json ='';
+            fetch('{{ path('suggest') }}' + '?q=' + encodeURIComponent(text)).then(function (response) {
+                return response.json();
+            }).then(function (data) {
+                update(data);
+            }).catch(function (err) {
+                // There was an error
+                console.warn('Something went wrong.', err);
+            });
+        },
+        // onSelect: function(item) {
+        //     input.value = item.label;
+        // },
+
+        emptyMsg: 'No elements found',
+        render: function(item, currentValue) {
+            var div = document.createElement("div");
+            div.className = 'suggest-item';
+
+            var anhor = document.createElement("a");
+            anhor.href = item.url;
+            anhor.className = 'text-reset';
+
+            var title = document.createElement("span");
+            title.textContent = item.label;
+            title.className = 'suggest-item-title';
+            anhor.appendChild(title);
+
+            var content = document.createElement("span");
+            content.textContent = item.content;
+            content.className = 'suggest-item-content';
+            anhor.appendChild(content);
+
+            div.appendChild(anhor);
+
+            return div;
+        },
+        renderGroup: function(groupName, currentValue) {
+            var div = document.createElement("div");
+            div.textContent = groupName;
+            return div;
+        },
+        disableAutoSelect: true,
+        debounceWaitMs: 200,
+        minLength: 3
+
+    });
 </script>
 
-{{ render_assets('js', 'footer') | raw }}
 
 <script id="R9wBKTwzv" src="https://app.usercentrics.eu/latest/main.js" type="application/javascript"></script>
 <script data-usercentrics="Matomo" src="/js/piwik.js" type="text/plain"></script>

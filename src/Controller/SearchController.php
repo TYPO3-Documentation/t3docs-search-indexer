@@ -38,4 +38,35 @@ class SearchController extends AbstractController
             'results' => $elasticRepository->findByQuery($searchDemand),
         ]);
     }
+
+    /**
+     * @Route("/suggest", name="suggest")
+     * @param Request $request
+     * @return Response
+     * @throws \Elastica\Exception\InvalidException
+     */
+    public function suggestAction(Request $request): Response
+    {
+        $elasticRepository = new ElasticRepository();
+        $searchDemand = SearchDemand::createFromRequest($request);
+
+        $results = $elasticRepository->suggest($searchDemand);
+        $suggestions = [];
+        foreach ($results['results'] as $result) {
+
+            $hit = $result->getData();
+            $suggestions[] = [
+                'label' => $hit['snippet_title'],
+                'value' => $hit['snippet_title'],
+                'url' => 'https://docs.typo3.org/' . $hit['manual_slug'] . '/' . $hit['relative_url'] .'#' . $hit['fragment'],
+                'group' => $hit['manual_title'],
+                'content' => \mb_substr($hit['snippet_content'], 0, 100)
+            ];
+        }
+        $jsonBody =  \json_encode($suggestions);
+
+        $response = new Response();
+        $response->setContent($jsonBody);
+        return $response;
+    }
 }

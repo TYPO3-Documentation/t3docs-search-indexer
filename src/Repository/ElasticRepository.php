@@ -143,6 +143,36 @@ EOD;
 
     }
 
+    public function suggest(SearchDemand $searchDemand): array
+    {
+         $searchTerms = Util::escapeTerm($searchDemand->getQuery());
+        $query = [
+            'query' => [
+                'bool' => [
+                    'must' => [
+                        [
+                            'query_string' => [
+                                'query' => $searchTerms,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $search = $this->elasticIndex->createSearch($query);
+        $search->getQuery()->setSize($this->perPage);
+        $search->getQuery()->setFrom(0);
+
+        $elasticaResultSet = $search->search();
+        $results = $elasticaResultSet->getResults();
+
+        $out = [
+            'results' => $results,
+        ];
+        return $out;
+    }
+
     /**
      * @param string $searchTerms
      * @return array
