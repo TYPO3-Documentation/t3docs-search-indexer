@@ -2,27 +2,11 @@
 
 namespace App\Service;
 
-use App\Dto\Manual;
 use Symfony\Component\DomCrawler\Crawler;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
 class ParseDocumentationHTMLService
 {
-
-    public function getFilesWithSections(Manual $manual): Finder
-    {
-        $finder = new Finder();
-        $finder
-            ->files()
-            ->in($manual->getAbsolutePath())
-            ->name('*.html')
-            ->notName(['search.html', 'genindex.html', 'Targets.html', 'Quicklinks.html'])
-            ->notPath(['_buildinfo', '_static', '_images', '_sources', 'singlehtml', 'Sitemap']);
-
-        return $finder;
-    }
-
     public function getSectionsFromFile(SplFileInfo $file): array
     {
         return $this->getSections($file->getContents());

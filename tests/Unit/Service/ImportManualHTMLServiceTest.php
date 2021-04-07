@@ -38,17 +38,20 @@ class ImportManualHTMLServiceTest extends TestCase
      */
     public function allowsImportOfManual()
     {
+        $finder = $this->prophesize(Finder::class);
+
         $manual = $this->prophesize(Manual::class);
         $manual->getTitle()->willReturn('typo3/cms-core');
         $manual->getType()->willReturn('c');
         $manual->getVersion()->willReturn('master');
         $manual->getLanguage()->willReturn('en-us');
         $manual->getSlug()->willReturn('slug');
+        $manual->getFilesWithSections()->willReturn($finder->reveal());
         $manualRevealed = $manual->reveal();
 
         $repo = $this->prophesize(ElasticRepository::class);
         $parser = $this->prophesize(ParseDocumentationHTMLService::class);
-        $finder = $this->prophesize(Finder::class);
+
         $file = $this->prophesize(SplFileInfo::class);
         $file->getRelativePathname()->willReturn('c/typo3/cms-core/master/en-us');
         $fileRevealed = $file->reveal();
@@ -64,7 +67,7 @@ class ImportManualHTMLServiceTest extends TestCase
             'snippet_content' => 'Blog entries are simply pages with a special page type blog entry and can be created and edited via the well-known page module. Creating new entries is as simple as dragging a new entry into the page tree.'
         ];
 
-        $parser->getFilesWithSections($manualRevealed)->willReturn($finder->reveal());
+
         $parser->getSectionsFromFile($fileRevealed)->willReturn([$section1, $section2]);
         $finder->getIterator()->willReturn(new \ArrayObject([$fileRevealed]));
 

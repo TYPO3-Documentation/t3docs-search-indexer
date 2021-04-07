@@ -2,6 +2,8 @@
 
 namespace App\Dto;
 
+use Symfony\Component\Finder\Finder;
+
 class Manual
 {
     /**
@@ -71,6 +73,19 @@ class Manual
             $language,
             implode('/', $values)
         );
+    }
+
+    public function getFilesWithSections(): Finder
+    {
+        $finder = new Finder();
+        $finder
+            ->files()
+            ->in($this->getAbsolutePath())
+            ->name('*.html')
+            ->notName(['search.html', 'genindex.html', 'Targets.html', 'Quicklinks.html'])
+            ->notPath(['_buildinfo', '_static', '_images', '_sources', 'singlehtml', 'Sitemap']);
+
+        return $finder;
     }
 
     public function getAbsolutePath(): string

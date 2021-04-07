@@ -49,7 +49,7 @@ class ImportManualHTMLService
 
     private function importSectionsFromManual(Manual $manual): void
     {
-        $files = $this->parser->getFilesWithSections($manual);
+        $files = $manual->getFilesWithSections();
 
         $this->dispatcher->dispatch(new ManualStart($files), ManualStart::NAME);
 
