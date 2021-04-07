@@ -45,7 +45,7 @@ class SearchDemand
             }
         }
         return new self(
-            $request->query->get('q'),
+            $request->query->get('q', ''),
             (int)$request->query->get('page', '1'),
             $filters,
         );

@@ -11,7 +11,7 @@
                 <div role="search">
                     <form id="rtd-search-form" class="wy-form" action="{{ path('searchresult') }}" method="get">
                         <div class="input-group mt-3">
-                            <input type="text" class="form-control shadow-none" name="q" placeholder="Search in TYPO3 documentation" id="searchinput" value="{{ q }}">
+                            <input type="text" class="form-control shadow-none" name="q" placeholder="Search in TYPO3 documentation" id="searchinput" value="{% if q is defined %}{{ q }}{% endif %}">
                             <div class="input-group-append">
                                 <button class="btn btn-sm btn-primary" type="submit"><i class="fa fa-search"></i>&nbsp;Search</button>
                             </div>
