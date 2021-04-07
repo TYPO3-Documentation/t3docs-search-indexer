@@ -13,7 +13,7 @@ Install locally
 
 * Run ``ddev exec composer install`` to install all dependencies.
 
-* Run ``ddev exec composer global require t3g/elasticorn`` to install Elasticorn
+* Run ``ddev exec composer global require t3g/elasticorn:dev-es_v7`` to install Elasticorn
 
 * Create elasticsearch index via Elasticorn:
 
