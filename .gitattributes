@@ -1,0 +1,12 @@
+/.editorconfig export-ignore
+/.gitignore export-ignore
+/.gitattributes export-ignore
+/.env.dist export-ignore
+/tests/ export-ignore
+/.vscode export-ignore
+/.ddev export-ignore
+/README.rst export-ignore
+/composer.lock export-ignore
+/composer.json export-ignore
+/symfony.lock export-ignore
+/Web export-ignore
