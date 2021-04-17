@@ -1,0 +1,44 @@
+name: docs-search
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: |
+          export APP_ENV=prod
+          composer install --prefer-dist --no-progress --no-suggest --no-dev
+
+
+      - name: SCP files to production system
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.DEPLOY_DOCS_HOST }}
+          username: ${{ secrets.DEPLOY_DOCS_USERNAME }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          source: "vendor,public,src,templates,config,bin,composer.json"
+          debug: true
+          rm: false
+          strip_components: 0
+          tar_tmp_path: ${{ secrets.SEARCH_TMP_TARGET_PATH }}
+          target: ${{ secrets.SEARCH_TARGET_PATH }}
