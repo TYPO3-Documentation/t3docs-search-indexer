@@ -1,18 +1,20 @@
 <div class="aggregations" id="aggregations" role="tablist">
-    {% for title, buckets in aggregations %}
-        <div class="aggregation">
-            <div class="aggregation-title" id="aggregation-title-{{ loop.index }}">
-                <span class="aggregation-title-text">{{title}}</span>
-            </div>
-            <div id="collapse-{{ loop.index }}" class="">
-                <div class="aggregation-body">
-                    {% for index, bucket in buckets.buckets %}
-                        {% if bucket.doc_count > 0 %}
-                            {{ aggregationBucket(title, index, bucket) }}
-                        {% endif %}
-                    {% endfor %}
+    <div class="card card-body">
+        {% for title, buckets in aggregations %}
+            <div class="aggregation">
+                <div class="aggregation-title" id="aggregation-title-{{ loop.index }}">
+                    <span class="aggregation-title-text">{{title}}</span>
+                </div>
+                <div id="collapse-{{ loop.index }}" class="">
+                    <div class="aggregation-body">
+                        {% for index, bucket in buckets.buckets %}
+                            {% if bucket.doc_count > 0 %}
+                                {{ aggregationBucket(title, index, bucket) }}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
+    </div>
 </div>
