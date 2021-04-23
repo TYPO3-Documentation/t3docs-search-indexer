@@ -38,7 +38,7 @@ jobs:
           key: ${{ secrets.DEPLOY_KEY }}
           source: "vendor,public,src,templates,config,bin,composer.json"
           debug: true
-          rm: false
+          rm: true
           strip_components: 0
           tar_tmp_path: ${{ secrets.SEARCH_TMP_TARGET_PATH }}
           target: ${{ secrets.SEARCH_TARGET_PATH }}
