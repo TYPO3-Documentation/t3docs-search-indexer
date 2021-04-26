@@ -1,20 +1,33 @@
 <div class="aggregations" id="aggregations" role="tablist">
-    <div class="card card-body">
-        {% for title, buckets in aggregations %}
-            <div class="aggregation">
-                <div class="aggregation-title" id="aggregation-title-{{ loop.index }}">
-                    <span class="aggregation-title-text">{{title}}</span>
-                </div>
-                <div id="collapse-{{ loop.index }}" class="">
-                    <div class="aggregation-body">
-                        {% for index, bucket in buckets.buckets %}
-                            {% if bucket.doc_count > 0 %}
-                                {{ aggregationBucket(title, index, bucket) }}
-                            {% endif %}
-                        {% endfor %}
+    <div class="card">
+        <div class="card-header p-0">
+            <h2 class="mb-0">
+                <button
+                        type="button"
+                        class="btn btn-link btn-block text-left pl-3 aggregations-toggle-body"
+                        data-text-hide="Hide filters"
+                        data-text-show="Show filters"
+                        onclick="document.getElementById('aggregations').classList.toggle('is-expanded')"
+                > <i class="fa fa-chevron-down"></i></button>
+            </h2>
+        </div>
+        <div class="card-body">
+            {% for title, buckets in aggregations %}
+                <div class="aggregation">
+                    <div class="aggregation-title" id="aggregation-title-{{ loop.index }}">
+                        <span class="aggregation-title-text">{{title}}</span>
+                    </div>
+                    <div id="collapse-{{ loop.index }}" class="">
+                        <div class="aggregation-body">
+                            {% for index, bucket in buckets.buckets %}
+                                {% if bucket.doc_count > 0 %}
+                                    {{ aggregationBucket(title, index, bucket) }}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
     </div>
 </div>
