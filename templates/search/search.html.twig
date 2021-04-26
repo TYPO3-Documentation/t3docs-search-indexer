@@ -6,6 +6,32 @@
 
 {% block stylesheets %}
     <style>
+        .aggregations-toggle-body::before {
+            content: attr(data-text-show);
+            margin-right: 10px;
+        }
+        .aggregations.is-expanded .aggregations-toggle-body::before {
+            content: attr(data-text-hide);
+        }
+        .aggregations .aggregations-toggle-body:active,
+        .aggregations .aggregations-toggle-body:focus {
+            text-decoration: none;
+        }
+        .aggregations.is-expanded .aggregations-toggle-body .fa::before {
+            content: '\f077';
+        }
+        .aggregations .card-header {
+            border-bottom-width: 0;
+        }
+        .aggregations .card-body {
+            display: none;
+        }
+        .aggregations.is-expanded .card-header {
+            border-bottom-width: 1px;
+        }
+        .aggregations.is-expanded .card-body {
+            display: block;
+        }
         .aggregation-title-text {
             font-size: 18px;
             font-weight: bold;
@@ -21,6 +47,14 @@
             min-width: 41px;
             margin-top: -1px;
             text-align: center;
+        }
+        @media (min-width: 768px) {
+            .aggregations .card-header {
+                display: none;
+            }
+            .aggregations .card-body {
+                display: block;
+            }
         }
     </style>
 {% endblock %}
