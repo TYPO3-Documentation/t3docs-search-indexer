@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Dto\SearchDemand;
 use App\Repository\ElasticRepository;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,6 +30,9 @@ class SearchController extends AbstractController
      */
     public function searchAction(Request $request): Response
     {
+        if ($request->query->get('q', '') === '') {
+            return $this->redirectToRoute('index');
+        }
         $elasticRepository = new ElasticRepository();
         $searchDemand = SearchDemand::createFromRequest($request);
 
