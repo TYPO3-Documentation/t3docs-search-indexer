@@ -60,6 +60,10 @@
 {% endblock %}
 
 {% block page_content %}
+    <script>
+        var searchCount = {{ results.totalResults }};
+    </script>
+    {% if results.totalResults > 0 %}
     <h4>Showing hits <strong>{{ results.startingAtItem }} </strong>to <strong>{{ results.endingAtItem }}</strong> of <strong>{{ results.totalResults }}</strong></h4>
     <div class="row">
         <div class="col-md-8 col-lg-9 order-2 order-md-1 mb-4">
@@ -88,5 +92,8 @@
             </div>
         </div>
     </div>
+    {% else %}
+        <h4>No search results found for: {{ q }}</h4>
+    {% endif %}
     {% include '/partial/paginator.html.twig' with {'result':results, 'arguments': {'q': q, 'filters': filters}} %}
 {% endblock %}

@@ -149,6 +149,12 @@
 
 <script id="R9wBKTwzv" src="https://app.usercentrics.eu/latest/main.js" type="application/javascript"></script>
 <script data-usercentrics="Matomo" src="/js/piwik.js" type="text/plain"></script>
+<script>
+    if (typeof searchCount != 'undefined') {
+        _paq.push(['setCustomUrl', document.URL + '&search_count=' + searchCount]);
+        _paq.push(['trackPageView']);
+    }
+</script>
 
 
 </body>
