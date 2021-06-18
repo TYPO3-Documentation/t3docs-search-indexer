@@ -56,6 +56,10 @@
                 display: block;
             }
         }
+        .summary em {
+            font-style: normal;
+            font-weight: 600;
+        }
     </style>
 {% endblock %}
 
@@ -78,7 +82,11 @@
                         <span class="badge badge-primary text-decoration-none">{{ version }}</span>
                         {% endfor %}
                     </h4>
-                    <p class="summary">{{ hit.data.snippet_content|slice(0, 400) }}...</p>
+                    {% if hit.highlights.snippet_content[0] %}
+                        <p class="summary">{{ hit.highlights.snippet_content[0] | raw }}...</p>
+                    {% else %}
+                        <p class="summary">{{ hit.data.snippet_content|slice(0, 400) }}...</p>
+                    {% endif %}
                 </a>
                 {% endfor %}
             </ul>

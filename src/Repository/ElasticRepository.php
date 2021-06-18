@@ -194,6 +194,15 @@ EOD;
                     ],
                 ],
             ],
+            'highlight' => [
+                'fields' => [
+                    'snippet_content' => [
+                        'fragment_size' => 400,
+                        'number_of_fragments' => 1
+                    ]
+                ],
+                'encoder' => 'html'
+            ]
         ];
         $filters = $searchDemand->getFilters();
         if (!empty($filters)) {
