@@ -1,2 +1,14 @@
 number_of_shards: 4
 number_of_replicas: 1
+analysis:
+  filter:
+    typo3_stemmer:
+      type: stemmer
+      language: minimal_english
+  analyzer:
+    typo3_analyzer:
+      filter:
+      - lowercase
+      - asciifolding
+      - typo3_stemmer
+      tokenizer: standard

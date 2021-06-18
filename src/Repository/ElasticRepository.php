@@ -188,6 +188,7 @@ EOD;
                         [
                             'query_string' => [
                                 'query' => $searchTerms,
+                                'fields' => [ 'page_title^10', 'snippet_title^20', 'snippet_content' ]
                             ],
                         ],
                     ],
