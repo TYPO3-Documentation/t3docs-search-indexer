@@ -213,6 +213,7 @@ EOD;
         $results = $elasticaResultSet->getResults();
         $maxScore = $elasticaResultSet->getMaxScore();
         $aggs = $elasticaResultSet->getAggregations();
+        $aggs = $this->sortAggregations($aggs);
 
         $this->totalHits = $elasticaResultSet->getTotalHits();
 
@@ -232,6 +233,24 @@ EOD;
             $out['endingAtItem'] = $this->totalHits;
         }
         return $out;
+    }
+
+    private function sortAggregations($aggregations, $direction='asc'):array
+    {
+        uksort($aggregations, function ($a, $b) {
+            if ($a === 'Language') {
+                return 1;
+            }
+            if ($b === 'Language') {
+                return -1;
+            }
+            return strcasecmp($a, $b);
+        });
+
+        if ($direction === 'desc') {
+            $aggregations = \array_reverse($aggregations);
+        }
+        return $aggregations;
     }
 
     /**
@@ -261,6 +280,7 @@ EOD;
 
         $t3ver = new Terms('Version');
         $t3ver->setField('manual_version');
+//        $t3ver->setSize(50);
         $elasticaQuery->addAggregation($t3ver);
 
 //
