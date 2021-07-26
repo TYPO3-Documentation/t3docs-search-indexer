@@ -116,7 +116,7 @@ class ElasticRepository
                     ],
                 ],
             ],
-            'source' =>  $this->getDeleteQueryScript()
+            'source' => $this->getDeleteQueryScript()
         ];
         $deleteQuery = new Query($query);
         $script = new Script($this->getDeleteQueryScript(), ['manual_version' => $manual->getVersion()], AbstractScript::LANG_PAINLESS);
@@ -131,7 +131,7 @@ class ElasticRepository
      */
     protected function getDeleteQueryScript(): string
     {
-        $script =<<<EOD
+        $script = <<<EOD
 if (ctx._source.manual_version.contains(params.manual_version)) {
    ctx._source.manual_version.remove(ctx._source.manual_version.indexOf(params.manual_version));
 }
@@ -145,7 +145,7 @@ EOD;
 
     public function suggest(SearchDemand $searchDemand): array
     {
-         $searchTerms = Util::escapeTerm($searchDemand->getQuery());
+        $searchTerms = Util::escapeTerm($searchDemand->getQuery());
         $query = [
             'query' => [
                 'bool' => [
@@ -183,15 +183,37 @@ EOD;
         $searchTerms = Util::escapeTerm($searchDemand->getQuery());
         $query = [
             'query' => [
-                'bool' => [
-                    'must' => [
-                        [
-                            'query_string' => [
-                                'query' => $searchTerms,
-                                'fields' => [ 'page_title^10', 'snippet_title^20', 'snippet_content' ]
+                'function_score' => [
+                    'query' => [
+                        'bool' => [
+                            'must' => [
+                                [
+                                    'query_string' => [
+                                        'query' => $searchTerms,
+                                        'fields' => ['page_title^10', 'snippet_title^20', 'snippet_content']
+                                    ],
+                                ],
                             ],
                         ],
                     ],
+                    "functions" => [
+                        [
+                            'filter' => [
+                                // query matching core manual pages
+                                'terms' => ['manual_type' => ['System extension', 'TYPO3 manual', 'Core changelog']]
+                            ],
+                            'weight' => 5
+                        ],
+                        [
+                            'filter' => [
+                                // query matching recent version
+                                'terms' => ['manual_version' => ['master', '11.5', '10.5', '9.4']]
+                            ],
+                            'weight' => 5
+                        ],
+                    ],
+                    'score_mode' => 'sum',
+                    'boost_mode' => 'multiply'
                 ],
             ],
             'highlight' => [
