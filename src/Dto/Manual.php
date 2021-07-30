@@ -71,7 +71,8 @@ class Manual
             'c' => 'System extension',
             'p' => 'Community extension',
             'm' => 'TYPO3 manual',
-            'changelog' => 'Core changelog'
+            'changelog' => 'Core changelog',
+            'h' => 'Docs Home Page',
         ];
         $type = $map[$type] ?? $type;
 
