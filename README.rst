@@ -57,10 +57,10 @@ Index docs
   root path (DOCS_ROOT_PATH) folder (taking into account configured ``allowed_paths``
   and ``excluded_directories``).
 
-* Open ``https://t3docs-search-indexer.ddev.site:9201/docsearch_english_a/_search?q=*:*`` to see indexed
+* Open :samp:`https://t3docs-search-indexer.ddev.site:9201/docsearch_english_a/_search?q=*:*` to see indexed
   documents.
 
-* enter `https://t3docs-search-indexer.ddev.site` to see application
+* enter :samp:`https://t3docs-search-indexer.ddev.site` to see application
 
 Index single manual
 ^^^^^^^^^^^^^^^^^^^
@@ -71,5 +71,5 @@ Index single manual
    documentation folder from custom location (so you don't have to recreate folder
    structure from docs server).
 
-* Open ``https://t3docs-search-indexer.ddev.site:9201/docsearch_english_a/_search?q=*:*`` to see indexed
+* Open :samp:`https://t3docs-search-indexer.ddev.site:9201/docsearch_english_a/_search?q=*:*` to see indexed
   documents.
