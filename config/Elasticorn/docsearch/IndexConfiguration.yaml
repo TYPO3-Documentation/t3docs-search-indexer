@@ -5,10 +5,16 @@ analysis:
     typo3_stemmer:
       type: stemmer
       language: minimal_english
+    typo3_filter:
+       type: word_delimiter_graph
+       preserve_original: true
   analyzer:
     typo3_analyzer:
+      type: custom
+      tokenizer: whitespace
       filter:
-      - lowercase
-      - asciifolding
-      - typo3_stemmer
-      tokenizer: standard
+        - lowercase
+        - asciifolding
+        - typo3_filter
+        - typo3_stemmer
+

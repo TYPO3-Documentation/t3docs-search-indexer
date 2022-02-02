@@ -1,22 +1,33 @@
 snippet_id:
   type: keyword
 manual_title:
-  type: keyword
+  type: text
+  analyzer: typo3_analyzer
+  fields:
+    raw:
+     type: keyword
 manual_type:
   type: keyword
 manual_version:
   type: keyword
 manual_language:
   type: keyword
+manual_slug:
+  type: keyword
+fragment:
+  type: keyword
 page_title:
   type: text
+  analyzer: typo3_analyzer
 rootline:
   type: keyword
 relative_url:
   type: keyword
 snippet_title:
   type: text
+  analyzer: typo3_analyzer
 snippet_content:
   type: text
+  analyzer: typo3_analyzer
 content_hash:
   type: keyword

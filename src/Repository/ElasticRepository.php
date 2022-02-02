@@ -95,7 +95,7 @@ class ElasticRepository
                     'must' => [
                         [
                             'term' => [
-                                'manual_title' => $manual->getTitle(),
+                                'manual_title.raw' => $manual->getTitle(),
                             ],
                         ],
                         [
@@ -190,7 +190,12 @@ EOD;
                                 [
                                     'query_string' => [
                                         'query' => $searchTerms,
-                                        'fields' => ['page_title^10', 'snippet_title^20', 'snippet_content']
+                                        'fields' => [
+                                            'page_title^10',
+                                            'snippet_title^20',
+                                            'snippet_content',
+                                            'manual_title'
+                                        ]
                                     ],
                                 ],
                             ],
@@ -295,7 +300,7 @@ EOD;
         $elasticaQuery->addAggregation($catAggregation);
 
         $trackerAggregation = new Terms('Document');
-        $trackerAggregation->setField('manual_title');
+        $trackerAggregation->setField('manual_title.raw');
         $catAggregation->addAggregation($trackerAggregation);
 
 //        $status = new Terms('Status');
