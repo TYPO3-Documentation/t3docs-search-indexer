@@ -5,6 +5,7 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>{% block title %}{% endblock %}</title>
+    <meta name="robots" content="noindex,follow" />
 
     {{ render_assets('css', 'header') | raw }}
     {{ render_assets('js', 'header') | raw }}
