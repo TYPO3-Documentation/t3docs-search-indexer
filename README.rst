@@ -4,8 +4,8 @@ TYPO3 Documentation Search
 Install locally
 ---------------
 
-* create `docs_server` folder (on the same level where cloned repository is)
-  and put some documents inside
+* create ``docs_server`` folder (on the same level where cloned repository is)
+  and put rendered documentation inside. This folder will be mounted inside DDEV under ``/var/www/docs_server``.
 
 * install DDEV
 
@@ -13,19 +13,20 @@ Install locally
 
 * Run ``ddev exec composer install`` to install all dependencies.
 
-* Run ``ddev exec composer global require t3g/elasticorn:7.0.1`` to install Elasticorn
+* Run ``ddev exec composer global require t3g/elasticorn:7.0`` to install Elasticorn
 
 * Create elasticsearch index via Elasticorn:
 
   ``ddev exec  ~/.composer/vendor/bin/elasticorn.php index:init -c config/Elasticorn``
 
 * Adapt ``DOCS_ROOT_PATH`` in your ``.env`` file if needed (see .env.dist for examples).
+  DDEV environment has ``DOCS_ROOT_PATH=../docs_server/docs.typo3.org/Web`` set up by default.
 
 Configuration
 -------
 
 Configure assets
-^^^^^^^^^^
+^^^^^^^^^^^^^^^^
 
 * Assets configuration is located in ``services.yml`` file in ``assets`` section
 
@@ -40,7 +41,7 @@ Usage
 Common instructions for docsearch indexer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* Docsearch indexer configuration is keep in the `services.yml` file in `docsearch` section.
+* Docsearch indexer configuration is keep in the ``services.yml`` file in ``docsearch`` section.
 
 * You can configure 2 kinds of directories:
 
@@ -57,10 +58,10 @@ Index docs
   root path (DOCS_ROOT_PATH) folder (taking into account configured ``allowed_paths``
   and ``excluded_directories``).
 
-* Open :samp:`https://t3docs-search-indexer.ddev.site:9201/docsearch_english_a/_search?q=*:*` to see indexed
+* Open `https://t3docs-search-indexer.ddev.site:9201/docsearch_english_a/_search?q=*:*` to see indexed
   documents.
 
-* enter :samp:`https://t3docs-search-indexer.ddev.site` to see application
+* enter `https://t3docs-search-indexer.ddev.site` to see application
 
 Index single manual
 ^^^^^^^^^^^^^^^^^^^
@@ -70,6 +71,14 @@ Index single manual
    This command doesn't check ``allowed_paths``, to ease usage when indexing single
    documentation folder from custom location (so you don't have to recreate folder
    structure from docs server).
+   e.g. ``ddev exec ./bin/console docsearch:import c/typo3/cms-felogin/12.4``
+   to import EXT:felogin documentation for v12
 
-* Open :samp:`https://t3docs-search-indexer.ddev.site:9201/docsearch_english_a/_search?q=*:*` to see indexed
+* Open `https://t3docs-search-indexer.ddev.site:9201/docsearch_english_a/_search?q=*:*` to see indexed
   documents.
+
+Removing index to start fresh
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you want to start with fresh Elasticsearch index locally, you can use chrome extensions
+like `Elasticvue` to clear/drop Elasticsearch index if necessary.
