@@ -89,7 +89,7 @@ Removing index to start fresh
 If you want to start with fresh Elasticsearch index locally, you can use chrome extensions
 like `Elasticvue` to clear/drop Elasticsearch index if necessary.
 
-Indexing core changelog
+Indexing Core changelog
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 Core changelog is treated as a "sub manual" of the core manual. To index it, just run indexing for `cms-core` manual.
