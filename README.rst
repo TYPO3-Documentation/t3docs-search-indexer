@@ -94,6 +94,6 @@ Indexing Core changelog
 
 Core changelog is treated as a "sub manual" of the core manual. To index it, just run indexing for `cms-core` manual.
 
-To avoid duplicates search is indexing core changelog only from "main" version/branch of the core documentation.
+To avoid duplicates search is indexing Core changelog only from "main" version/branch of the core documentation.
 E.g. when you run ``./bin/console docsearch:import c/typo3/cms-core/main/`` then the changelog for all versions will be indexed,
 but if you run `./bin/console docsearch:import c/typo3/cms-core/12.4/` the changelog will NOT be indexed.
