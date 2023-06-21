@@ -4,26 +4,32 @@ TYPO3 Documentation Search
 Install locally
 ---------------
 
-* create ``docs_server`` folder (on the same level where cloned repository is)
-  and put rendered documentation inside. This folder will be mounted inside DDEV under ``/var/www/docs_server``.
+* Clone this repo ``git clone https://github.com/TYPO3-Documentation/t3docs-search-indexer.git``
 
-* install DDEV
-
-* Run ``ddev start``
+* Enter the `t3docs-search-indexer`` folder and run ``ddev start``
 
 * Run ``ddev exec composer install`` to install all dependencies.
 
-* Run ``ddev exec composer global require t3g/elasticorn:7.0`` to install Elasticorn
+* Run ``ddev exec composer global require t3g/elasticorn:^7.0`` to install Elasticorn
 
 * Create elasticsearch index via Elasticorn:
 
   ``ddev exec  ~/.composer/vendor/bin/elasticorn.php index:init -c config/Elasticorn``
 
-* Adapt ``DOCS_ROOT_PATH`` in your ``.env`` file if needed (see .env.dist for examples).
-  DDEV environment has ``DOCS_ROOT_PATH=../docs_server/docs.typo3.org/Web`` set up by default.
+* If necessary adapt ``DOCS_ROOT_PATH`` in your ``.env`` file if needed (see .env.dist for examples).
+  DDEV environment has ``DOCS_ROOT_PATH=../docs_server/docs.typo3.org/Web`` set up by default, so usually
+  you don't need to change it if you followed the folder structure.
+
+* Create ``docs_server`` folder (on the same level where ``t3docs-search-indexer`` folder is)
+  and put rendered documentation inside. This folder will be mounted inside DDEV under ``/var/www/docs_server``.
+  You should have a structure like ``docs_server/docs.typo3.org/Web``
+
+* Index documents as described below in "Usage" section
+
+* Enjoy the local search under ``https://t3docs-search-indexer.ddev.site/``
 
 Configuration
--------
+-------------
 
 Configure assets
 ^^^^^^^^^^^^^^^^
@@ -58,7 +64,7 @@ Index docs
   root path (DOCS_ROOT_PATH) folder (taking into account configured ``allowed_paths``
   and ``excluded_directories``).
 
-* Open `https://t3docs-search-indexer.ddev.site:9201/docsearch_english_a/_search?q=*:*` to see indexed
+* Open `https://t3docs-search-indexer.ddev.site:9201/docsearch/_search?q=*:*` to see indexed
   documents.
 
 * enter `https://t3docs-search-indexer.ddev.site` to see application
