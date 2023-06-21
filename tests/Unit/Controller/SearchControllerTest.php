@@ -55,14 +55,10 @@ class SearchControllerTest extends TestCase
         $subject = new SearchController();
         $this->setProperty($subject, 'container', $this->container->reveal());
 
-        $query = $this->prophesize(ParameterBag::class);
-        $query->get('q')->willReturn('searchTerm');
-        $query->get('page', 1)->willReturn(1);
-        $query->get('filters')->willReturn(null);
+        $query = new ParameterBag(['q' => 'searchTerm', 'page' => '1']);
 
         $request = $this->prophesize(Request::class);
-        $request->query = $query->reveal();
-
+        $request->query = $query;
 
         $this->view->render(Argument::any(), Argument::that(function (array $variables) {
             return isset($variables['q'])
@@ -114,14 +110,10 @@ class SearchControllerTest extends TestCase
         $subject = new SearchController();
         $this->setProperty($subject, 'container', $this->container->reveal());
 
-        $query = $this->prophesize(ParameterBag::class);
-        $query->get('q')->willReturn('searchTerm');
-        $query->get('page', 1)->willReturn(1);
-        $query->get('filters')->willReturn(null);
-
+        $query = new ParameterBag(['q' => 'searchTerm', 'page' => '1']);
 
         $request = $this->prophesize(Request::class);
-        $request->query = $query->reveal();
+        $request->query = $query;
 
         $this->view->render('search/search.html.twig', Argument::any())->shouldBeCalledTimes(1);
 

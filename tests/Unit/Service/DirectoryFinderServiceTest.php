@@ -21,14 +21,14 @@ class DirectoryFinderServiceTest extends TestCase
             'c' => [
                 'typo3' => [
                     'cms-core' => [
-                        'master' => [
+                        'main' => [
                             'en-us' => [
                                 'objects.inv.json' => ''
                             ],
                         ],
                     ],
                     'cms-form' => [
-                        'master' => [
+                        'main' => [
                             'en-us' => [
                                 'objects.inv.json' => ''
                             ],
@@ -44,7 +44,7 @@ class DirectoryFinderServiceTest extends TestCase
                                 'objects.inv.json' => ''
                             ],
                         ],
-                        'master' => [
+                        'main' => [
                             'en-us' => [
                                 'objects.inv.json' => ''
                             ],
@@ -56,7 +56,7 @@ class DirectoryFinderServiceTest extends TestCase
                                 'objects.inv.json' => ''
                             ],
                         ],
-                        'master' => [
+                        'main' => [
                             'en-us' => [
                                 'objects.inv.json' => ''
                             ],

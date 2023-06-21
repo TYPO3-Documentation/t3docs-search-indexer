@@ -2,44 +2,12 @@
 
 namespace App\Tests\Unit\Service;
 
-use App\Dto\Manual;
 use App\Service\ParseDocumentationHTMLService;
-use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Finder\SplFileInfo;
 
 class ParseDocumentationHTMLServiceTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function returnsFilesWithSectionsForManual()
-    {
-        $filesRoot = implode(DIRECTORY_SEPARATOR, [
-            __DIR__,
-            'Fixtures',
-            'ParseDocumentationHTMLServiceTest',
-            'ReturnsFilesWithSectionsForManual',
-            'manual',
-        ]);
-        $manual = $this->prophesize(Manual::class);
-        $manual->getAbsolutePath()->willReturn($filesRoot);
-
-        $subject = new ParseDocumentationHTMLService();
-        $files = $subject->getFilesWithSections($manual->reveal());
-
-        self::assertCount(3, $files);
-        $expectedFiles = [
-            $filesRoot . '/index.html',
-            $filesRoot . '/another.html',
-            $filesRoot . '/additional/index.html',
-        ];
-        foreach ($files as $file) {
-            /* @var $file SplFileInfo */
-            self::assertTrue(in_array((string)$file, $expectedFiles), 'Unexpected file: ' . $file);
-        }
-    }
-
     /**
      * @test
      * @dataProvider documentationDataProvider

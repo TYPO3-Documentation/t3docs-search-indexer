@@ -212,7 +212,7 @@ EOD;
                         [
                             'filter' => [
                                 // query matching recent version
-                                'terms' => ['manual_version' => ['master', '11.5', '10.5', '9.4']]
+                                'terms' => ['manual_version' => ['main', '12.4', '11.5', '10.5']]
                             ],
                             'weight' => 5
                         ],

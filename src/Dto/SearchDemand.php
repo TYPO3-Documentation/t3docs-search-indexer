@@ -45,8 +45,9 @@ class SearchDemand
             }
         }
         $page = (int)$request->query->get('page', '1');
+        $query = $request->query->get('q', '');
         return new self(
-            $request->query->get('q', ''),
+            $query,
             max($page, 1),
             $filters,
         );
