@@ -112,7 +112,7 @@ class Manual
         if ($this->getTitle() !== 'typo3/cms-core') {
             return [];
         }
-        if ($this->getVersion() !== 'master') {
+        if ($this->getVersion() !== 'main') {
             return [];
         }
         $finder = new Finder();

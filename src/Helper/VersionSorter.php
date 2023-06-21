@@ -9,10 +9,10 @@ class VersionSorter
     public static function sortVersions(array $versions, string $direction='asc'):array
     {
         usort($versions, function ($a, $b) {
-            if ($a === 'master') {
+            if ($a === 'main') {
                 return 1;
             }
-            if ($b === 'master') {
+            if ($b === 'main') {
                 return -1;
             }
             return version_compare($a, $b);

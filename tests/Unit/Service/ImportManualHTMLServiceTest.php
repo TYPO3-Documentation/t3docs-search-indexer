@@ -43,7 +43,7 @@ class ImportManualHTMLServiceTest extends TestCase
         $manual = $this->prophesize(Manual::class);
         $manual->getTitle()->willReturn('typo3/cms-core');
         $manual->getType()->willReturn('c');
-        $manual->getVersion()->willReturn('master');
+        $manual->getVersion()->willReturn('main');
         $manual->getLanguage()->willReturn('en-us');
         $manual->getSlug()->willReturn('slug');
         $manual->getFilesWithSections()->willReturn($finder->reveal());
@@ -53,7 +53,7 @@ class ImportManualHTMLServiceTest extends TestCase
         $parser = $this->prophesize(ParseDocumentationHTMLService::class);
 
         $file = $this->prophesize(SplFileInfo::class);
-        $file->getRelativePathname()->willReturn('c/typo3/cms-core/master/en-us');
+        $file->getRelativePathname()->willReturn('c/typo3/cms-core/main/en-us');
         $fileRevealed = $file->reveal();
 
         $section1 = [
@@ -76,10 +76,10 @@ class ImportManualHTMLServiceTest extends TestCase
         $repo->addOrUpdateDocument([
             'manual_title' => 'typo3/cms-core',
             'manual_type' => 'c',
-            'manual_version' => 'master',
+            'manual_version' => 'main',
             'manual_language' => 'en-us',
             'manual_slug' => 'slug',
-            'relative_url' => 'c/typo3/cms-core/master/en-us',
+            'relative_url' => 'c/typo3/cms-core/main/en-us',
             'fragment' => 'features-and-basic-concept',
             'snippet_title' => 'Features and Basic Concept',
             'snippet_content' => 'The main goal for this blog extension was to use TYPO3s core concepts and elements to provide a full-blown blog that users of TYPO3 can instantly understand and use.'
@@ -87,10 +87,10 @@ class ImportManualHTMLServiceTest extends TestCase
         $repo->addOrUpdateDocument([
             'manual_title' => 'typo3/cms-core',
             'manual_type' => 'c',
-            'manual_version' => 'master',
+            'manual_version' => 'main',
             'manual_language' => 'en-us',
             'manual_slug' => 'slug',
-            'relative_url' => 'c/typo3/cms-core/master/en-us',
+            'relative_url' => 'c/typo3/cms-core/main/en-us',
             'fragment' => 'pages-as-blog-entries',
             'snippet_title' => 'Pages as blog entries',
             'snippet_content' => 'Blog entries are simply pages with a special page type blog entry and can be created and edited via the well-known page module. Creating new entries is as simple as dragging a new entry into the page tree.'
