@@ -2,9 +2,7 @@
 
 namespace App\Tests\Unit\Service;
 
-use App\Kernel;
 use App\Service\DirectoryFinderService;
-use App\Service\ParseDocumentationHTMLService;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 

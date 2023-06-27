@@ -1,18 +1,21 @@
 <?php
 
-namespace Codappix\tests\Unit\Command;
+namespace App\Tests\Unit\Command;
 
 use App\Command\SnippetImporter;
 use App\Service\DirectoryFinderService;
 use App\Service\ImportManualHTMLService;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder;
 
 class SnippetImporterTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @test
      */
@@ -24,8 +27,12 @@ class SnippetImporterTest extends TestCase
 
         $directoryFinder->getAllManualDirectories('_docsDefault')->shouldBeCalledTimes(1);
 
-        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal(),
-            $directoryFinder->reveal());
+        $command = new SnippetImporter(
+            '_docsDefault',
+            $importer->reveal(),
+            $dispatcher->reveal(),
+            $directoryFinder->reveal()
+        );
         $commandTester = new CommandTester($command);
         $commandTester->execute([]);
     }
@@ -41,8 +48,12 @@ class SnippetImporterTest extends TestCase
 
         $directoryFinder->getAllManualDirectories('_docsCustom')->shouldBeCalledTimes(1);
 
-        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal(),
-            $directoryFinder->reveal());
+        $command = new SnippetImporter(
+            '_docsDefault',
+            $importer->reveal(),
+            $dispatcher->reveal(),
+            $directoryFinder->reveal()
+        );
         $commandTester = new CommandTester($command);
         $commandTester->execute(['--rootPath' => '_docsCustom']);
     }
@@ -73,8 +84,12 @@ class SnippetImporterTest extends TestCase
         $directoryFinder = $this->prophesize(DirectoryFinderService::class);
         $directoryFinder->getAllManualDirectories(Argument::any())->willReturn($finder)->shouldBeCalledTimes(1);
 
-        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal(),
-            $directoryFinder->reveal());
+        $command = new SnippetImporter(
+            '_docsDefault',
+            $importer->reveal(),
+            $dispatcher->reveal(),
+            $directoryFinder->reveal()
+        );
         $commandTester = new CommandTester($command);
         $commandTester->execute([]);
     }
@@ -94,16 +109,21 @@ class SnippetImporterTest extends TestCase
         $finder = new Finder();
         $finder->Append([$folder->reveal()]);
 
-
         $directoryFinder = $this->prophesize(DirectoryFinderService::class);
-        $directoryFinder->getDirectoriesByPath('_docsDefault',
-            'c/typo3/cms-core/master/en-us')->willReturn($finder)->shouldBeCalledTimes(1);
+        $directoryFinder->getDirectoriesByPath(
+            '_docsDefault',
+            'c/typo3/cms-core/master/en-us'
+        )->willReturn($finder)->shouldBeCalledTimes(1);
 
         $importer->deleteManual(Argument::which('getTitle', 'typo3/cms-core'))->shouldBeCalledTimes(1);
         $importer->importManual(Argument::which('getTitle', 'typo3/cms-core'))->shouldBeCalledTimes(1);
 
-        $command = new SnippetImporter('_docsDefault', $importer->reveal(), $dispatcher->reveal(),
-            $directoryFinder->reveal());
+        $command = new SnippetImporter(
+            '_docsDefault',
+            $importer->reveal(),
+            $dispatcher->reveal(),
+            $directoryFinder->reveal()
+        );
         $commandTester = new CommandTester($command);
         $commandTester->execute(['packagePath' => 'c/typo3/cms-core/master/en-us']);
     }

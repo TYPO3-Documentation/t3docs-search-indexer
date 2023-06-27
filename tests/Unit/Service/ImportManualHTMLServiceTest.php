@@ -7,12 +7,15 @@ use App\Repository\ElasticRepository;
 use App\Service\ImportManualHTMLService;
 use App\Service\ParseDocumentationHTMLService;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
 class ImportManualHTMLServiceTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @test
      */
@@ -66,7 +69,6 @@ class ImportManualHTMLServiceTest extends TestCase
             'snippet_content' => 'Blog entries are simply pages with a special page type blog entry and can be created and edited via the well-known page module. Creating new entries is as simple as dragging a new entry into the page tree.'
         ];
 
-
         $parser->getSectionsFromFile($fileRevealed)->willReturn([$section1, $section2]);
         $finder->getIterator()->willReturn(new \ArrayObject([$fileRevealed]));
 
@@ -82,7 +84,7 @@ class ImportManualHTMLServiceTest extends TestCase
             'manual_language' => 'en-us',
             'manual_slug' => 'slug',
             'relative_url' => 'c/typo3/cms-core/main/en-us',
-            "content_hash" => "718ab540920b06f925f6ef7a34d6a5c7",
+            'content_hash' => '718ab540920b06f925f6ef7a34d6a5c7',
         ])->shouldBeCalledTimes(1);
         $repo->addOrUpdateDocument([
             'fragment' => 'pages-as-blog-entries',
@@ -94,7 +96,7 @@ class ImportManualHTMLServiceTest extends TestCase
             'manual_language' => 'en-us',
             'manual_slug' => 'slug',
             'relative_url' => 'c/typo3/cms-core/main/en-us',
-            "content_hash" => "a248b5d0798e30e7c9389b81b499c5d9",
+            'content_hash' => 'a248b5d0798e30e7c9389b81b499c5d9',
         ])->shouldBeCalledTimes(1);
 
         $subject->importManual($manualRevealed);

@@ -6,6 +6,7 @@ use App\Controller\SearchController;
 use App\Repository\ElasticRepository;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
@@ -14,17 +15,13 @@ use Twig\Environment;
 
 class SearchControllerTest extends TestCase
 {
-    /**
-     * @var ObjectProphecy
-     */
-    private $view;
+    use ProphecyTrait;
 
-    /**
-     * @var ObjectProphecy
-     */
-    private $container;
+    private ObjectProphecy $view;
 
-    public function setUp()
+    private ObjectProphecy $container;
+
+    public function setUp(): void
     {
         $this->view = $this->prophesize(Environment::class);
 
@@ -60,11 +57,8 @@ class SearchControllerTest extends TestCase
         $request = $this->prophesize(Request::class);
         $request->query = $query;
 
-        $this->view->render(Argument::any(), Argument::that(function (array $variables) {
-            return isset($variables['q'])
-                && $variables['q'] === 'searchTerm'
-                ;
-        }))->shouldBeCalledTimes(1);
+        $this->view->render(Argument::any(), Argument::that(fn (array $variables) => isset($variables['q'])
+            && $variables['q'] === 'searchTerm'))->shouldBeCalledTimes(1);
 
         $subject->searchAction($request->reveal());
     }
@@ -90,14 +84,11 @@ class SearchControllerTest extends TestCase
             'resultItem2' => 'something',
         ]);
 
-        $view->expects(self::once())->method('assignMultiple')->with(self::callback(function (array $variables) {
-            return isset($variables['results'])
-                && $variables['results'] === [
-                    'resultItem1' => 'something',
-                    'resultItem2' => 'something',
-                ]
-                ;
-        }));
+        $view->expects(self::once())->method('assignMultiple')->with(self::callback(fn (array $variables) => isset($variables['results'])
+            && $variables['results'] === [
+                'resultItem1' => 'something',
+                'resultItem2' => 'something',
+            ]));
 
         $subject->searchAction($request);
     }

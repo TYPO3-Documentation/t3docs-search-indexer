@@ -4,10 +4,13 @@ namespace App\Tests\Unit\Dto;
 
 use App\Dto\Manual;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Finder\SplFileInfo;
 
 class ManualTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @test
      */
@@ -35,7 +38,7 @@ class ManualTest extends TestCase
         $filesRoot = implode(DIRECTORY_SEPARATOR, [
             __DIR__,
             'Fixtures',
-            'ParseDocumentationHTMLServiceTest',
+            'ManualTest',
             'ReturnsFilesWithSectionsForManual',
             'manual',
         ]);
