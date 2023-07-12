@@ -642,35 +642,37 @@
         },
         {
             "name": "ruflin/elastica",
-            "version": "7.1.1",
+            "version": "7.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ruflin/Elastica.git",
-                "reference": "8ecc5cdadd5bf0b69c1eb20e56246a940b43bdb7"
+                "reference": "7c61a630c3d456b00a5610960ae3a9bd29987469"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ruflin/Elastica/zipball/8ecc5cdadd5bf0b69c1eb20e56246a940b43bdb7",
-                "reference": "8ecc5cdadd5bf0b69c1eb20e56246a940b43bdb7",
+                "url": "https://api.github.com/repos/ruflin/Elastica/zipball/7c61a630c3d456b00a5610960ae3a9bd29987469",
+                "reference": "7c61a630c3d456b00a5610960ae3a9bd29987469",
                 "shasum": ""
             },
             "require": {
-                "elasticsearch/elasticsearch": "^7.1.1",
+                "elasticsearch/elasticsearch": "^7.10",
                 "ext-json": "*",
                 "nyholm/dsn": "^2.0.0",
                 "php": "^7.2 || ^8.0",
-                "psr/log": "^1.0",
-                "symfony/deprecation-contracts": "^2.2"
+                "psr/log": "^1.0 || ^2.0 || ^3.0",
+                "symfony/deprecation-contracts": "^2.2 || ^3.0",
+                "symfony/polyfill-php73": "^1.19"
             },
             "require-dev": {
                 "aws/aws-sdk-php": "^3.155",
                 "guzzlehttp/guzzle": "^6.3 || ^7.2",
+                "phpstan/phpstan": "^1.5",
+                "phpstan/phpstan-phpunit": "^1.1",
                 "phpunit/phpunit": "^8.5.8 || ^9.4",
-                "symfony/phpunit-bridge": "^5.1.1"
+                "symfony/phpunit-bridge": "^6.0"
             },
             "suggest": {
                 "aws/aws-sdk-php": "Allow using IAM authentication with Amazon ElasticSearch Service",
-                "egeloen/http-adapter": "Allow using httpadapter as transport",
                 "guzzlehttp/guzzle": "Allow using guzzle as transport",
                 "monolog/monolog": "Logging request"
             },
@@ -703,9 +705,9 @@
             ],
             "support": {
                 "issues": "https://github.com/ruflin/Elastica/issues",
-                "source": "https://github.com/ruflin/Elastica/tree/7.1.1"
+                "source": "https://github.com/ruflin/Elastica/tree/7.3.1"
             },
-            "time": "2021-03-24T14:35:48+00:00"
+            "time": "2023-04-21T09:04:46+00:00"
         },
         {
             "name": "symfony/asset",
