@@ -7,7 +7,6 @@ use PHPUnit\Framework\TestCase;
 
 class VersionSorterTest extends TestCase
 {
-
     /**
      * @test
      * @dataProvider sortVersionsDataProvider

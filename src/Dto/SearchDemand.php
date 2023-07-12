@@ -1,25 +1,13 @@
 <?php
 
-
 namespace App\Dto;
-
 
 use Symfony\Component\HttpFoundation\Request;
 
 class SearchDemand
 {
-
-    protected string $query;
-
-    protected int $page = 1;
-
-    protected array $filters;
-
-    public function __construct(string $query, int $page, array $filters)
+    public function __construct(protected string $query, protected int $page, protected array $filters)
     {
-        $this->query = $query;
-        $this->page = $page;
-        $this->filters = $filters;
     }
 
     public static function createFromRequest(Request $request): SearchDemand
@@ -41,7 +29,6 @@ class SearchDemand
                         $filters[$filterMap[$filter]][] = $name;
                     }
                 }
-
             }
         }
         $page = (int)$request->query->get('page', '1');

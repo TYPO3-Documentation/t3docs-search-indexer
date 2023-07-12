@@ -4,33 +4,34 @@
     "type": "project",
     "license": "proprietary",
     "require": {
-        "php": "^7.4",
+        "php": "^8.2",
         "ext-dom": "*",
         "ext-iconv": "*",
         "ext-json": "*",
         "cweagans/composer-patches": "^1.7",
         "ruflin/elastica": "^7.1",
-        "sensio/framework-extra-bundle": "^5.5",
-        "symfony/asset": "^4.3",
-        "symfony/console": "^4.3",
-        "symfony/css-selector": "^4.3",
-        "symfony/dom-crawler": "^4.3",
-        "symfony/finder": "^4.3",
+        "symfony/asset": "^5.4",
+        "symfony/console": "^5.4",
+        "symfony/css-selector": "^5.4",
+        "symfony/dom-crawler": "^5.4",
+        "symfony/finder": "^5.4",
         "symfony/flex": "^1.4",
-        "symfony/framework-bundle": "^4.3",
-        "symfony/stopwatch": "^4.3",
-        "symfony/twig-bundle": "^4.3",
-        "symfony/yaml": "^4.3"
+        "symfony/framework-bundle": "^5.4",
+        "symfony/monolog-bundle": "^3.8",
+        "symfony/stopwatch": "^5.4",
+        "symfony/twig-bundle": "^5.4",
+        "symfony/yaml": "^5.4"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": ">=v2.18.2",
+        "friendsofphp/php-cs-fixer": "^v3.19.2",
         "mikey179/vfsstream": "^1.6",
         "phpspec/prophecy": "^1.17",
         "phpspec/prophecy-phpunit": "^2.0",
         "phpunit/phpunit": "^9.6",
         "symfony/browser-kit": "^5.4",
-        "symfony/dotenv": "^4.3",
-        "symfony/phpunit-bridge": "^6.3"
+        "symfony/dotenv": "^5.4",
+        "symfony/phpunit-bridge": "^6.3",
+        "symfony/web-profiler-bundle": "5.4.*"
     },
     "config": {
         "preferred-install": {
@@ -76,7 +77,8 @@
     "extra": {
         "symfony": {
             "id": "01C3GA9QV9DBZXQBG4MFTG7YCG",
-            "allow-contrib": false
+            "allow-contrib": false,
+            "require": "5.4.*"
         }
     }
 }

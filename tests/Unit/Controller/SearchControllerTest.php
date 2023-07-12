@@ -66,7 +66,7 @@ class SearchControllerTest extends TestCase
     /**
      * @test
      */
-    public function searchActionAssignsResultsToTemplate()
+    public function searchActionAssignsResultsToTemplate(): never
     {
         self::markTestIncomplete('Need to move repository to DI and replace by mock');
 

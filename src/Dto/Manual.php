@@ -6,50 +6,14 @@ use Symfony\Component\Finder\Finder;
 
 class Manual
 {
-    /**
-     * @var string
-     */
-    private $absolutePath;
-
-    /**
-     * @var string
-     */
-    private $title;
-
-    /**
-     * @var string
-     */
-    private $type;
-
-    /**
-     * @var string
-     */
-    private $version;
-
-    /**
-     * @var string
-     */
-    private $language;
-
-    /**
-     * @var string
-     */
-    private $slug;
-
     public function __construct(
-        string $absolutePath,
-        string $title,
-        string $type,
-        string $version,
-        string $language,
-        string $slug
+        private readonly string $absolutePath,
+        private readonly string $title,
+        private readonly string $type,
+        private readonly string $version,
+        private readonly string $language,
+        private readonly string $slug
     ) {
-        $this->absolutePath = $absolutePath;
-        $this->title = $title;
-        $this->type = $type;
-        $this->version = $version;
-        $this->language = $language;
-        $this->slug = $slug;
     }
 
     public static function createFromFolder(\SplFileInfo $folder, $changelog = false): Manual
@@ -58,16 +22,16 @@ class Manual
         if ($changelog) {
             // e.g. c/typo3/cms-core/master/en-us/Changelog/9.4
             $values = array_slice($pathArray, -7, 7);
-            list($_, $vendor, $name, $__, $language, $type, $version) = $values;
+            [$_, $vendor, $name, $__, $language, $type, $version] = $values;
             $type = \strtolower($type);
             $name .= '-' . $type;
         } else {
             // e.g. "c/typo3/cms-workspaces/9.5/en-us"
             $values = array_slice($pathArray, -5, 5);
-            list($type, $vendor, $name, $version, $language) = $values;
+            [$type, $vendor, $name, $version, $language] = $values;
         }
 
-         $map = [
+        $map = [
             'c' => 'System extension',
             'p' => 'Community extension',
             'm' => 'TYPO3 manual',

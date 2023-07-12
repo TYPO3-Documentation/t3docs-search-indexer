@@ -1,36 +1,28 @@
 <?php
 
-
 namespace App\Twig;
-
 
 use App\Helper\VersionSorter;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
-use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 class AppExtension extends AbstractExtension
 {
-    /** @var ParameterBagInterface */
-    private $parameterBag;
-    /** @var Environment */
-    private $twigEnvironment;
-
-    public function __construct(ParameterBagInterface $parameterBag, Environment $twigEnvironment)
-    {
-        $this->parameterBag = $parameterBag;
-        $this->twigEnvironment = $twigEnvironment;
+    public function __construct(
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly Environment $twigEnvironment
+    ) {
     }
 
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('render_assets', [$this, 'renderAssets']),
-            new TwigFunction('render_single_asset', [$this, 'renderSingleAsset']),
-            new TwigFunction('aggregationBucket', [$this, 'aggregationBucket'], ['is_safe' => ['html']]),
-            new TwigFunction('sortVersions', [VersionSorter::class, 'sortVersions']),
+            new TwigFunction('render_assets', $this->renderAssets(...)),
+            new TwigFunction('render_single_asset', $this->renderSingleAsset(...)),
+            new TwigFunction('aggregationBucket', $this->aggregationBucket(...), ['is_safe' => ['html']]),
+            new TwigFunction('sortVersions', VersionSorter::sortVersions(...)),
         ];
     }
 
@@ -60,9 +52,8 @@ class AppExtension extends AbstractExtension
     {
         $assetsConfig = $this->parameterBag->get('assets');
 
-        return isset($assetsConfig[$assetType][$assetLocation]) ? $assetsConfig[$assetType][$assetLocation] : [];
+        return $assetsConfig[$assetType][$assetLocation] ?? [];
     }
-
 
     public function aggregationBucket(string $category, string $index, array $bucket): string
     {
@@ -76,31 +67,26 @@ class AppExtension extends AbstractExtension
         } else {
             $checked = '';
         }
-        $content = '<div class="custom-control custom-checkbox">'
+        return '<div class="custom-control custom-checkbox">'
             . '<input type="checkbox" class="custom-control-input" id="' . $category . '-' . $index . '" name="filters[' . $category . '][' . $key . ']" ' . $checked . ' value="true" onchange="this.form.submit()">'
             . '<label class="custom-control-label custom-control-label-hascount" for="' . $category . '-' . $index . '">'
             . '<span class="custom-control-label-title">' . $label . '</span> <span class="custom-control-label-count">(' . $docCount . ')</span>'
             . '</label>'
             . '</div>';
-
-        return $content;
     }
-
 
     /**
      * @param      $in
-     * @param bool $lowerCase
      *
-     * @return mixed|string
+     * @return array|string|string[]
      */
-    private function fixWording($in, $lowerCase = true)
+    private function fixWording($in, bool $lowerCase = true)
     {
-        $in = str_replace(' ', '_', $in);
+        $in = str_replace(' ', '_', (string)$in);
         if ($lowerCase) {
             $in = strtolower($in);
         }
 
         return $in;
     }
-
 }

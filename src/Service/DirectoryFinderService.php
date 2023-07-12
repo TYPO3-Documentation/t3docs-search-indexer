@@ -1,28 +1,19 @@
 <?php
 
-
 namespace App\Service;
-
 
 use Symfony\Component\Finder\Finder;
 
 class DirectoryFinderService
 {
-    private $allowedPaths;
-
-    private $excludedDirectories;
-
-    public function __construct(array $allowedPaths, array $excludedDirectories)
+    public function __construct(private readonly array $allowedPaths, private readonly array $excludedDirectories)
     {
-        $this->allowedPaths = $allowedPaths;
-        $this->excludedDirectories = $excludedDirectories;
     }
 
     /**
      * Finds all directories containing documentation under rootPath (DOCS_ROOT_PATH)
      * taking into account 'allowed_paths' and 'excluded_directories'
      *
-     * @param string $rootPath
      * @return Finder
      */
     public function getAllManualDirectories(string $rootPath): Finder
@@ -30,9 +21,7 @@ class DirectoryFinderService
         $allowedPathsRegexs = $this->wrapValuesWithPregDelimiters($this->allowedPaths);
 
         $finder = $this->getDirectoriesByPath($rootPath);
-        $folders = $finder->path($allowedPathsRegexs);
-
-        return $folders;
+        return $finder->path($allowedPathsRegexs);
     }
 
     /**
@@ -73,7 +62,6 @@ class DirectoryFinderService
     /**
      * Wraps array values with regular expression delimiters
      *
-     * @param array $regexs
      * @return array
      */
     private function wrapValuesWithPregDelimiters(array $regexs): array

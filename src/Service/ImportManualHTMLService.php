@@ -12,29 +12,11 @@ use Symfony\Component\Finder\SplFileInfo;
 
 class ImportManualHTMLService
 {
-    /**
-     * @var ElasticRepository
-     */
-    private $elasticRepository;
-
-    /**
-     * @var ParseDocumentationHTMLService
-     */
-    private $parser;
-
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $dispatcher;
-
     public function __construct(
-        ElasticRepository $elasticRepository,
-        ParseDocumentationHTMLService $parser,
-        EventDispatcherInterface $dispatcher
+        private readonly ElasticRepository $elasticRepository,
+        private readonly ParseDocumentationHTMLService $parser,
+        private readonly EventDispatcherInterface $dispatcher,
     ) {
-        $this->elasticRepository = $elasticRepository;
-        $this->parser = $parser;
-        $this->dispatcher = $dispatcher;
     }
 
     public function deleteManual(Manual $manual)

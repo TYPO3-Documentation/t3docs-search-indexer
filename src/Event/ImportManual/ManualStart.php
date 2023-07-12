@@ -7,16 +7,10 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class ManualStart extends Event
 {
-    public const NAME = 'importManual.start';
+    final public const NAME = 'importManual.start';
 
-    /**
-     * @var Finder
-     */
-    private $files;
-
-    public function __construct(Finder $files)
+    public function __construct(private readonly Finder $files)
     {
-        $this->files = $files;
     }
 
     public function getFiles(): Finder
