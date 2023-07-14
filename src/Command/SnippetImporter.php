@@ -10,6 +10,7 @@ use App\Service\DirectoryFinderService;
 use App\Service\ImportManualHTMLService;
 use LogicException;
 use RuntimeException;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
@@ -22,9 +23,9 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Contracts\EventDispatcher\Event;
 
+#[AsCommand(name: 'docsearch:import', description: 'Imports documentation')]
 class SnippetImporter extends Command
 {
-    protected static $defaultName = 'docsearch:import';
     public function __construct(
         private readonly string $defaultRootPath,
         private readonly ImportManualHTMLService $importer,
@@ -43,7 +44,6 @@ class SnippetImporter extends Command
      */
     protected function configure(): void
     {
-        $this->setDescription('Imports documentation');
         $this->addOption('rootPath', null, InputOption::VALUE_REQUIRED, 'Root Path', $this->defaultRootPath);
         $this->addArgument('packagePath', InputArgument::OPTIONAL, 'Package Path');
     }
