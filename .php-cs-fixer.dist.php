@@ -33,7 +33,7 @@ if (PHP_SAPI !== 'cli') {
 }
 // Define in which folders to search and which folders to exclude.
 // Exclude some directories that are excluded by Git anyway to speed up the sniffing
-$finder = PhpCsFixer\Finder::create()
+$finder = (new PhpCsFixer\Finder())
     ->exclude('vendor')
     ->exclude('typo3conf')
     ->exclude('typo3temp')
@@ -50,7 +50,6 @@ $finder = PhpCsFixer\Finder::create()
 //  - Remove unused use statements in the PHP source code
 //  - Ensure Concatenation to have at least one whitespace around
 //  - Remove trailing whitespace at the end of blank lines.
-//return PhpCsFixer\Config::create()
 return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)
     ->setRules([
