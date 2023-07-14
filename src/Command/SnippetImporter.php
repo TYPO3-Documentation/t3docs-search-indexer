@@ -24,6 +24,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class SnippetImporter extends Command
 {
+    protected static $defaultName = 'docsearch:import';
     public function __construct(
         private readonly string $defaultRootPath,
         private readonly ImportManualHTMLService $importer,
@@ -42,7 +43,6 @@ class SnippetImporter extends Command
      */
     protected function configure(): void
     {
-        $this->setName('docsearch:import');
         $this->setDescription('Imports documentation');
         $this->addOption('rootPath', null, InputOption::VALUE_REQUIRED, 'Root Path', $this->defaultRootPath);
         $this->addArgument('packagePath', InputArgument::OPTIONAL, 'Package Path');
@@ -85,7 +85,7 @@ class SnippetImporter extends Command
 
         $totalTime = $timer->stop('importer');
         $this->io->title('importing ' . $processed . ' manuals took ' . $this->formatMilliseconds($totalTime->getDuration()));
-        return 0;
+        return Command::SUCCESS;
     }
 
     protected function importManual($manual, $input)

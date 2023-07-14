@@ -17,18 +17,17 @@ class SearchController extends AbstractController
      * @return Response
      */
     #[Route(path: '/', name: 'index')]
-    public function indexAction(): Response
+    public function index(): Response
     {
         return $this->render('search/index.html.twig');
     }
 
     /**
-     * @param Request $request
      * @return Response
      * @throws InvalidException
      */
     #[Route(path: '/search', name: 'searchresult')]
-    public function searchAction(Request $request): Response
+    public function search(Request $request): Response
     {
         if ($request->query->get('q', '') === '') {
             return $this->redirectToRoute('index');
@@ -44,12 +43,11 @@ class SearchController extends AbstractController
     }
 
     /**
-     * @param Request $request
      * @return Response
      * @throws InvalidException|JsonException
      */
     #[Route(path: '/suggest', name: 'suggest')]
-    public function suggestAction(Request $request): Response
+    public function suggest(Request $request): Response
     {
         $elasticRepository = new ElasticRepository();
         $searchDemand = SearchDemand::createFromRequest($request);
