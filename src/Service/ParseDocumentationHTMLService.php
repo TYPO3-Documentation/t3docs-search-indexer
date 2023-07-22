@@ -61,7 +61,7 @@ class ParseDocumentationHTMLService
         }
 
         return [
-            'headlineText' => filter_var($headline->textContent, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH),
+            'headlineText' => filter_var(htmlspecialchars($headline->textContent), FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_HIGH),
             'node' => $headline,
         ];
     }
@@ -77,7 +77,7 @@ class ParseDocumentationHTMLService
         foreach ($subSections as $subSection) {
             try {
                 $section->removeChild($subSection);
-            } catch (\DOMException $e) {
+            } catch (\DOMException) {
                 continue;
             }
         }
@@ -96,7 +96,7 @@ class ParseDocumentationHTMLService
         foreach ($preTags as $tag) {
             try {
                 $tag->parentNode->removeChild($tag);
-            } catch (\DOMException $e) {
+            } catch (\DOMException) {
                 continue;
             }
         }

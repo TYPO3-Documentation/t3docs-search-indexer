@@ -1,34 +1,33 @@
 <?php
 
-
 namespace App\Controller;
 
 use App\Dto\SearchDemand;
 use App\Repository\ElasticRepository;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\Routing\Annotation\Route;
+use Elastica\Exception\InvalidException;
+use JsonException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 
 class SearchController extends AbstractController
 {
     /**
-     * @Route("/", name="index")
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
-    public function indexAction(): Response
+    #[Route(path: '/', name: 'index')]
+    public function index(): Response
     {
         return $this->render('search/index.html.twig');
     }
 
     /**
-     * @Route("/search", name="searchresult")
-     * @param Request $request
      * @return Response
-     * @throws \Elastica\Exception\InvalidException
+     * @throws InvalidException
      */
-    public function searchAction(Request $request): Response
+    #[Route(path: '/search', name: 'searchresult')]
+    public function search(Request $request): Response
     {
         if ($request->query->get('q', '') === '') {
             return $this->redirectToRoute('index');
@@ -44,12 +43,11 @@ class SearchController extends AbstractController
     }
 
     /**
-     * @Route("/suggest", name="suggest")
-     * @param Request $request
      * @return Response
-     * @throws \Elastica\Exception\InvalidException
+     * @throws InvalidException|JsonException
      */
-    public function suggestAction(Request $request): Response
+    #[Route(path: '/suggest', name: 'suggest')]
+    public function suggest(Request $request): Response
     {
         $elasticRepository = new ElasticRepository();
         $searchDemand = SearchDemand::createFromRequest($request);
@@ -57,17 +55,16 @@ class SearchController extends AbstractController
         $results = $elasticRepository->suggest($searchDemand);
         $suggestions = [];
         foreach ($results['results'] as $result) {
-
             $hit = $result->getData();
             $suggestions[] = [
                 'label' => $hit['snippet_title'],
                 'value' => $hit['snippet_title'],
-                'url' => 'https://docs.typo3.org/' . $hit['manual_slug'] . '/' . $hit['relative_url'] .'#' . $hit['fragment'],
+                'url' => 'https://docs.typo3.org/' . $hit['manual_slug'] . '/' . $hit['relative_url'] . '#' . $hit['fragment'],
                 'group' => $hit['manual_title'],
-                'content' => \mb_substr($hit['snippet_content'], 0, 100)
+                'content' => \mb_substr((string)$hit['snippet_content'], 0, 100)
             ];
         }
-        $jsonBody =  \json_encode($suggestions);
+        $jsonBody =  \json_encode($suggestions, JSON_THROW_ON_ERROR);
 
         $response = new Response();
         $response->setContent($jsonBody);

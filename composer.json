@@ -4,34 +4,44 @@
     "type": "project",
     "license": "proprietary",
     "require": {
-        "php": "^7.4",
+        "php": "^8.2",
         "ext-dom": "*",
         "ext-iconv": "*",
+        "ext-json": "*",
         "cweagans/composer-patches": "^1.7",
         "ruflin/elastica": "^7.1",
-        "sensio/framework-extra-bundle": "^5.5",
-        "symfony/asset": "^4.3",
-        "symfony/console": "^4.3",
-        "symfony/css-selector": "^4.3",
-        "symfony/dom-crawler": "^4.3",
-        "symfony/finder": "^4.3",
-        "symfony/flex": "^1.4",
-        "symfony/framework-bundle": "^4.3",
-        "symfony/stopwatch": "^4.3",
-        "symfony/twig-bundle": "^4.3",
-        "symfony/yaml": "^4.3"
+        "symfony/asset": "^6.3",
+        "symfony/console": "^6.3",
+        "symfony/css-selector": "^6.3",
+        "symfony/dom-crawler": "^6.3",
+        "symfony/finder": "^6.3",
+        "symfony/flex": "^1.20",
+        "symfony/framework-bundle": "^6.3",
+        "symfony/monolog-bundle": "^3.8",
+        "symfony/stopwatch": "^6.3",
+        "symfony/twig-bundle": "^6.3",
+        "symfony/yaml": "^6.3"
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^v3.19.2",
         "mikey179/vfsstream": "^1.6",
-        "symfony/dotenv": "^4.3",
-        "symfony/phpunit-bridge": "^4.3",
-        "friendsofphp/php-cs-fixer": ">=v2.18.2"
+        "phpspec/prophecy": "^1.17",
+        "phpspec/prophecy-phpunit": "^2.0",
+        "phpunit/phpunit": "^9.6",
+        "symfony/browser-kit": "^6.3",
+        "symfony/dotenv": "^6.3",
+        "symfony/phpunit-bridge": "^6.3",
+        "symfony/web-profiler-bundle": "6.3.*"
     },
     "config": {
         "preferred-install": {
             "*": "dist"
         },
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "cweagans/composer-patches": true,
+            "symfony/flex": true
+        }
     },
     "autoload": {
         "psr-4": {
@@ -67,7 +77,8 @@
     "extra": {
         "symfony": {
             "id": "01C3GA9QV9DBZXQBG4MFTG7YCG",
-            "allow-contrib": false
+            "allow-contrib": false,
+            "require": "6.3.*"
         }
     }
 }

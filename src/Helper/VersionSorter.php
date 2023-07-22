@@ -1,12 +1,10 @@
 <?php
 
-
 namespace App\Helper;
-
 
 class VersionSorter
 {
-    public static function sortVersions(array $versions, string $direction='asc'):array
+    public static function sortVersions(array $versions, string $direction = 'asc'): array
     {
         usort($versions, function ($a, $b) {
             if ($a === 'main') {

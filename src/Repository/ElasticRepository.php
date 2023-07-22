@@ -6,7 +6,7 @@ use App\Dto\Manual;
 use App\Dto\SearchDemand;
 use Elastica\Aggregation\Terms;
 use Elastica\Client;
-use Elastica\Document;
+use Elastica\Exception\InvalidException;
 use Elastica\Index;
 use Elastica\Query;
 use Elastica\Script\AbstractScript;
@@ -25,19 +25,13 @@ class ElasticRepository
         'password' => '',
     ];
 
-    /**
-     * @var Index
-     */
-    private $elasticIndex;
+    private readonly Index $elasticIndex;
 
-    private $perPage = 10;
+    private int $perPage = 10;
 
-    private $totalHits = 0;
+    private int $totalHits = 0;
 
-    /**
-     * @var Client
-     */
-    private $elasticClient;
+    private readonly Client $elasticClient;
 
     public function __construct()
     {
@@ -85,7 +79,6 @@ class ElasticRepository
 
     /**
      * Removes manual_version from all snippets and if it's the last version, remove the whole snippet
-     * @param Manual $manual
      */
     public function deleteByManual(Manual $manual): void
     {
@@ -140,7 +133,6 @@ if (ctx._source.manual_version.size() == 0) {
 }
 EOD;
         return \str_replace("\n", ' ', $script);
-
     }
 
     public function suggest(SearchDemand $searchDemand): array
@@ -174,9 +166,8 @@ EOD;
     }
 
     /**
-     * @param string $searchTerms
      * @return array
-     * @throws \Elastica\Exception\InvalidException
+     * @throws InvalidException
      */
     public function findByQuery(SearchDemand $searchDemand): array
     {
@@ -201,7 +192,7 @@ EOD;
                             ],
                         ],
                     ],
-                    "functions" => [
+                    'functions' => [
                         [
                             'filter' => [
                                 // query matching core manual pages
@@ -272,7 +263,7 @@ EOD;
         return $out;
     }
 
-    private function sortAggregations($aggregations, $direction='asc'):array
+    private function sortAggregations($aggregations, $direction = 'asc'): array
     {
         uksort($aggregations, function ($a, $b) {
             if ($a === 'Language') {
@@ -290,9 +281,6 @@ EOD;
         return $aggregations;
     }
 
-    /**
-     * @param Query $elasticaQuery
-     */
     private function addAggregations(Query $elasticaQuery): void
     {
         $catAggregation = new Terms('Document Type');
@@ -303,13 +291,13 @@ EOD;
         $trackerAggregation->setField('manual_title.raw');
         $catAggregation->addAggregation($trackerAggregation);
 
-//        $status = new Terms('Status');
-//        $status->setField('status.name');
-//        $elasticaQuery->addAggregation($status);
+        //        $status = new Terms('Status');
+        //        $status->setField('status.name');
+        //        $elasticaQuery->addAggregation($status);
 
-//        $priority = new Terms('Priority');
-//        $priority->setField('priority.name');
-//        $elasticaQuery->addAggregation($priority);
+        //        $priority = new Terms('Priority');
+        //        $priority->setField('priority.name');
+        //        $elasticaQuery->addAggregation($priority);
 
         $language = new Terms('Language');
         $language->setField('manual_language');
@@ -317,17 +305,17 @@ EOD;
 
         $t3ver = new Terms('Version');
         $t3ver->setField('manual_version');
-//        $t3ver->setSize(50);
+        //        $t3ver->setSize(50);
         $elasticaQuery->addAggregation($t3ver);
 
-//
-//        $targetver = new Terms('Target Version');
-//        $targetver->setField('fixed_version.name');
-//        $elasticaQuery->addAggregation($targetver);
+        //
+        //        $targetver = new Terms('Target Version');
+        //        $targetver->setField('fixed_version.name');
+        //        $elasticaQuery->addAggregation($targetver);
 
-//        $phpVer = new Terms('PHP Version');
-//        $phpVer->setField('php_version');
-//        $elasticaQuery->addAggregation($phpVer);
+        //        $phpVer = new Terms('PHP Version');
+        //        $phpVer->setField('php_version');
+        //        $elasticaQuery->addAggregation($phpVer);
     }
 
     /**
@@ -368,6 +356,7 @@ EOD;
 
     private function getElasticSearchConfig(): array
     {
+        $config = [];
         $config['host'] = $_ENV['ELASTICA_HOST'] ?? self::ELASTICA_DEFAULT_CONFIGURATION['host'];
         $config['port'] = $_ENV['ELASTICA_PORT'] ?? self::ELASTICA_DEFAULT_CONFIGURATION['port'];
         $config['path'] = $_ENV['ELASTICA_PATH'] ?? self::ELASTICA_DEFAULT_CONFIGURATION['path'];

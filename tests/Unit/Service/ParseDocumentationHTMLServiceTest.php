@@ -4,10 +4,13 @@ namespace App\Tests\Unit\Service;
 
 use App\Service\ParseDocumentationHTMLService;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Finder\SplFileInfo;
 
 class ParseDocumentationHTMLServiceTest extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @test
      * @dataProvider documentationDataProvider

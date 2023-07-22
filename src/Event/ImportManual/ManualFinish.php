@@ -6,5 +6,5 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class ManualFinish extends Event
 {
-    public const NAME = 'importManual.finish';
+    final public const NAME = 'importManual.finish';
 }
