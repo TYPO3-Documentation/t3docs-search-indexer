@@ -3,14 +3,19 @@
 namespace App\Tests\Unit\Service;
 
 use App\Dto\Manual;
+use App\Event\ImportManual\ManualAdvance;
+use App\Event\ImportManual\ManualFinish;
+use App\Event\ImportManual\ManualStart;
 use App\Repository\ElasticRepository;
 use App\Service\ImportManualHTMLService;
 use App\Service\ParseDocumentationHTMLService;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Contracts\EventDispatcher\Event;
 
 class ImportManualHTMLServiceTest extends TestCase
 {
@@ -38,7 +43,7 @@ class ImportManualHTMLServiceTest extends TestCase
     /**
      * @test
      */
-    public function allowsImportOfManual()
+    public function allowsImportOfManual(): void
     {
         $finder = $this->prophesize(Finder::class);
 
@@ -70,9 +75,23 @@ class ImportManualHTMLServiceTest extends TestCase
         ];
 
         $parser->getSectionsFromFile($fileRevealed)->willReturn([$section1, $section2]);
-        $finder->getIterator()->willReturn(new \ArrayObject([$fileRevealed]));
+        $finder->getIterator()->willReturn(new \ArrayIterator([$fileRevealed]));
 
-        $subject = new ImportManualHTMLService($repo->reveal(), $parser->reveal(), $this->prophesize(EventDispatcherInterface::class)->reveal());
+        $eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
+        $eventDispatcher
+            ->dispatch(Argument::type(ManualStart::class), ManualStart::NAME)
+            ->shouldBeCalled()
+            ->willReturn($this->prophesize(ManualStart::class)->reveal());
+        $eventDispatcher
+            ->dispatch(Argument::type(ManualAdvance::class), ManualAdvance::NAME)
+            ->shouldBeCalled()
+            ->willReturn($this->prophesize(ManualAdvance::class)->reveal());
+        $eventDispatcher
+            ->dispatch(Argument::type(ManualFinish::class), ManualFinish::NAME)
+            ->shouldBeCalled()
+            ->willReturn($this->prophesize(ManualFinish::class)->reveal());
+
+        $subject = new ImportManualHTMLService($repo->reveal(), $parser->reveal(), $eventDispatcher->reveal());
 
         $repo->addOrUpdateDocument([
             'fragment' => 'features-and-basic-concept',

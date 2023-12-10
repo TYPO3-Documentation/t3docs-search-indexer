@@ -19,19 +19,24 @@ class SnippetImporterTest extends TestCase
     /**
      * @test
      */
-    public function rootPathIsUsedFromConfiguration()
+    public function rootPathIsUsedFromConfiguration(): void
     {
         $importer = $this->prophesize(ImportManualHTMLService::class);
         $dispatcher = $this->prophesize(EventDispatcherInterface::class);
         $directoryFinder = $this->prophesize(DirectoryFinderService::class);
 
-        $directoryFinder->getAllManualDirectories('_docsDefault')->shouldBeCalledTimes(1);
+        $finder = $this->prophesize(Finder::class);
+        $finder->hasResults()->shouldBeCalledTimes(2)->willReturn(false);
+        $directoryFinder
+            ->getAllManualDirectories('_docsDefault')
+            ->shouldBeCalledTimes(1)
+            ->willReturn($finder->reveal());
 
         $command = new SnippetImporter(
             '_docsDefault',
             $importer->reveal(),
-            $dispatcher->reveal(),
-            $directoryFinder->reveal()
+            $directoryFinder->reveal(),
+            $dispatcher->reveal()
         );
         $commandTester = new CommandTester($command);
         $commandTester->execute([]);
@@ -40,19 +45,25 @@ class SnippetImporterTest extends TestCase
     /**
      * @test
      */
-    public function rootPathCanBeDefinedViaOption()
+    public function rootPathCanBeDefinedViaOption(): void
     {
         $importer = $this->prophesize(ImportManualHTMLService::class);
         $dispatcher = $this->prophesize(EventDispatcherInterface::class);
         $directoryFinder = $this->prophesize(DirectoryFinderService::class);
 
-        $directoryFinder->getAllManualDirectories('_docsCustom')->shouldBeCalledTimes(1);
+        $finder = $this->prophesize(Finder::class);
+        $finder->hasResults()->shouldBeCalledTimes(2)->willReturn(false);
+
+        $directoryFinder
+            ->getAllManualDirectories('_docsCustom')
+            ->shouldBeCalledTimes(1)
+            ->willReturn($finder->reveal());
 
         $command = new SnippetImporter(
             '_docsDefault',
             $importer->reveal(),
+            $directoryFinder->reveal(),
             $dispatcher->reveal(),
-            $directoryFinder->reveal()
         );
         $commandTester = new CommandTester($command);
         $commandTester->execute(['--rootPath' => '_docsCustom']);
@@ -61,7 +72,7 @@ class SnippetImporterTest extends TestCase
     /**
      * @test
      */
-    public function callsImportProcedureManualForAllReturnedManuals()
+    public function callsImportProcedureManualForAllReturnedManuals(): void
     {
         $importer = $this->prophesize(ImportManualHTMLService::class);
         $dispatcher = $this->prophesize(EventDispatcherInterface::class);
@@ -87,8 +98,8 @@ class SnippetImporterTest extends TestCase
         $command = new SnippetImporter(
             '_docsDefault',
             $importer->reveal(),
-            $dispatcher->reveal(),
-            $directoryFinder->reveal()
+            $directoryFinder->reveal(),
+            $dispatcher->reveal()
         );
         $commandTester = new CommandTester($command);
         $commandTester->execute([]);
@@ -97,7 +108,7 @@ class SnippetImporterTest extends TestCase
     /**
      * @test
      */
-    public function importsOnlyProvidedPackage()
+    public function importsOnlyProvidedPackage(): void
     {
         $importer = $this->prophesize(ImportManualHTMLService::class);
         $dispatcher = $this->prophesize(EventDispatcherInterface::class);
@@ -121,8 +132,8 @@ class SnippetImporterTest extends TestCase
         $command = new SnippetImporter(
             '_docsDefault',
             $importer->reveal(),
-            $dispatcher->reveal(),
-            $directoryFinder->reveal()
+            $directoryFinder->reveal(),
+            $dispatcher->reveal()
         );
         $commandTester = new CommandTester($command);
         $commandTester->execute(['packagePath' => 'c/typo3/cms-core/master/en-us']);

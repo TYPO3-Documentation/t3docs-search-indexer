@@ -26,6 +26,8 @@ use Symfony\Contracts\EventDispatcher\Event;
 #[AsCommand(name: 'docsearch:import', description: 'Imports documentation')]
 class SnippetImporter extends Command
 {
+    private SymfonyStyle $io;
+
     public function __construct(
         private readonly string $defaultRootPath,
         private readonly ImportManualHTMLService $importer,

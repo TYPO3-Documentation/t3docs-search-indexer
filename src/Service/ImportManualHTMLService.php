@@ -19,12 +19,12 @@ class ImportManualHTMLService
     ) {
     }
 
-    public function deleteManual(Manual $manual)
+    public function deleteManual(Manual $manual): void
     {
         $this->elasticRepository->deleteByManual($manual);
     }
 
-    public function importManual(Manual $manual)
+    public function importManual(Manual $manual): void
     {
         $this->importSectionsFromManual($manual);
     }
@@ -43,7 +43,7 @@ class ImportManualHTMLService
         $this->dispatcher->dispatch(new ManualFinish(), ManualFinish::NAME);
     }
 
-    private function importSectionsFromFile(SplFileInfo $file, Manual $manual)
+    private function importSectionsFromFile(SplFileInfo $file, Manual $manual): void
     {
         foreach ($this->parser->getSectionsFromFile($file) as $section) {
             $section['manual_title'] = $manual->getTitle();
