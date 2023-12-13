@@ -7,27 +7,34 @@ use Symfony\Component\Finder\SplFileInfo;
 
 class ParseDocumentationHTMLService
 {
+    private bool $newRendering = true;
+
     public function getSectionsFromFile(SplFileInfo $file): array
     {
-        return $this->getSections($file->getContents());
+        $fileContents = $file->getContents();
+        $crawler = new Crawler($fileContents);
+        $this->newRendering = $crawler->filterXPath("//meta[@name='generator' and @content='phpdocumentor/guides']")->count();
+
+        return $this->getSections($crawler);
     }
 
-    private function getSections(string $html): array
+    private function getSections(Crawler $html): array
     {
-        $crawler = new Crawler($html);
-        $sections = $crawler->filter('div[itemprop="articleBody"]');
+        $sections = $html->filter($this->newRendering ? 'article' : 'div[itemprop="articleBody"]');
 
-        if ($sections->count() === 0) {
-            return [];
-        }
-
-        return $this->getAllSections($sections);
+        return $sections->count() === 0 ? [] : $this->getAllSections($sections);
     }
 
+    /**
+     * When multiple sections are present, including nested sections,
+     * the process iterates over each section to fetch its content snippet.
+     * However, child sections are excluded from this content retrieval,
+     * instead, they are treated as distinct sections individually.
+     */
     private function getAllSections(Crawler $sections): array
     {
         $sectionPieces = [];
-        foreach ($sections->filter('div.section') as $section) {
+        foreach ($sections->filter($this->newRendering ? 'section' : 'div.section') as $section) {
             $foundHeadline = $this->findHeadline($section);
             if ($foundHeadline === []) {
                 continue;
@@ -56,20 +63,16 @@ class ParseDocumentationHTMLService
         $crawler = new Crawler($section);
         $headline = $crawler->filter('h1, h2, h3, h4, h5, h6')->getNode(0);
 
-        if (($headline instanceof \DOMElement) === false) {
-            return [];
-        }
-
-        return [
+        return $headline instanceof \DOMElement ? [
             'headlineText' => filter_var(htmlspecialchars($headline->textContent), FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_HIGH),
             'node' => $headline,
-        ];
+        ] : [];
     }
 
     private function stripSubSectionsIfAny(\DOMElement $section): \DOMElement
     {
         $crawler = new Crawler($section);
-        $subSections = $crawler->filter('div.section div.section');
+        $subSections = $crawler->filter($this->newRendering ? 'section section' : 'div.section div.section');
         if ($subSections->count() === 0) {
             return $section;
         }
@@ -105,10 +108,6 @@ class ParseDocumentationHTMLService
 
     private function sanitizeString(string $input): string
     {
-        $pattern = [
-            '/\s\s+/',
-        ];
-        $regexBuildName = preg_replace($pattern, ' ', $input);
-        return trim($regexBuildName);
+        return trim(preg_replace('/\s\s+/', ' ', $input));
     }
 }

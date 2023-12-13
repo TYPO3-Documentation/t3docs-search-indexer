@@ -26,7 +26,8 @@ class SnippetImporterTest extends TestCase
         $directoryFinder = $this->prophesize(DirectoryFinderService::class);
 
         $finder = $this->prophesize(Finder::class);
-        $finder->hasResults()->shouldBeCalledTimes(2)->willReturn(false);
+        $finder->hasResults()->willReturn(true);
+        $finder->getIterator()->willReturn(new \AppendIterator());
         $directoryFinder
             ->getAllManualDirectories('_docsDefault')
             ->shouldBeCalledTimes(1)
@@ -52,8 +53,8 @@ class SnippetImporterTest extends TestCase
         $directoryFinder = $this->prophesize(DirectoryFinderService::class);
 
         $finder = $this->prophesize(Finder::class);
-        $finder->hasResults()->shouldBeCalledTimes(2)->willReturn(false);
-
+        $finder->hasResults()->willReturn(true);
+        $finder->getIterator()->willReturn(new \AppendIterator());
         $directoryFinder
             ->getAllManualDirectories('_docsCustom')
             ->shouldBeCalledTimes(1)
@@ -85,7 +86,7 @@ class SnippetImporterTest extends TestCase
         $folder2->__toString()->willReturn('_docsFolder/c/typo3/manual-2/master/en-us');
 
         $finder = new Finder();
-        $finder->Append([$folder->reveal(), $folder2->reveal()]);
+        $finder->append([$folder->reveal(), $folder2->reveal()]);
 
         $importer->importManual(Argument::which('getTitle', 'typo3/manual-1'))->shouldBeCalledTimes(1);
         $importer->deleteManual(Argument::which('getTitle', 'typo3/manual-1'))->shouldBeCalledTimes(1);
@@ -118,13 +119,13 @@ class SnippetImporterTest extends TestCase
         $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/master/en-us');
 
         $finder = new Finder();
-        $finder->Append([$folder->reveal()]);
+        $finder->append([$folder->reveal()]);
 
         $directoryFinder = $this->prophesize(DirectoryFinderService::class);
-        $directoryFinder->getDirectoriesByPath(
-            '_docsDefault',
-            'c/typo3/cms-core/master/en-us'
-        )->willReturn($finder)->shouldBeCalledTimes(1);
+        $directoryFinder
+            ->getDirectoriesByPath('_docsDefault', 'c/typo3/cms-core/master/en-us')
+            ->willReturn($finder)
+            ->shouldBeCalledTimes(1);
 
         $importer->deleteManual(Argument::which('getTitle', 'typo3/cms-core'))->shouldBeCalledTimes(1);
         $importer->importManual(Argument::which('getTitle', 'typo3/cms-core'))->shouldBeCalledTimes(1);

@@ -1,192 +1,332 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<meta content="phpdocumentor/guides" name="generator">
+<meta content="TYPO3 Explained" name="docsearch:name">
+<meta content="" name="docsearch:package_type">
+<meta content="10.4" name="docsearch:release">
+<meta content="10.4" name="docsearch:version">
+<meta content="2023-12-13T14:20:30+00:00" name="docsearch:modified">
+<link href="http://purl.org/dc/elements/1.1/" rel="schema.dc">
+<meta content="2023-12-13T14:20:30+00:00" name="dc.modified">
+<meta content="2023-12-13T14:20:30+00:00" property="article:modified_time">
+<title>Rendering Page Trees — TYPO3 Explained 10.4 documentation</title>
 
-<div class="page-main-content">
-<div class="rst-content">
-<!-- pager-hidden.html -->
-<!-- /pager-hidden.html -->
-<!-- breadcrumbs.html -->
-<div aria-label="breadcrumbs navigation" class="breadcrumb-bar" role="navigation">
-<ol class="breadcrumb">
-<li class="breadcrumb-item"><a href="../../../Index.html">Start</a></li>
-<li aria-current="page" class="breadcrumb-item active">Rendering Page Trees</li>
-</ol>
-<div class="breadcrumb-additions">
-<a class="btn btn-sm btn-primary" href="https://github.com/TYPO3-Documentation/TYPO3CMS-Reference-CoreApi/edit/10.4/Documentation/ApiOverview/Examples/PageTrees/Index.rst" rel="nofollow noopener" target="_blank">
-<span class="btn-icon"><span class="fab fa-github"></span></span>
-<span class="btn-text">Edit on GitHub</span>
+<link href="../../../_resources/css/fontawesome.css" rel="stylesheet">
+<link href="../../../_resources/css/webfonts.css" rel="stylesheet">
+<link href="../../../_resources/css/theme.css" rel="stylesheet">
+<link href="https://docs.typo3.org/search/" rel="search" title="Search">
+<link href="../Index.html" rel="prev" title="Examples"/>
+<link href="../ParsingHtml/Index.html" rel="next" title="Parsing HTML"/>
+<link href="../../../Index.html" rel="top" title="TYPO3 Explained"/>
+<!-- extrahead --><!-- /extrahead -->
+<!-- UNIVERSE BAR START -->
+<script src="https://typo3.azureedge.net/typo3infrastructure/universe/dist/webcomponents-loader.js"></script>
+<script src="https://typo3.azureedge.net/typo3infrastructure/universe/dist/typo3-universe.js" type="module"></script>
+<!-- UNIVERSE BAR END -->
+</head>
+<body cz-shortcut-listen="true">
+<div class="page">
+<header>
+<div class="page-topbar">
+<div class="page-topbar-inner">
+<!-- UNIVERSE BAR START -->
+<typo3-universe active="documentation">
+<div style="display: block; height: 44px; background-color: #313131;"></div>
+</typo3-universe>
+<!-- UNIVERSE BAR END -->
+</div>
+</div>
+<div class="page-header">
+<div class="page-header-inner">
+<!-- pageheader -->
+<a class="logo" href="https://docs.typo3.org/" title="TYPO3 Documentation">
+<img alt="TYPO3 Logo" class="logo-image" src="../../../_resources/img/typo3-logo.svg" width="484" height="130">
 </a>
-<a class="btn btn-sm btn-light" href="../../../_sources/ApiOverview/Examples/PageTrees/Index.rst.txt" rel="nofollow">
+<!-- /pageheader -->
+</div>
+</div>
+</header>
+
+<main class="page-main">
+<div class="page-main-inner">
+<div class="page-main-navigation">
+<nav>
+<input class="toc-checkbox" id="toggleToc" type="checkbox">
+<div class="toc-header">
+<div class="toc-title">
+<a class="toc-title-project" href="/">TYPO3 Explained</a>
+<div class="toc-version-wrapper" id="toc-version-wrapper">
+<div id="toc-version" class="toc-version">
+<span class="toc-version-prefix">Release:</span>
+<span class="toc-version-number">10.4</span>
+</div>
+<div id="toc-version-options" class="toc-version-options">
+<p><span class="fa fa-spinner fa-spin"></span> Loading data.</p>
+</div>
+</div></div>
+<div class="toc-actions">
+<label class="toc-toggle" for="toggleToc">
+Menu
+</label>
+</div>
+</div>
+<div class="toc-collapse">
+<div aria-label="main navigation" class="toc" role="navigation">
+<!-- menu -->
+
+<div aria-label="main navigation" class="toc" role="navigation">
+<ul>
+<li class="toctree-l1">
+<a href="../../../Introduction/Index.html"
+class="reference internal">
+Introduction
+</a></li>
+</ul>
+<ul>
+<li class="toctree-l1">
+<a href="../../Index.html"
+class="reference internal">
+API A-Z
+</a></li>
+<li class="toctree-l1">
+<a href="../../../CodingGuidelines/Index.html"
+class="reference internal">
+Coding Guidelines
+</a></li>
+<li class="toctree-l1">
+<a href="../../../Configuration/Index.html"
+class="reference internal">
+Configuration
+</a></li>
+<li class="toctree-l1">
+<a href="../../../ExtensionArchitecture/Index.html"
+class="reference internal">
+Extension development
+</a></li>
+<li class="toctree-l1">
+<a href="../../../Security/Index.html"
+class="reference internal">
+Security Guidelines
+</a></li>
+<li class="toctree-l1">
+<a href="../../../Testing/Index.html"
+class="reference internal">
+Testing
+</a></li>
+</ul>
+<ul>
+<li class="toctree-l1">
+<a href="../../../About.html"
+class="reference internal">
+About This Manual
+</a></li>
+<li class="toctree-l1">
+<a href="../../../Sitemap.html"
+class="reference internal">
+Sitemap
+</a></li>
+<li class="toctree-l1">
+<a href="../../../genindex.html"
+class="reference internal">
+Index
+</a></li>
+</ul>
+
+
+</div>
+<!-- /menu -->
+</div>
+</div>
+</nav>
+</div>
+<div class="page-main-content">
+<div class="rst-content">                        <nav aria-label="breadcrumbs navigation" class="breadcrumb-bar" role="navigation">
+
+<ol class="breadcrumb">
+<li class="breadcrumb-item"><a href="../../../Index.html">TYPO3 Explained</a></li>
+<li class="breadcrumb-item"><a href="../../Index.html">API A-Z</a></li>
+<li class="breadcrumb-item"><a href="../Index.html">Examples</a></li>
+<li aria-current="page"  class="breadcrumb-item  active">Rendering Page Trees</li>
+</ol>
+
+<div class="breadcrumb-additions">    <a class="btn btn-sm btn-light" href="../../../_sources/ApiOverview/Examples/PageTrees/Index.rst.txt" rel="nofollow noopener" target="_blank">
 <span class="btn-icon"><span class="fas fa-code"></span></span>
 <span class="btn-text">View source</span>
 </a>
+<a class="btn btn-sm btn-light" href="https://docs.typo3.org/m/typo3/docs-how-to-document/main/en-us/WritingDocsOfficial/GithubMethod.html" id="btnHowToEdit" rel="nofollow noopener" target="_blank">
+<span class="btn-icon"><span class="fas fa-info-circle"></span></span>
+<span class="btn-text">How to edit</span>
+</a>
+<a class="btn btn-sm btn-primary" href="https://github.com/TYPO3-Documentation/TYPO3CMS-Reference-CoreApi/edit/10.4/Documentation/ApiOverview/Examples/PageTrees/Index.rst" id="btnEditOnGitHub" rel="nofollow noopener" target="_blank">
+<span class="btn-icon"><span class="fab fa-github"></span></span>
+<span class="btn-text">Edit on GitHub</span>
+</a>
 </div>
-</div>
-<!-- /breadcrumbs.html -->
-<div class="document" itemscope="itemscope" itemtype="http://schema.org/Article" role="main">
+</nav>
+
+<article class="document" itemscope="itemscope" itemtype="http://schema.org/Article" role="main">
 <div itemprop="articleBody">
-<!-- body -->
-<div class="section" id="rendering-page-trees">
-<span id="examples-page-tree"></span><h1>Rendering Page Trees<a class="headerlink" href="#rendering-page-trees" title="Permalink to this headline">¶</a></h1>
+<!-- content start -->
+
+
+
+<section class="section" id="rendering-page-trees">
+<h1>Rendering Page Trees</h1>
+
+<a id="examples-page-tree"></a>
 <p>In your backend modules you might like to show information or perform
 processing for a part of the page tree. There is a whole family of
 libraries in the core for making trees from records, static page trees
 or page trees that can be browsed (open/close nodes).</p>
 <p>This simple example demonstrates how to produce the HTML for a static
 page tree. The result looks like:</p>
-<div class="figure" id="id1">
-<img alt="A page tree" src="../../../_images/PageTreeRendering.png"/>
-<p class="caption"><span class="caption-text">A static page tree in TYPO3 Backend</span></p>
-</div>
+<figure>
+<img
+src="../../../Images/PageTreeRendering.png"
+alt="A page tree"        />
+
+
+
+<figcaption><p>A static page tree in TYPO3 Backend</p>
+</figcaption>
+</figure>
+
 <p>The tree object itself is prepared this way (taken from
-<code class="file docutils literal notranslate"><span class="pre">EXT:examples/Classes/Controller/DefaultController.php</span></code>):</p>
-<div class="highlight-php notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="k">public</span> <span class="k">function</span> <span class="nf">treeAction</span><span class="p">()</span> <span class="p">{</span>
-   <span class="c1">// Get page record for tree starting point</span>
-   <span class="nv">$startingPoint</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-   <span class="nv">$pageRecord</span> <span class="o">=</span> <span class="nx">\TYPO3\CMS\Backend\Utility\BackendUtility</span><span class="o">::</span><span class="na">getRecord</span><span class="p">(</span>
-      <span class="s1">'pages'</span><span class="p">,</span>
-      <span class="nv">$startingPoint</span>
-   <span class="p">);</span>
+<code class="code-inline file" translate="no">EXT:examples/Classes/Controller/DefaultController.php</code>):</p>
+<div translate="no">
 
-   <span class="c1">// Create and initialize the tree object</span>
-   <span class="sd">/** @var $tree \TYPO3\CMS\Backend\Tree\View\PageTreeView */</span>
-   <span class="nv">$tree</span> <span class="o">=</span> <span class="nx">\TYPO3\CMS\Core\Utility\GeneralUtility</span><span class="o">::</span><span class="na">makeInstance</span><span class="p">(</span><span class="nx">\TYPO3\CMS\Backend\Tree\View\PageTreeView</span><span class="o">::</span><span class="na">class</span><span class="p">);</span>
-   <span class="nv">$tree</span><span class="o">-&gt;</span><span class="na">init</span><span class="p">(</span><span class="s1">'AND '</span> <span class="o">.</span> <span class="nv">$GLOBALS</span><span class="p">[</span><span class="s1">'BE_USER'</span><span class="p">]</span><span class="o">-&gt;</span><span class="na">getPagePermsClause</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span>
+<pre class="code-block"><code class="hljs php"><span data-line-number="1"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">treeAction</span><span class="hljs-params">()</span> </span>{</span>
+<span data-line-number="2">   <span class="hljs-comment">// Get page record for tree starting point</span></span>
+<span data-line-number="3">   $startingPoint = <span class="hljs-number">1</span>;</span>
+<span data-line-number="4">   $pageRecord = \TYPO3\CMS\Backend\Utility\BackendUtility::getRecord(</span>
+<span data-line-number="5">      <span class="hljs-string">'pages'</span>,</span>
+<span data-line-number="6">      $startingPoint</span>
+<span data-line-number="7">   );</span>
+<span data-line-number="8"></span>
+<span data-line-number="9">   <span class="hljs-comment">// Create and initialize the tree object</span></span>
+<span data-line-number="10">   <span class="hljs-comment">/** <span class="hljs-doctag">@var</span> $tree \TYPO3\CMS\Backend\Tree\View\PageTreeView */</span></span>
+<span data-line-number="11">   $tree = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Backend\Tree\View\PageTreeView::class);</span>
+<span data-line-number="12">   $tree-&gt;init(<span class="hljs-string">'AND '</span> . $GLOBALS[<span class="hljs-string">'BE_USER'</span>]-&gt;getPagePermsClause(<span class="hljs-number">1</span>));</span>
+<span data-line-number="13"></span>
+<span data-line-number="14">   <span class="hljs-comment">// Creating the icon for the current page and add it to the tree</span></span>
+<span data-line-number="15">   $html = \TYPO3\CMS\Backend\Utility\IconUtility::getSpriteIconForRecord(</span>
+<span data-line-number="16">      <span class="hljs-string">'pages'</span>,</span>
+<span data-line-number="17">      $pageRecord,</span>
+<span data-line-number="18">      <span class="hljs-keyword">array</span>(</span>
+<span data-line-number="19">         <span class="hljs-string">'title'</span> =&gt; $pageRecord[<span class="hljs-string">'title'</span>]</span>
+<span data-line-number="20">      )</span>
+<span data-line-number="21">   );</span>
+<span data-line-number="22">   $tree-&gt;tree[] = <span class="hljs-keyword">array</span>(</span>
+<span data-line-number="23">       <span class="hljs-string">'row'</span> =&gt; $pageRecord,</span>
+<span data-line-number="24">       <span class="hljs-string">'HTML'</span> =&gt; $html</span>
+<span data-line-number="25">   );</span>
+<span data-line-number="26"></span>
+<span data-line-number="27">   <span class="hljs-comment">// Create the page tree, from the starting point, 2 levels deep</span></span>
+<span data-line-number="28">   $depth = <span class="hljs-number">2</span>;</span>
+<span data-line-number="29">   $tree-&gt;getTree(</span>
+<span data-line-number="30">      $startingPoint,</span>
+<span data-line-number="31">      $depth,</span>
+<span data-line-number="32">      <span class="hljs-string">''</span></span>
+<span data-line-number="33">   );</span>
+<span data-line-number="34"></span>
+<span data-line-number="35">   <span class="hljs-comment">// Pass the tree to the view</span></span>
+<span data-line-number="36">   <span class="hljs-keyword">$this</span>-&gt;view-&gt;assign(</span>
+<span data-line-number="37">      <span class="hljs-string">'tree'</span>,</span>
+<span data-line-number="38">      $tree-&gt;tree</span>
+<span data-line-number="39">   );</span>
+<span data-line-number="40">}</span></code></pre>
+</div>
 
-   <span class="c1">// Creating the icon for the current page and add it to the tree</span>
-   <span class="nv">$html</span> <span class="o">=</span> <span class="nx">\TYPO3\CMS\Backend\Utility\IconUtility</span><span class="o">::</span><span class="na">getSpriteIconForRecord</span><span class="p">(</span>
-      <span class="s1">'pages'</span><span class="p">,</span>
-      <span class="nv">$pageRecord</span><span class="p">,</span>
-      <span class="k">array</span><span class="p">(</span>
-         <span class="s1">'title'</span> <span class="o">=&gt;</span> <span class="nv">$pageRecord</span><span class="p">[</span><span class="s1">'title'</span><span class="p">]</span>
-      <span class="p">)</span>
-   <span class="p">);</span>
-   <span class="nv">$tree</span><span class="o">-&gt;</span><span class="na">tree</span><span class="p">[]</span> <span class="o">=</span> <span class="k">array</span><span class="p">(</span>
-       <span class="s1">'row'</span> <span class="o">=&gt;</span> <span class="nv">$pageRecord</span><span class="p">,</span>
-       <span class="s1">'HTML'</span> <span class="o">=&gt;</span> <span class="nv">$html</span>
-   <span class="p">);</span>
 
-   <span class="c1">// Create the page tree, from the starting point, 2 levels deep</span>
-   <span class="nv">$depth</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
-   <span class="nv">$tree</span><span class="o">-&gt;</span><span class="na">getTree</span><span class="p">(</span>
-      <span class="nv">$startingPoint</span><span class="p">,</span>
-      <span class="nv">$depth</span><span class="p">,</span>
-      <span class="s1">''</span>
-   <span class="p">);</span>
+<ul>
+<li class="dash">At the top of the code we define the starting page and get the corresponding
+page record using <code class="code-inline" translate="no">\TYPO3\CMS\Backend\Utility\BackendUtility::getRecord()</code>.</li>
 
-   <span class="c1">// Pass the tree to the view</span>
-   <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">view</span><span class="o">-&gt;</span><span class="na">assign</span><span class="p">(</span>
-      <span class="s1">'tree'</span><span class="p">,</span>
-      <span class="nv">$tree</span><span class="o">-&gt;</span><span class="na">tree</span>
-   <span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-</td></tr></table></div>
-<ul class="simple">
-<li>At the top of the code we define the starting page and get the corresponding
-page record using <code class="code docutils literal notranslate"><span class="pre">\TYPO3\CMS\Backend\Utility\BackendUtility::getRecord()</span></code>.</li>
-<li>Next we create an instance of <code class="code docutils literal notranslate"><span class="pre">\TYPO3\CMS\Backend\Tree\View\PageTreeView</span></code>,
-which we use for generating the tree. Notice how the <a class="reference internal" href="../../BackendUserObject/Index.html#be-user"><span class="std std-ref">BE_USER object</span></a> is
+<li class="dash">Next we create an instance of <code class="code-inline" translate="no">\TYPO3\CMS\Backend\Tree\View\PageTreeView</code>,
+which we use for generating the tree. Notice how the <a href="../../BackendUserObject/Index.html#be-user">BE_USER object</a> is
 called to get a SQL where clause that will ensure that only pages
 that are accessible for the user will be shown in the tree!</li>
-<li>As a next step we manually add the starting page to the page tree.
+
+<li class="dash">As a next step we manually add the starting page to the page tree.
 This is not done automatically because it is not always a desirable
-behavior. Note the use of <code class="code docutils literal notranslate"><span class="pre">\TYPO3\CMS\Backend\Utility\IconUtility::getSpriteIconForRecord()</span></code>
+behavior. Note the use of <code class="code-inline" translate="no">\TYPO3\CMS\Backend\Utility\IconUtility::getSpriteIconForRecord()</code>
 to fetch the right icon for the page.</li>
-<li>Finally we get the tree to prepare itself, up to a certain depth.
+
+<li class="dash">Finally we get the tree to prepare itself, up to a certain depth.
 Internally this will - in particular - generate a HTML part containing
 the tree elements and the page icon itself.</li>
-<li>The rendered page tree is stored in a data array inside of the tree
+
+<li class="dash">The rendered page tree is stored in a data array inside of the tree
 object. We need to traverse the tree data to create the tree in HTML.
 This gives us the chance to organize the tree in a table for instance.
 It is this part that we pass on to the view.</li>
+
 </ul>
+
 <p>The result is rendered with a very simple Fluid template:</p>
-<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;f:for</span> <span class="na">each=</span><span class="s">"{tree}"</span> <span class="na">as=</span><span class="s">"page"</span><span class="nt">&gt;</span>
-   <span class="nt">&lt;tr</span> <span class="na">class=</span><span class="s">"db_list_normal"</span><span class="nt">&gt;</span>
-      <span class="nt">&lt;td&gt;</span>{page.depthData -&gt; f:format.raw()}<span class="nt">&lt;f:format.raw&gt;</span>{page.HTML}<span class="nt">&lt;/f:format.raw&gt;</span> {page.row.title}<span class="nt">&lt;/td&gt;</span>
-      <span class="nt">&lt;td&gt;</span>{page.row.uid}<span class="nt">&lt;/td&gt;</span>
-   <span class="nt">&lt;/tr&gt;</span>
-<span class="nt">&lt;/f:for&gt;</span>
-</pre></div>
+<div translate="no">
+
+<pre class="code-block"><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">f:for</span> <span class="hljs-attr">each</span>=<span class="hljs-string">"{tree}"</span> <span class="hljs-attr">as</span>=<span class="hljs-string">"page"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">tr</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"db_list_normal"</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>{page.depthData -&gt; f:format.raw()}<span class="hljs-tag">&lt;<span class="hljs-name">f:format.raw</span>&gt;</span>{page.HTML}<span class="hljs-tag">&lt;/<span class="hljs-name">f:format.raw</span>&gt;</span> {page.row.title}<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">td</span>&gt;</span>{page.row.uid}<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">f:for</span>&gt;</span></code></pre>
 </div>
 <p>We do a simple loop on the tree array of pages and display the relevant
 elements.</p>
-</div>
-<!-- /body -->
-</div>
-</div>
-<!-- pager.html -->
-<!-- /pager.html -->
-</div>
-</div>
-</div>
-</div>
+</section>
 
-<div class="page-footer">
+<!-- content end -->
+</div>
+</article>
+
+<nav aria-label="Page navigation">
+<ul class="pagination justify-content-center"><li class="page-item">
+<a class="page-link" href="../Index.html"
+title="Accesskey Alt(+Shift)+p">
+Previous
+</a>
+</li>
+<li class="page-item">
+<a class="page-link" href="../ParsingHtml/Index.html"
+title="Accesskey Alt(+Shift)+n">
+Next
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+</main>
+
+<!-- Google Tag Manager -->
+<script type="text/plain" data-usercentrics="Google Tag Manager">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-MKNXD8Q');</script>
+<!-- End Google Tag Manager -->
+
+<footer class="page-footer">
 <!-- footer.html -->
-<footer>
 <div class="frame frame-ruler-before frame-background-dark">
 <div class="frame-container">
 <div class="frame-inner">
-<ul class="footer-simplemenu"><li><a href="mailto:documentation@typo3.org" title="Contact"><span>Contact</span></a></li>
-<li><a href="https://github.com/TYPO3-Documentation/TYPO3CMS-Reference-CoreApi/issues" rel="nofollow noopener" title="Issues"><span>Issues</span></a></li>
-<li><a href="https://github.com/TYPO3-Documentation/TYPO3CMS-Reference-CoreApi" rel="nofollow noopener" title="Repository"><span>Repository</span></a></li>
+<ul class="footer-simplemenu"><li><a href="https://typo3.org/community/teams/documentation/#c9886" title="Contact"><span>Contact</span></a></li>
+<li><a href="https://github.com/TYPO3-Documentation/DocsTypo3Org-Homepage/issues" rel="nofollow noopener" title="Issues"><span>Issues</span></a></li>
+<li><a href="https://github.com/TYPO3-Documentation/DocsTypo3Org-Homepage" rel="nofollow noopener" title="Repository"><span>Repository</span></a></li>
 </ul>
 <div class="footer-additional">
-<p class="text-center">
-                        Last updated: <a href="https://github.com/TYPO3-Documentation/TYPO3CMS-Reference-CoreApi/commit/121dcacce2b481009fba1d71cb9d5be8cb7d48af" rel="nofollow noopener" target="_blank" title="Last commit">
-                           Mar 15, 2021 18:40
-                        </a>
-</p>
-<p class="text-center">Last rendered: Mar 15, 2021 18:40</p>
-<p class="text-center">
-<a href="https://github.com/TYPO3-Documentation/sphinx_typo3_theme" rel="nofollow noopener" target="_blank">
-                            TYPO3 Theme 4.4.3
-                        </a>
-</p>
+<p class="text-center">Last rendered: Dec 13, 2023 14:20</p>
 </div>
 <div class="footer-meta">
 <div class="footer-meta-copyright">
-                        © Copyright since 2000 by the TYPO3 Documentation Team
-                    </div>
+</div>
 <ul class="footer-meta-navigation">
 <li><a href="https://typo3.org/legal-notice" rel="nofollow" target="_blank" title="Legal Notice">Legal Notice</a></li>
 <li><a href="https://typo3.org/privacy-policy" rel="nofollow" target="_blank" title="Privacy Policy">Privacy Policy</a></li>
@@ -195,6 +335,33 @@ elements.</p>
 </div>
 </div>
 </div>
-</footer>
 <!-- /footer.html -->
+</footer>
 </div>
+
+<script>
+var DOCUMENTATION_OPTIONS = {
+URL_ROOT: './',
+VERSION: '10.4',
+COLLAPSE_INDEX: false,
+FILE_SUFFIX: '.html',
+HAS_SOURCE: true
+};
+</script>
+<script src="../../../_resources/js/jquery.min.js"></script>
+<script src="../../../_resources/js/underscore.min.js"></script>
+<script src="../../../_resources/js/doctools.min.js"></script>
+<script src="../../../_resources/js/popper.min.js"></script>
+<script src="../../../_resources/js/bootstrap.min.js"></script>
+<script src="../../../_resources/js/theme.min.js"></script>
+<script src="../../../_resources/js/searchtools.min.js"></script>
+<script src="../../../_resources/js/autocomplete.min.js"></script>
+<script>
+jQuery(function() { Search.loadIndex("searchindex.js"); });
+</script>
+<script id="searchindexloader"></script>
+
+<script id="R9wBKTwzv" src="https://app.usercentrics.eu/latest/main.js"></script>
+<script data-usercentrics="Matomo" src="/js/piwik.js" type="text/plain"></script>
+</body>
+</html>

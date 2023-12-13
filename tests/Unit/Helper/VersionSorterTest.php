@@ -11,13 +11,13 @@ class VersionSorterTest extends TestCase
      * @test
      * @dataProvider sortVersionsDataProvider
      */
-    public function sortVersions($versions, $direction, $expected)
+    public function sortVersions($versions, $direction, $expected): void
     {
         $actual = VersionSorter::sortVersions($versions, $direction);
         self::assertEquals($expected, $actual);
     }
 
-    public function sortVersionsDataProvider()
+    public function sortVersionsDataProvider(): array
     {
         return [
             [

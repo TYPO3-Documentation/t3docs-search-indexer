@@ -4,15 +4,15 @@ namespace App\Dto;
 
 use Symfony\Component\HttpFoundation\Request;
 
-class SearchDemand
+readonly class SearchDemand
 {
-    public function __construct(protected string $query, protected int $page, protected array $filters)
+    public function __construct(private string $query, private int $page, private array $filters)
     {
     }
 
     public static function createFromRequest(Request $request): SearchDemand
     {
-        $requestFilters = $request->query->get('filters');
+        $requestFilters = $request->query->all()['filters'] ?? [];
         $filters = [];
         if (!empty($requestFilters)) {
             foreach ($requestFilters as $filter => $value) {
@@ -33,11 +33,8 @@ class SearchDemand
         }
         $page = (int)$request->query->get('page', '1');
         $query = $request->query->get('q', '');
-        return new self(
-            $query,
-            max($page, 1),
-            $filters,
-        );
+
+        return new self($query, max($page, 1), $filters);
     }
 
     public function getQuery(): string

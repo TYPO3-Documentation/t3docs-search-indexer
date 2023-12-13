@@ -90,14 +90,13 @@ class SnippetImporter extends Command
         return Command::SUCCESS;
     }
 
-    protected function importManual($manual, $input)
+    protected function importManual($manual, $input): void
     {
         $this->io->section('Importing ' . $this->makePathRelative(
             $input->getOption('rootPath'),
             $manual->getAbsolutePath()
-        ) . ' - sit tight.');
+        ) . ' ...');
         $this->importer->deleteManual($manual);
-
         $this->importer->importManual($manual);
     }
 
@@ -122,28 +121,32 @@ class SnippetImporter extends Command
         return $folders;
     }
 
-    private function makePathRelative(string $base, string $path)
+    private function makePathRelative(string $base, string $path): string
     {
-        return str_replace(rtrim($base, '/') . '/', '', $path);
+        $normalizedBase = rtrim($base, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        if (str_starts_with($path, $normalizedBase)) {
+            return substr($path, strlen($normalizedBase));
+        }
+        return $path;
     }
 
     private function formatMilliseconds(int $milliseconds): string
     {
-        $t = round($milliseconds / 1000);
+        $t = intdiv($milliseconds, 1000);
         return sprintf('%02d:%02d:%02d', (int)($t / 3600), (int)($t / 60) % 60, $t % 60);
     }
 
-    public function startProgress(Event $event)
+    public function startProgress(Event $event): void
     {
         $this->io->progressStart($event->getFiles()->count());
     }
 
-    public function advanceProgress(Event $event)
+    public function advanceProgress(Event $event): void
     {
         $this->io->progressAdvance();
     }
 
-    public function finishProgress(Event $event)
+    public function finishProgress(Event $event): void
     {
         $this->io->progressFinish();
     }
