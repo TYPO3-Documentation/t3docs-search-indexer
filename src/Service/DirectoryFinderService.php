@@ -34,29 +34,32 @@ class DirectoryFinderService
     {
         $combinedPath = $docRootPath . ($packagePath ?  '/' . $packagePath : '');
 
-        // checks if given path is already a manual, as finder only checks subfolders
-        if ($combinedPath !== $docRootPath && \file_exists($combinedPath . '/objects.inv.json')) {
-            $finder = new Finder();
-            $finder->append([$combinedPath]);
-            return $finder;
-        }
         $finder = new Finder();
-        $finder->directories()
-            ->in($combinedPath)
-            ->exclude($this->excludedDirectories)
-            ->filter($this->getFolderFilter());
+
+        // checks if given path is already a manual, as finder only checks subfolders
+        if ($combinedPath !== $docRootPath && $this->objectsFileExists($combinedPath)) {
+            $finder->append([$combinedPath]);
+        } else {
+            $finder->directories()
+                ->in($combinedPath)
+                ->exclude($this->excludedDirectories)
+                ->filter($this->getFolderFilter());
+        }
 
         return $finder;
     }
 
     private function getFolderFilter()
     {
-        return function (\SplFileInfo $file) {
-            if (\file_exists($file->getPathname() . '/objects.inv.json')) {
-                return true;
-            }
-            return false;
+        $self = $this;
+        return static function (\SplFileInfo $file) use ($self) {
+            return $self->objectsFileExists($file->getPathname());
         };
+    }
+
+    private function objectsFileExists(string $path): bool
+    {
+        return \file_exists($path . '/objects.inv') || \file_exists($path . '/objects.inv.json');
     }
 
     /**
