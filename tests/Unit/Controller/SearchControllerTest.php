@@ -34,20 +34,20 @@ class SearchControllerTest extends TestCase
     /**
      * @test
      */
-    public function indexActionRendersIndexTemplate()
+    public function indexActionRendersIndexTemplate(): void
     {
         $subject = new SearchController();
         $this->setProperty($subject, 'container', $this->container->reveal());
 
         $this->view->render('search/index.html.twig', [])->shouldBeCalledTimes(1);
 
-        $subject->indexAction();
+        $subject->index();
     }
 
     /**
      * @test
      */
-    public function searchActionAssignsQueryToTemplate()
+    public function searchActionAssignsQueryToTemplate(): void
     {
         $subject = new SearchController();
         $this->setProperty($subject, 'container', $this->container->reveal());
@@ -60,7 +60,7 @@ class SearchControllerTest extends TestCase
         $this->view->render(Argument::any(), Argument::that(fn (array $variables) => isset($variables['q'])
             && $variables['q'] === 'searchTerm'))->shouldBeCalledTimes(1);
 
-        $subject->searchAction($request->reveal());
+        $subject->search($request->reveal());
     }
 
     /**
@@ -90,13 +90,13 @@ class SearchControllerTest extends TestCase
                 'resultItem2' => 'something',
             ]));
 
-        $subject->searchAction($request);
+        $subject->search($request);
     }
 
     /**
      * @test
      */
-    public function searchActionRendersSearchTemplate()
+    public function searchActionRendersSearchTemplate(): void
     {
         $subject = new SearchController();
         $this->setProperty($subject, 'container', $this->container->reveal());
@@ -108,7 +108,7 @@ class SearchControllerTest extends TestCase
 
         $this->view->render('search/search.html.twig', Argument::any())->shouldBeCalledTimes(1);
 
-        $subject->searchAction($request->reveal());
+        $subject->search($request->reveal());
     }
 
     private function setProperty($instance, string $property, $value)
