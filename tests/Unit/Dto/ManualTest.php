@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Dto;
 
 use App\Dto\Manual;
+use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Finder\SplFileInfo;
@@ -14,26 +15,100 @@ class ManualTest extends TestCase
     /**
      * @test
      */
-    public function createFromFolder()
+    public function createFromFolderWithChangelog(): void
     {
         $folder = $this->prophesize(\SplFileInfo::class);
-        $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us');
-        $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us');
-        $returnedManual = Manual::createFromFolder($folder->reveal());
+        $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us/Changelog/5.14');
+        $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us/Changelog/5.14');
 
-        self::assertInstanceOf(Manual::class, $returnedManual);
-        self::assertSame('_docsFolder/c/typo3/cms-core/main/en-us', $returnedManual->getAbsolutePath());
-        self::assertSame('typo3/cms-core', $returnedManual->getTitle());
-        self::assertSame('System extension', $returnedManual->getType());
-        self::assertSame('en-us', $returnedManual->getLanguage());
-        self::assertSame('c/typo3/cms-core/main/en-us', $returnedManual->getSlug());
-        self::assertSame('main', $returnedManual->getVersion());
+        $manual = Manual::createFromFolder($folder->reveal(), true);
+
+        $this->assertSame('_docsFolder/c/typo3/cms-core/main/en-us/Changelog/5.14', $manual->getAbsolutePath());
+        $this->assertSame('typo3/cms-core-changelog', $manual->getTitle());
+        $this->assertSame('Core changelog', $manual->getType());
+        $this->assertSame('5.14', $manual->getVersion());
+        $this->assertSame('en-us', $manual->getLanguage());
+        $this->assertSame('c/typo3/cms-core/main/en-us/Changelog/5.14', $manual->getSlug());
     }
 
     /**
      * @test
      */
-    public function returnsFilesWithSectionsForManual()
+    public function createFromFolderWithoutChangelog(): void
+    {
+        $folder = $this->prophesize(\SplFileInfo::class);
+        $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/12.4/en-us');
+        $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/12.4/en-us');
+
+        $manual = Manual::createFromFolder($folder->reveal(), false);
+
+        $this->assertSame('_docsFolder/c/typo3/cms-core/12.4/en-us', $manual->getAbsolutePath());
+        $this->assertSame('typo3/cms-core', $manual->getTitle());
+        $this->assertSame('System extension', $manual->getType());
+        $this->assertSame('12.4', $manual->getVersion());
+        $this->assertSame('en-us', $manual->getLanguage());
+        $this->assertSame('c/typo3/cms-core/12.4/en-us', $manual->getSlug());
+    }
+
+    /**
+     * @test
+     */
+    public function createFromFolderWithInvalidPath(): void
+    {
+        $folder = $this->prophesize(\SplFileInfo::class);
+        $folder->getPathname()->willReturn('invalid/path');
+        $folder->__toString()->willReturn('invalid/path');
+
+        $this->expectError();
+        $this->expectErrorMessage('Undefined array key 2');
+
+        $manual = Manual::createFromFolder($folder->reveal());
+    }
+
+    public function  createFromFolderWithDifferentPathTypesDataProvider(): array
+    {
+        return [
+            ['_docsFolder/c/typo3/cms-core/main/en-us', 'System extension', false],
+            ['_docsFolder/p/vendor/package/1.0/pl-pl', 'Community extension', false],
+            ['_docsFolder/m/typo3/reference-coreapi/12.4/en-us', 'TYPO3 manual', false],
+            ['_docsFolder/c/typo3/cms-core/main/en-us/Changelog/9.4', 'Core changelog', true],
+            ['_docsFolder/h/typo3/docs-homepage/main/en-us', 'Docs Home Page', false]
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider createFromFolderWithDifferentPathTypesDataProvider
+     */
+    public function createFromFolderWithDifferentPathTypes(string $path, string $expectedType, bool $changelog = false): void
+    {
+        $folder = $this->prophesize(\SplFileInfo::class);
+        $folder->getPathname()->willReturn($path);
+        $folder->__toString()->willReturn($path);
+
+        $manual = Manual::createFromFolder($folder->reveal(), $changelog);
+
+        $this->assertSame($expectedType, $manual->getType());
+    }
+
+    /**
+     * @test
+     */
+    public function createFromFolderWithUnmappedType(): void
+    {
+        $folder = $this->prophesize(\SplFileInfo::class);
+        $folder->getPathname()->willReturn('_docsFolder/x/typo3/cms-core/main/en-us');
+        $folder->__toString()->willReturn('_docsFolder/x/typo3/cms-core/main/en-us');
+
+        $manual = Manual::createFromFolder($folder->reveal());
+
+        $this->assertSame('x', $manual->getType());
+    }
+
+    /**
+     * @test
+     */
+    public function returnsFilesWithSectionsForManual(): void
     {
         $filesRoot = implode(DIRECTORY_SEPARATOR, [
             __DIR__,
@@ -53,7 +128,141 @@ class ManualTest extends TestCase
         ];
         foreach ($files as $file) {
             /* @var $file SplFileInfo */
-            self::assertTrue(in_array((string)$file, $expectedFiles), 'Unexpected file: ' . $file);
+            self::assertContains((string)$file, $expectedFiles, 'Unexpected file: ' . $file);
         }
+    }
+
+    /**
+     * @test
+     */
+    public function subManualsAreNotReturnForNonTypo3CmsCoreExtensions(): void
+    {
+        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug');
+
+        $result = $manual->getSubManuals();
+
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
+    }
+
+    /**
+     * @test
+     */
+    public function subManualsAreNotReturnForNonMainVersion(): void
+    {
+        $manual = new Manual('/path', 'typo3/cms-core', 'type', '1.0', 'en-us', 'slug');
+
+        $result = $manual->getSubManuals();
+
+        $this->assertIsArray($result);
+        $this->assertEmpty($result);
+    }
+
+    /**
+     * @test
+     */
+    public function returnsSubManuals(): void
+    {
+        $rootPath = vfsStream::setup('_docsFolder', null, [
+            'c' => [
+                'typo3' => [
+                    'cms-core' => [
+                        'main' => [
+                            'en-us' => [
+                                'Changelog' => [
+                                    '9.4' => [
+                                        'index.html' => '',
+                                    ],
+                                    '10.4' => [
+                                        'index.html' => '',
+                                    ],
+                                ],
+                                'Editor' => [
+                                    'index.html' => '',
+                                ],
+                                'index.html' => '',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $folder = $this->prophesize(\SplFileInfo::class);
+        $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us');
+        $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us');
+
+        $manual = new Manual($rootPath->url() . '/c/typo3/cms-core/main/en-us', 'typo3/cms-core', 'System extension', 'main', 'en-us', 'c/typo3/cms-core/main/en-us');
+        $subManuals = $manual->getSubManuals();
+
+        self::assertCount(2, $subManuals);
+
+        self::assertSame('vfs://_docsFolder/c/typo3/cms-core/main/en-us/Changelog/9.4', $subManuals[0]->getAbsolutePath());
+        self::assertSame('typo3/cms-core-changelog', $subManuals[0]->getTitle());
+        self::assertSame('Core changelog', $subManuals[0]->getType());
+        self::assertSame('9.4', $subManuals[0]->getVersion());
+        self::assertSame('en-us', $subManuals[0]->getLanguage());
+        self::assertSame('c/typo3/cms-core/main/en-us/Changelog/9.4', $subManuals[0]->getSlug());
+
+        self::assertSame('vfs://_docsFolder/c/typo3/cms-core/main/en-us/Changelog/10.4', $subManuals[1]->getAbsolutePath());
+        self::assertSame('typo3/cms-core-changelog', $subManuals[1]->getTitle());
+        self::assertSame('Core changelog', $subManuals[1]->getType());
+        self::assertSame('10.4', $subManuals[1]->getVersion());
+        self::assertSame('en-us', $subManuals[1]->getLanguage());
+        self::assertSame('c/typo3/cms-core/main/en-us/Changelog/10.4', $subManuals[1]->getSlug());
+    }
+
+    /**
+     * @test
+     */
+    public function returnsAbsolutePath(): void
+    {
+        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug');
+        $this->assertEquals('/path', $manual->getAbsolutePath());
+    }
+
+    /**
+     * @test
+     */
+    public function returnsTitle(): void
+    {
+        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug');
+        $this->assertEquals('Title', $manual->getTitle());
+    }
+
+    /**
+     * @test
+     */
+    public function returnsType(): void
+    {
+        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug');
+        $this->assertEquals('type', $manual->getType());
+    }
+
+    /**
+     * @test
+     */
+    public function returnsVersion(): void
+    {
+        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug');
+        $this->assertEquals('main', $manual->getVersion());
+    }
+
+    /**
+     * @test
+     */
+    public function returnsLanguage(): void
+    {
+        $manual = new Manual('SomePath', 'SomeTitle', 'SomeType', 'SomeVersion', 'SomeLanguage', 'SomeSlug');
+        $this->assertEquals('SomeLanguage', $manual->getLanguage());
+    }
+
+    /**
+     * @test
+     */
+    public function returnsSlug(): void
+    {
+        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug');
+        $this->assertEquals('slug', $manual->getSlug());
     }
 }

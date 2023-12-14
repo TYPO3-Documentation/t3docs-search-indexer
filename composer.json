@@ -69,6 +69,12 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
+        ],
+        "ci:test:unit": [
+            "php bin/phpunit -c phpunit.xml.dist"
+        ],
+        "fix:php:cs-fixer": [
+            "php-cs-fixer fix src -v --using-cache no"
         ]
     },
     "conflict": {

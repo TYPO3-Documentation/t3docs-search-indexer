@@ -14,22 +14,20 @@ parameters:
     assets:
         css:
             header:
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/css/theme.css'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/css/webfonts.css'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/css/fontawesome.css'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/css/theme.css'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/css/webfonts.css'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/css/fontawesome.css'
             footer:
         js:
             header:
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/js/modernizr.min.js'
-
             footer:
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/js/jquery.min.js'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/js/underscore.min.js'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/js/doctools.min.js'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/js/popper.min.js'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/js/bootstrap.min.js'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/js/autocomplete.min.js'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/js/theme.min.js'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/js/jquery.min.js'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/js/underscore.min.js'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/js/doctools.min.js'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/js/popper.min.js'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/js/bootstrap.min.js'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/js/autocomplete.min.js'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/js/theme.min.js'
 
 services:
     # default configuration for services in *this* file

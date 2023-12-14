@@ -6,7 +6,7 @@ class VersionSorter
 {
     public static function sortVersions(array $versions, string $direction = 'asc'): array
     {
-        usort($versions, function ($a, $b) {
+        usort($versions, static function ($a, $b) {
             if ($a === 'main') {
                 return 1;
             }

@@ -159,10 +159,9 @@ EOD;
         $elasticaResultSet = $search->search();
         $results = $elasticaResultSet->getResults();
 
-        $out = [
+        return [
             'results' => $results,
         ];
-        return $out;
     }
 
     /**

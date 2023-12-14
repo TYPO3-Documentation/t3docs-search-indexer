@@ -24,7 +24,7 @@ class ImportManualHTMLServiceTest extends TestCase
     /**
      * @test
      */
-    public function allowsToDeleteManual()
+    public function allowsToDeleteManual(): void
     {
         $manual = $this->prophesize(Manual::class)->reveal();
         $repo = $this->prophesize(ElasticRepository::class);

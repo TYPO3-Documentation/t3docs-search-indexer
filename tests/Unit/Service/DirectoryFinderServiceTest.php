@@ -11,7 +11,7 @@ class DirectoryFinderServiceTest extends TestCase
     /**
      * @test
      */
-    public function returnsManualsFromFolder()
+    public function returnsManualsFromFolder(): void
     {
         $subject = new DirectoryFinderService(['^m/', '^c/', '^p/'], ['other', 'draft', 'typo3cms/extensions']);
 
@@ -65,5 +65,386 @@ class DirectoryFinderServiceTest extends TestCase
         ]);
 
         self::assertCount(6, $subject->getAllManualDirectories($rootDir->url()));
+    }
+
+    public function getAllManualDirectoriesRespectsOnlyDirectoriesWithMetadataFileDataProvider(): array
+    {
+        return [
+            'none directory contain metadata file' => [
+                'allowedPathsRegexs' => ['^p/'],
+                'excluded' => [],
+                [
+                    'p' => [
+                        'vendor' => [
+                            'news' => [
+                                'main' => [
+                                    'en-us' => [
+                                    ],
+                                ],
+                            ],
+                            'gallery' => [
+                                'main' => [
+                                    'en-us' => [
+                                    ],
+                                ],
+                            ],
+                            'logger' => [
+                                'main' => [
+                                    'en-us' => [
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'expected' => 0,
+            ],
+            'single directory contains metadata file' => [
+                'allowedPathsRegexs' => ['^p/'],
+                'excluded' => [],
+                [
+                    'p' => [
+                        'vendor' => [
+                            'news' => [
+                                'main' => [
+                                    'en-us' => [
+                                    ],
+                                ],
+                            ],
+                            'gallery' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                            'logger' => [
+                                'main' => [
+                                    'en-us' => [
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'expected' => 1,
+            ],
+            'all directories contain metadata file' => [
+                'allowedPathsRegexs' => ['^p/'],
+                'excluded' => [],
+                [
+                    'p' => [
+                        'vendor' => [
+                            'news' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                            'gallery' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                            'logger' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'expected' => 3,
+            ],
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider getAllManualDirectoriesRespectsOnlyDirectoriesWithMetadataFileDataProvider
+     */
+    public function getAllManualDirectoriesRespectsOnlyDirectoriesWithMetadataFile(
+        array $allowedPathsRegexs,
+        array $excludedDirectories,
+        array $foldersStructure,
+        int $expectedDirectories
+    ): void
+    {
+        $vfsStream = vfsStream::setup('_docsFolder', null, $foldersStructure);
+        $subject = new DirectoryFinderService($allowedPathsRegexs, $excludedDirectories);
+
+        $finder = $subject->getAllManualDirectories($vfsStream->url());
+
+        self::assertEquals($expectedDirectories, iterator_count($finder));
+    }
+
+    public function getAllManualDirectoriesRespectsAllowedPathsDataProvider(): array
+    {
+        return [
+            'all paths are allowed (no selection)' => [
+                'allowedPathsRegexs' => [],
+                'excluded' => [],
+                [
+                    'c' => [
+                        'vendor' => [
+                            'news' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'm' => [
+                        'vendor' => [
+                            'gallery' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'p' => [
+                        'vendor' => [
+                            'logger' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'expected' => 3,
+            ],
+            '1 out of 3 paths are allowed' => [
+                'allowedPathsRegexs' => ['^c/'],
+                'excluded' => [],
+                [
+                    'c' => [
+                        'vendor' => [
+                            'news' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'm' => [
+                        'vendor' => [
+                            'gallery' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'p' => [
+                        'vendor' => [
+                            'logger' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'expected' => 1,
+            ],
+            '2 out of 3 paths are allowed' => [
+                'allowedPathsRegexs' => ['^c/', '^p/'],
+                'excluded' => [],
+                [
+                    'c' => [
+                        'vendor' => [
+                            'news' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'm' => [
+                        'vendor' => [
+                            'gallery' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'p' => [
+                        'vendor' => [
+                            'logger' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'expected' => 2,
+            ],
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider getAllManualDirectoriesRespectsAllowedPathsDataProvider
+     */
+    public function getAllManualDirectoriesRespectsAllowedPaths(
+        array $allowedPathsRegexs,
+        array $excludedDirectories,
+        array $foldersStructure,
+        int $expectedDirectories
+    ): void
+    {
+        $vfsStream = vfsStream::setup('_docsFolder', null, $foldersStructure);
+        $subject = new DirectoryFinderService($allowedPathsRegexs, $excludedDirectories);
+
+        $finder = $subject->getAllManualDirectories($vfsStream->url());
+
+        self::assertEquals($expectedDirectories, iterator_count($finder));
+    }
+
+    public function getDirectoriesByPathRespectsDirectoriesExclusionDataProvider(): array
+    {
+        return [
+            'all excluded' => [
+                'allowedPathsRegexs' => ['^p/'],
+                'excluded' => ['news', 'gallery', 'logger'],
+                [
+                    'p' => [
+                        'vendor' => [
+                            'news' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                            'gallery' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                            'logger' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'expected' => 0,
+            ],
+            'single excluded' => [
+                'allowedPathsRegexs' => ['^p/'],
+                'excluded' => ['news'],
+                [
+                    'p' => [
+                        'vendor' => [
+                            'news' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                            'gallery' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                            'logger' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'expected' => 2,
+            ],
+            'none excluded' => [
+                'allowedPathsRegexs' => ['^p/'],
+                'excluded' => [],
+                [
+                    'p' => [
+                        'vendor' => [
+                            'news' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                            'gallery' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                            'logger' => [
+                                'main' => [
+                                    'en-us' => [
+                                        'objects.inv.json' => ''
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'expected' => 3,
+            ],
+        ];
+    }
+
+    /**
+     * @test
+     * @dataProvider getDirectoriesByPathRespectsDirectoriesExclusionDataProvider
+     */
+    public function getDirectoriesByPathRespectsDirectoriesExclusion(
+        array $allowedPathsRegexs,
+        array $excludedDirectories,
+        array $foldersStructure,
+        int $expectedDirectories
+    ): void {
+        $vfsStream = vfsStream::setup('_docsFolder', null, $foldersStructure);
+        $subject = new DirectoryFinderService($allowedPathsRegexs, $excludedDirectories);
+
+        $finder = $subject->getDirectoriesByPath($vfsStream->url());
+
+        self::assertCount($expectedDirectories, $finder->directories());
     }
 }

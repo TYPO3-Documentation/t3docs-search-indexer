@@ -69,6 +69,9 @@ class Manual
     /**
      * TYPO3 Core Changelogs are treated as submanuals from typo3/cms-core manual
      *
+     * Changelogs from other packages are not treated as submanuals, because they
+     * can have different structure and will be threat as normal manual pages.
+     *
      * @return array<Manual>
      */
     public function getSubManuals(): array
