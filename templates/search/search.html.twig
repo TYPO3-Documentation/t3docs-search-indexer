@@ -68,38 +68,48 @@
         var searchCount = {{ results.totalResults }};
     </script>
     {% if results.totalResults > 0 %}
-    <h4>Showing hits <strong>{{ results.startingAtItem }} </strong>to <strong>{{ results.endingAtItem }}</strong> of <strong>{{ results.totalResults }}</strong></h4>
-    <div class="row">
-        <div class="col-md-8 col-lg-9 order-2 order-md-1 mb-4">
-            <ul class="list-group">
-                {% for hit in results.results %}
-                <a class="list-group-item list-group-item-action hit" href="https://docs.typo3.org/{{ hit.data.manual_slug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">
-                    <h4>
-                        {{ hit.data.snippet_title }}
-                        <small class="text-muted text-decoration-none">{{ hit.data.manual_title }}</small>
-                        <span class="badge badge-secondary text-decoration-none">{{ hit.data.manual_type }}</span>
-                        {% for version in  sortVersions(hit.data.manual_version, 'desc') %}
-                        <span class="badge badge-primary text-decoration-none">{{ version }}</span>
-                        {% endfor %}
-                    </h4>
-                    {% if hit.highlights and hit.highlights.snippet_content and hit.highlights.snippet_content[0] %}
-                        <p class="summary">{{ hit.highlights.snippet_content[0] | raw }}...</p>
-                    {% else %}
-                        <p class="summary">{{ hit.data.snippet_content|slice(0, 400) }}...</p>
-                    {% endif %}
-                </a>
-                {% endfor %}
-            </ul>
-        </div>
-        <div class="col-md-4 col-lg-3 order-1 order-md-2 mb-4">
-            <div class="wy-menuXX wy-menu-verticalXX" data-spy="affix" role="navigation" aria-label="main navigation">
-                <form action="{{ path('searchresult') }}" method="get" class="form">
-                <input type="hidden" name="q" value="{{ (q is defined) ? q : '' }}">
-                {% include 'partial/aggregations.html.twig' with {'aggregations': results.aggs, 'query': q} only %}
-                </form>
+        <h4>Showing hits <strong>{{ results.startingAtItem }} </strong>to <strong>{{ results.endingAtItem }}</strong> of <strong>{{ results.totalResults }}</strong></h4>
+        <div class="row">
+            <div class="col-md-8 col-lg-9 order-2 order-md-1 mb-4">
+                <ul class="list-group">
+                    {% for hit in results.results %}
+                        <li class="list-group-item list-group-item-action hit">
+                            <h4>
+                                <a class="text-dark" href="https://docs.typo3.org/{{ hit.data.manual_slug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ hit.data.snippet_title }}</a>
+                                <small class="text-muted text-decoration-none">{{ hit.data.manual_title }}</small>
+                                <span class="badge badge-secondary text-decoration-none">{{ hit.data.manual_type }}</span>
+                                {% set slugParts = hit.data.manual_slug|split('/') %}
+                                {% set versionInSlug = hit.data.manual_version|filter(item => item in slugParts) | first %}
+                                {% for version in sortVersions(hit.data.manual_version, 'desc') %}
+                                    {% if version != versionInSlug %}
+                                        {% set versionBadgeSlug = hit.data.manual_slug|replace({ (versionInSlug): version }) %}
+                                    {% else %}
+                                        {% set versionBadgeSlug = hit.data.manual_slug %}
+                                    {% endif %}
+                                    <a class="badge badge-primary text-decoration-none" href="https://docs.typo3.org/{{ versionBadgeSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ version }}</a>
+                                {% endfor %}
+                            </h4>
+                            <div class="position-relative">
+                                {% if hit.highlights and hit.highlights.snippet_content and hit.highlights.snippet_content[0] %}
+                                    <p class="summary">{{ hit.highlights.snippet_content[0] | raw }}...</p>
+                                {% else %}
+                                    <p class="summary">{{ hit.data.snippet_content|slice(0, 400) }}...</p>
+                                {% endif %}
+                                <a class="stretched-link" href="https://docs.typo3.org/{{ hit.data.manual_slug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}"></a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-md-4 col-lg-3 order-1 order-md-2 mb-4">
+                <div class="wy-menuXX wy-menu-verticalXX" data-spy="affix" role="navigation" aria-label="main navigation">
+                    <form action="{{ path('searchresult') }}" method="get" class="form">
+                        <input type="hidden" name="q" value="{{ (q is defined) ? q : '' }}">
+                        {% include 'partial/aggregations.html.twig' with {'aggregations': results.aggs, 'query': q} only %}
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
     {% else %}
         <h4>No search results found for: {{ q }}</h4>
     {% endif %}
