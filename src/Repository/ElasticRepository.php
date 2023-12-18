@@ -2,8 +2,10 @@
 
 namespace App\Repository;
 
+use App\Dto\Constraints;
 use App\Dto\Manual;
 use App\Dto\SearchDemand;
+use App\QueryBuilder\ElasticQueryBuilder;
 use Elastica\Aggregation\Terms;
 use Elastica\Client;
 use Elastica\Exception\InvalidException;
@@ -33,7 +35,7 @@ class ElasticRepository
 
     private readonly Client $elasticClient;
 
-    public function __construct()
+    public function __construct(private readonly ElasticQueryBuilder $elasticQueryBuilder)
     {
         $elasticConfig = $this->getElasticSearchConfig();
 
@@ -117,6 +119,28 @@ class ElasticRepository
     }
 
     /**
+     * @return int Number of deleted documents
+     */
+    public function deleteByConstraints(Constraints $constraints): int
+    {
+        $query = $this->elasticQueryBuilder->buildQuery($constraints);
+
+        // If a specific manual version is provided, the goal is to remove only this version from
+        // all associated snippets. In such cases, an update query is used instead of delete.
+        // This approach ensures that if a snippet has no other versions remaining after the
+        // removal of the specified one, the entire snippet is deleted. This deletion is
+        // accomplished by setting ctx.op to "delete" in the provided script.
+        if ($constraints->getVersion()) {
+            $script = new Script($this->getDeleteQueryScript(), ['manual_version' => $constraints->getVersion()], AbstractScript::LANG_PAINLESS);
+            $response = $this->elasticIndex->updateByQuery($query, $script, ['wait_for_completion' => true]);
+        } else {
+            $response = $this->elasticIndex->deleteByQuery($query, ['wait_for_completion' => true]);
+        }
+
+        return $response->getData()['total'];
+    }
+
+    /**
      * Provide elasticsearch script which removes version (provided in params) from a snippet
      * and if this is the last version assigned to snippet, it deletes the snippet from index (by setting ctx.op).
      *
@@ -126,7 +150,11 @@ class ElasticRepository
     {
         $script = <<<EOD
 if (ctx._source.manual_version.contains(params.manual_version)) {
-   ctx._source.manual_version.remove(ctx._source.manual_version.indexOf(params.manual_version));
+    for (int i=ctx._source.manual_version.length-1; i>=0; i--) {
+        if (ctx._source.manual_version[i] == params.manual_version) {
+            ctx._source.manual_version.remove(i);
+        }
+    }
 }
 if (ctx._source.manual_version.size() == 0) {
     ctx.op = "delete";

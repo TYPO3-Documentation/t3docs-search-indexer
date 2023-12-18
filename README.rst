@@ -89,6 +89,28 @@ Removing index to start fresh
 If you want to start with fresh Elasticsearch index locally, you can use chrome extensions
 like `Elasticvue` to clear/drop Elasticsearch index if necessary.
 
+Removing selected manuals from index
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you want to remove selected manuals from index, you can use chrome extensions or the command `docsearch:index:delete`.
+
+.. code-block:: bash
+
+  --manual-slug - slug of the manual to remove from index
+  --manual-version - version of the manual to remove from index
+  --manual-type - type of the manual to remove from index
+  --manual-language - language of the manual to remove from index
+
+execute it with:
+
+.. code-block:: bash
+
+  ddev exec ./bin/console docsearch:index:delete --manual-slug= --manual-version=9.5 --manual-type=Extension --manual-language=en-us
+
+.. note::
+   If you set the ``--manual-version`` option, manuals with this version will be updated by removing
+   selected version from the list, and if this version was the last one, only then the whole manual will be removed.
+
 Indexing Core changelog
 ^^^^^^^^^^^^^^^^^^^^^^^
 
