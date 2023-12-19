@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Dto;
 
+use App\Config\ManualType;
 use App\Dto\Manual;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
@@ -25,10 +26,11 @@ class ManualTest extends TestCase
 
         $this->assertSame('_docsFolder/c/typo3/cms-core/main/en-us/Changelog/5.14', $manual->getAbsolutePath());
         $this->assertSame('typo3/cms-core-changelog', $manual->getTitle());
-        $this->assertSame('Core changelog', $manual->getType());
+        $this->assertSame(ManualType::CoreChangelog->value, $manual->getType());
         $this->assertSame('5.14', $manual->getVersion());
         $this->assertSame('en-us', $manual->getLanguage());
         $this->assertSame('c/typo3/cms-core/main/en-us/Changelog/5.14', $manual->getSlug());
+        $this->assertSame([], $manual->getKeywords());
     }
 
     /**
@@ -44,10 +46,11 @@ class ManualTest extends TestCase
 
         $this->assertSame('_docsFolder/c/typo3/cms-core/12.4/en-us', $manual->getAbsolutePath());
         $this->assertSame('typo3/cms-core', $manual->getTitle());
-        $this->assertSame('System extension', $manual->getType());
+        $this->assertSame(ManualType::SystemExtension->value, $manual->getType());
         $this->assertSame('12.4', $manual->getVersion());
         $this->assertSame('en-us', $manual->getLanguage());
         $this->assertSame('c/typo3/cms-core/12.4/en-us', $manual->getSlug());
+        $this->assertSame(['cms-core'], $manual->getKeywords());
     }
 
     /**
@@ -68,11 +71,11 @@ class ManualTest extends TestCase
     public function  createFromFolderWithDifferentPathTypesDataProvider(): array
     {
         return [
-            ['_docsFolder/c/typo3/cms-core/main/en-us', 'System extension', false],
-            ['_docsFolder/p/vendor/package/1.0/pl-pl', 'Community extension', false],
-            ['_docsFolder/m/typo3/reference-coreapi/12.4/en-us', 'TYPO3 manual', false],
-            ['_docsFolder/c/typo3/cms-core/main/en-us/Changelog/9.4', 'Core changelog', true],
-            ['_docsFolder/h/typo3/docs-homepage/main/en-us', 'Docs Home Page', false]
+            ['_docsFolder/c/typo3/cms-core/main/en-us', ManualType::SystemExtension->value, false],
+            ['_docsFolder/p/vendor/package/1.0/pl-pl', ManualType::CommunityExtension->value, false],
+            ['_docsFolder/m/typo3/reference-coreapi/12.4/en-us', ManualType::Typo3Manual->value, false],
+            ['_docsFolder/c/typo3/cms-core/main/en-us/Changelog/9.4', ManualType::CoreChangelog->value, true],
+            ['_docsFolder/h/typo3/docs-homepage/main/en-us', ManualType::DocsHomePage->value, false]
         ];
     }
 
@@ -118,7 +121,7 @@ class ManualTest extends TestCase
             'manual',
         ]);
 
-        $manual = new Manual($filesRoot, 'title', 'type', 'main', 'en_us', 'slug');
+        $manual = new Manual($filesRoot, 'title', 'type', 'main', 'en_us', 'slug', []);
         $files = $manual->getFilesWithSections();
         self::assertCount(3, $files);
         $expectedFiles = [
@@ -137,7 +140,7 @@ class ManualTest extends TestCase
      */
     public function subManualsAreNotReturnForNonTypo3CmsCoreExtensions(): void
     {
-        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug');
+        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug', []);
 
         $result = $manual->getSubManuals();
 
@@ -150,7 +153,7 @@ class ManualTest extends TestCase
      */
     public function subManualsAreNotReturnForNonMainVersion(): void
     {
-        $manual = new Manual('/path', 'typo3/cms-core', 'type', '1.0', 'en-us', 'slug');
+        $manual = new Manual('/path', 'typo3/cms-core', 'type', '1.0', 'en-us', 'slug', []);
 
         $result = $manual->getSubManuals();
 
@@ -192,21 +195,29 @@ class ManualTest extends TestCase
         $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us');
         $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us');
 
-        $manual = new Manual($rootPath->url() . '/c/typo3/cms-core/main/en-us', 'typo3/cms-core', 'System extension', 'main', 'en-us', 'c/typo3/cms-core/main/en-us');
+        $manual = new Manual(
+            $rootPath->url() . '/c/typo3/cms-core/main/en-us',
+            'typo3/cms-core',
+            ManualType::SystemExtension->value,
+            'main',
+            'en-us',
+            'c/typo3/cms-core/main/en-us',
+            ['keyword 1', 'keyword 2']
+        );
         $subManuals = $manual->getSubManuals();
 
         self::assertCount(2, $subManuals);
 
         self::assertSame('vfs://_docsFolder/c/typo3/cms-core/main/en-us/Changelog/9.4', $subManuals[0]->getAbsolutePath());
         self::assertSame('typo3/cms-core-changelog', $subManuals[0]->getTitle());
-        self::assertSame('Core changelog', $subManuals[0]->getType());
+        self::assertSame(ManualType::CoreChangelog->value, $subManuals[0]->getType());
         self::assertSame('9.4', $subManuals[0]->getVersion());
         self::assertSame('en-us', $subManuals[0]->getLanguage());
         self::assertSame('c/typo3/cms-core/main/en-us/Changelog/9.4', $subManuals[0]->getSlug());
 
         self::assertSame('vfs://_docsFolder/c/typo3/cms-core/main/en-us/Changelog/10.4', $subManuals[1]->getAbsolutePath());
         self::assertSame('typo3/cms-core-changelog', $subManuals[1]->getTitle());
-        self::assertSame('Core changelog', $subManuals[1]->getType());
+        self::assertSame(ManualType::CoreChangelog->value, $subManuals[1]->getType());
         self::assertSame('10.4', $subManuals[1]->getVersion());
         self::assertSame('en-us', $subManuals[1]->getLanguage());
         self::assertSame('c/typo3/cms-core/main/en-us/Changelog/10.4', $subManuals[1]->getSlug());
@@ -217,7 +228,7 @@ class ManualTest extends TestCase
      */
     public function returnsAbsolutePath(): void
     {
-        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug');
+        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug', []);
         $this->assertEquals('/path', $manual->getAbsolutePath());
     }
 
@@ -226,7 +237,7 @@ class ManualTest extends TestCase
      */
     public function returnsTitle(): void
     {
-        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug');
+        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug', []);
         $this->assertEquals('Title', $manual->getTitle());
     }
 
@@ -235,7 +246,7 @@ class ManualTest extends TestCase
      */
     public function returnsType(): void
     {
-        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug');
+        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug', []);
         $this->assertEquals('type', $manual->getType());
     }
 
@@ -244,7 +255,7 @@ class ManualTest extends TestCase
      */
     public function returnsVersion(): void
     {
-        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug');
+        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug', []);
         $this->assertEquals('main', $manual->getVersion());
     }
 
@@ -253,7 +264,7 @@ class ManualTest extends TestCase
      */
     public function returnsLanguage(): void
     {
-        $manual = new Manual('SomePath', 'SomeTitle', 'SomeType', 'SomeVersion', 'SomeLanguage', 'SomeSlug');
+        $manual = new Manual('SomePath', 'SomeTitle', 'SomeType', 'SomeVersion', 'SomeLanguage', 'SomeSlug', []);
         $this->assertEquals('SomeLanguage', $manual->getLanguage());
     }
 
@@ -262,7 +273,16 @@ class ManualTest extends TestCase
      */
     public function returnsSlug(): void
     {
-        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug');
+        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug', []);
         $this->assertEquals('slug', $manual->getSlug());
+    }
+
+    /**
+     * @test
+     */
+    public function returnsKeywords(): void
+    {
+        $manual = new Manual('/path', 'Title', 'type', 'main', 'en-us', 'slug', ['keyword 1', 'keyword 2']);
+        $this->assertSame(['keyword 1', 'keyword 2'], $manual->getKeywords());
     }
 }
