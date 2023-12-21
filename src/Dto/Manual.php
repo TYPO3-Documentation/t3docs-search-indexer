@@ -2,6 +2,7 @@
 
 namespace App\Dto;
 
+use App\Config\ManualType;
 use Symfony\Component\Finder\Finder;
 
 class Manual
@@ -12,7 +13,8 @@ class Manual
         private readonly string $type,
         private readonly string $version,
         private readonly string $language,
-        private readonly string $slug
+        private readonly string $slug,
+        private readonly array $keywords
     ) {
     }
 
@@ -31,22 +33,21 @@ class Manual
             [$type, $vendor, $name, $version, $language] = $values;
         }
 
-        $map = [
-            'c' => 'System extension',
-            'p' => 'Community extension',
-            'm' => 'TYPO3 manual',
-            'changelog' => 'Core changelog',
-            'h' => 'Docs Home Page',
-        ];
+        $map = ManualType::getMap();
         $type = $map[$type] ?? $type;
 
+        $keywords = [];
+        if ($type === ManualType::SystemExtension->value || $type === ManualType::CommunityExtension->value) {
+            $keywords[] = $name;
+        }
         return new Manual(
             $folder,
             implode('/', [$vendor, $name]),
             $type,
             $version,
             $language,
-            implode('/', $values)
+            implode('/', $values),
+            $keywords
         );
     }
 
@@ -123,5 +124,10 @@ class Manual
     public function getSlug(): string
     {
         return $this->slug;
+    }
+
+    public function getKeywords(): array
+    {
+        return $this->keywords;
     }
 }

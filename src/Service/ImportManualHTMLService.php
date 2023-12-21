@@ -51,6 +51,7 @@ class ImportManualHTMLService
             $section['manual_version'] = $manual->getVersion();
             $section['manual_language'] = $manual->getLanguage();
             $section['manual_slug'] = $manual->getSlug();
+            $section['manual_keywords'] = $manual->getKeywords();
             $section['relative_url'] = $file->getRelativePathname();
             $section['content_hash'] = md5($section['snippet_title'] . $section['snippet_content']);
 

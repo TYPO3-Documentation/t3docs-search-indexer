@@ -54,6 +54,7 @@ class ImportManualHTMLServiceTest extends TestCase
         $manual->getLanguage()->willReturn('en-us');
         $manual->getSlug()->willReturn('slug');
         $manual->getFilesWithSections()->willReturn($finder->reveal());
+        $manual->getKeywords()->willReturn(['typo3', 'cms', 'core']);
         $manualRevealed = $manual->reveal();
 
         $repo = $this->prophesize(ElasticRepository::class);
@@ -102,6 +103,7 @@ class ImportManualHTMLServiceTest extends TestCase
             'manual_version' => 'main',
             'manual_language' => 'en-us',
             'manual_slug' => 'slug',
+            'manual_keywords' => ['typo3', 'cms', 'core'],
             'relative_url' => 'c/typo3/cms-core/main/en-us',
             'content_hash' => '718ab540920b06f925f6ef7a34d6a5c7',
         ])->shouldBeCalledTimes(1);
@@ -114,6 +116,7 @@ class ImportManualHTMLServiceTest extends TestCase
             'manual_version' => 'main',
             'manual_language' => 'en-us',
             'manual_slug' => 'slug',
+            'manual_keywords' => ['typo3', 'cms', 'core'],
             'relative_url' => 'c/typo3/cms-core/main/en-us',
             'content_hash' => 'a248b5d0798e30e7c9389b81b499c5d9',
         ])->shouldBeCalledTimes(1);

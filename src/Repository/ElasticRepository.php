@@ -12,6 +12,7 @@ use Elastica\Query;
 use Elastica\Script\AbstractScript;
 use Elastica\Script\Script;
 use Elastica\Util;
+use function Symfony\Component\String\u;
 
 class ElasticRepository
 {
@@ -193,16 +194,32 @@ EOD;
                     ],
                     'functions' => [
                         [
+                            'script_score' => [
+                                'script' => [
+                                    'source' => "int matchCount = 0; for (String term : params.terms) { if (doc['manual_keywords'].contains(term)) { matchCount++; } } return 10 * matchCount;",
+                                    'params' => [
+                                        'terms' => explode(' ', u($searchTerms)->trim()->toString())
+                                    ]
+                                ]
+                            ]
+                        ],
+                        [
                             'filter' => [
                                 // query matching core manual pages
-                                'terms' => ['manual_type' => ['System extension', 'TYPO3 manual', 'Core changelog']]
+                                'terms' => [
+                                    'manual_type' => [
+                                        \App\Config\ManualType::SystemExtension->value,
+                                        \App\Config\ManualType::Typo3Manual->value,
+                                        \App\Config\ManualType::CoreChangelog->value,
+                                    ],
+                                ],
                             ],
                             'weight' => 5
                         ],
                         [
                             'filter' => [
                                 // query matching recent version
-                                'terms' => ['manual_version' => ['main', '12.4', '11.5', '10.5']]
+                                'terms' => ['manual_version' => ['main', '12.4', '11.5']]
                             ],
                             'weight' => 5
                         ],
