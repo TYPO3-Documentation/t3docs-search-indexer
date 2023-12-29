@@ -33,3 +33,5 @@ snippet_content:
   analyzer: typo3_analyzer
 content_hash:
   type: keyword
+major_versions:
+  type: keyword

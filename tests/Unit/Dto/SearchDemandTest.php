@@ -69,7 +69,7 @@ class SearchDemandTest extends TestCase
                 'Document Type' => ['manual' => 'true'],
                 'Invalid Filter' => ['value' => 'true'],
                 'Language' => ['en-us' => 'true', 'de-de' => 'false'],
-                'Version' => ['12.4' => 'true', '11.5' => 'true'],
+                'Version' => ['12' => 'true', '11' => 'true'],
             ]]
         );
 
@@ -78,7 +78,7 @@ class SearchDemandTest extends TestCase
         $this->assertSame([
             'manual_type' => ['manual'],
             'manual_language' => ['en-us'],
-            'manual_version' => ['12.4', '11.5'],
+            'major_versions' => [12, 11],
         ], $searchDemand->getFilters());
     }
 
