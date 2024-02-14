@@ -3,42 +3,58 @@ name: docs-search
 on:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
 
-      - name: Cache Composer packages
+      - name: Setup Composer cache
         id: composer-cache
-        uses: actions/cache@v2
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Recover Composer caches
+        uses: actions/cache@v4
         with:
-          path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('composer.lock') }}
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock', '**/composer.json') }}
           restore-keys: |
-            ${{ runner.os }}-php-
+            ${{ runner.os }}-composer-
+
+      - name: Install Magallanes
+        run: |
+          composer global require "andres-montanez/magallanes" --no-progress --ansi
+          /home/runner/.composer/vendor/bin/mage version
+          mkdir -p ./.mage/logs
 
       - name: Install dependencies
         run: |
           export APP_ENV=prod
-          composer install --prefer-dist --no-progress --no-suggest --no-dev
+          composer install --prefer-dist --no-progress --no-interaction --no-dev --ansi
 
+      - name: Setup SSH Key
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh-auth.sock
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/deploy_rsa
+          chmod 0600 ~/.ssh/deploy_rsa
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add ~/.ssh/deploy_rsa
 
-      - name: SCP files to production system
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.DEPLOY_DOCS_HOST }}
-          username: ${{ secrets.DEPLOY_DOCS_USERNAME }}
-          key: ${{ secrets.DEPLOY_KEY }}
-          source: "vendor,public,src,templates,config,bin,composer.json"
-          debug: true
-          rm: true
-          strip_components: 0
-          tar_tmp_path: ${{ secrets.SEARCH_TMP_TARGET_PATH }}
-          target: ${{ secrets.SEARCH_TARGET_PATH }}
+      - name: Deploy
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh-auth.sock
+        run: |
+          /home/runner/.composer/vendor/bin/mage deploy main -vvv
