@@ -1,0 +1,38 @@
+magephp:
+  log_dir: ./.mage/logs
+  composer:
+    path: composer
+  exclude:
+    - ./.ddev
+    - ./.git
+    - ./.gitattributes
+    - ./.gitignore
+    - ./.github
+    - ./.mage
+    - ./.env
+    - ./.mage.yml
+    - ./var
+    - ./.php_cs.cache
+    - ./.php_cs.dist
+    - ./.phpunit.result.cache
+    - ./auth.json
+  environments:
+    main:
+      user: prod.docs.typo3.com
+      from: ./
+      host_path: /srv/vhosts/prod.docs.typo3.com/site/applications/search/mage
+      releases: 3
+      hosts:
+        - prod.docs.typo3.com
+      pre-deploy:
+        - exec: { cmd: "echo \"APP_ENV=prod\" >> .env" }
+        - composer/install: { flags: "--no-interaction --no-dev --optimize-autoloader --ansi" }
+      on-deploy:
+        - fs/link: { from: "../../../shared/var", to: "var" }
+        - fs/link: { from: "../../../shared/.env", to: ".env" }
+      on-release:
+      post-release:
+        - exec: { cmd: "bash ../../../cachetool/run.sh" }
+        - symfony/cache-clear: { env: 'prod' }
+        - symfony/cache-warmup: { env: 'prod' }
+      post-deploy:
