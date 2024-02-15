@@ -13,6 +13,11 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class SearchController extends AbstractController
 {
+    public function __construct(private readonly ElasticRepository $elasticRepository)
+    {
+    }
+
+
     /**
      * @return Response
      */
@@ -32,13 +37,12 @@ class SearchController extends AbstractController
         if ($request->query->get('q', '') === '') {
             return $this->redirectToRoute('index');
         }
-        $elasticRepository = new ElasticRepository();
         $searchDemand = SearchDemand::createFromRequest($request);
 
         return $this->render('search/search.html.twig', [
             'q' => $searchDemand->getQuery(),
             'filters' => $request->get('filters', []),
-            'results' => $elasticRepository->findByQuery($searchDemand),
+            'results' => $this->elasticRepository->findByQuery($searchDemand),
         ]);
     }
 
@@ -49,10 +53,9 @@ class SearchController extends AbstractController
     #[Route(path: '/suggest', name: 'suggest')]
     public function suggest(Request $request): Response
     {
-        $elasticRepository = new ElasticRepository();
         $searchDemand = SearchDemand::createFromRequest($request);
 
-        $results = $elasticRepository->suggest($searchDemand);
+        $results = $this->elasticRepository->suggest($searchDemand);
         $suggestions = [];
         foreach ($results['results'] as $result) {
             $hit = $result->getData();
