@@ -73,7 +73,12 @@ class ElasticRepository
         $urlFragment = str_replace('/', '-', $snippet['manual_title'] . '-' . $snippet['relative_url'] . '-' . $snippet['content_hash']);
         $documentId = $urlFragment . '-' . $snippet['fragment'];
 
-        $script = new Script('ctx._source.manual_version.add(params.manual_version)');
+        $scriptCode = <<<EOD
+if (!ctx._source.manual_version.contains(params.manual_version)) {
+    ctx._source.manual_version.add(params.manual_version);
+}
+EOD;
+        $script = new Script($scriptCode);
         $script->setParam('manual_version', $snippet['manual_version']);
         $snippet['manual_version'] = [$snippet['manual_version']];
         $script->setUpsert($snippet);
