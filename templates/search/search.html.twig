@@ -75,11 +75,12 @@
                     {% for hit in results.results %}
                         <li class="list-group-item list-group-item-action hit">
                             <h4>
-                                <a class="text-dark" href="https://docs.typo3.org/{{ hit.data.manual_slug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ hit.data.snippet_title }}</a>
-                                <small class="text-muted text-decoration-none">{{ hit.data.manual_title }}</small>
-                                <span class="badge badge-secondary text-decoration-none">{{ hit.data.manual_type }}</span>
                                 {% set slugParts = hit.data.manual_slug|split('/') %}
                                 {% set versionInSlug = hit.data.manual_version|filter(item => item in slugParts) | first %}
+                                {% set latestVersionSlug = hit.data.manual_slug|replace({ (versionInSlug): sortVersions(hit.data.manual_version, 'desc')|first }) %}
+                                <a class="text-dark" href="https://docs.typo3.org/{{ latestVersionSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ hit.data.snippet_title }}</a>
+                                <small class="text-muted text-decoration-none">{{ hit.data.manual_title }}</small>
+                                <span class="badge badge-secondary text-decoration-none">{{ hit.data.manual_type }}</span>
                                 {% for version in sortVersions(hit.data.manual_version, 'desc') %}
                                     {% if version != versionInSlug %}
                                         {% set versionBadgeSlug = hit.data.manual_slug|replace({ (versionInSlug): version }) %}
@@ -95,7 +96,7 @@
                                 {% else %}
                                     <p class="summary">{{ hit.data.snippet_content|slice(0, 400) }}...</p>
                                 {% endif %}
-                                <a class="stretched-link" href="https://docs.typo3.org/{{ hit.data.manual_slug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}"></a>
+                                <a class="stretched-link" href="https://docs.typo3.org/{{ latestVersionSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}"></a>
                             </div>
                         </li>
                     {% endfor %}
