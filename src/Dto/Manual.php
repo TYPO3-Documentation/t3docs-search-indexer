@@ -27,6 +27,14 @@ class Manual
             [$_, $vendor, $name, $__, $language, $type, $version] = $values;
             $type = \strtolower($type);
             $name .= '-' . $type;
+        } elseif (count($pathArray) >= 4 && array_slice($pathArray, -4, 1)[0] === ManualType::ExceptionReference->getKey()) {
+            // typo3 exceptions manuals have different structure than other manuals
+            // they are located in /typo3cms/exceptions/ folder, and we also ignore one other
+            // folder inside /typo3cms/ through services.yaml file and the docsearch.excluded_directories parameter
+            $values = array_slice($pathArray, -5, 5);
+            array_shift($values); // remove the Web part from the path
+            [$type, $name, $version, $language] = $values;
+            $vendor = 'typo3';
         } else {
             // e.g. "c/typo3/cms-workspaces/9.5/en-us"
             $values = array_slice($pathArray, -5, 5);
