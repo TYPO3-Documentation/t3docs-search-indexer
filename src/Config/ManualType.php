@@ -11,6 +11,7 @@ enum ManualType: string
     case Typo3Manual = 'TYPO3 manual';
     case CoreChangelog = 'Core changelog';
     case DocsHomePage = 'Docs Home Page';
+    case ExceptionReference = 'Exception Reference';
 
     public function getKey(): string
     {
@@ -20,6 +21,7 @@ enum ManualType: string
             self::Typo3Manual => 'm',
             self::CoreChangelog => 'changelog',
             self::DocsHomePage => 'h',
+            self::ExceptionReference => 'typo3cms',
         };
     }
 
@@ -31,6 +33,8 @@ enum ManualType: string
             'm' => self::Typo3Manual->value,
             'changelog' => self::CoreChangelog->value,
             'h' => self::DocsHomePage->value,
+            'other' => self::Typo3Manual->value,
+            'typo3cms' => self::ExceptionReference->value,
         ];
     }
 }

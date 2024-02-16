@@ -6,10 +6,12 @@ parameters:
                 - ^m/
                 - ^c/
                 - ^p/
+                - ^other/
+                - ^typo3cms/
+    # should be relative paths to the main folders we search in, see DirectoryFinderService
     docsearch.excluded_directories:
-                - other
                 - draft
-                - typo3cms/extensions
+                - extensions
     .container.dumper.inline_class_loader: true
     assets:
         css:
