@@ -19,7 +19,7 @@ readonly class SearchDemand
                 $filterMap = [
                     'Document Type' => 'manual_type',
                     'Language' => 'manual_language',
-                    'Version' => 'manual_version',
+                    'Version' => 'major_versions',
                 ];
                 if (!\array_key_exists($filter, $filterMap)) {
                     continue;

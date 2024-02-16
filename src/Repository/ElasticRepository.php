@@ -77,10 +77,19 @@ class ElasticRepository
 if (!ctx._source.manual_version.contains(params.manual_version)) {
     ctx._source.manual_version.add(params.manual_version);
 }
+if (!ctx._source.major_versions.contains(params.major_version)) {
+    ctx._source.major_versions.add(params.major_version);
+}
 EOD;
+        $version = $snippet['manual_version'];
+        $majorVersion = explode('.', $version)[0];
+
         $script = new Script($scriptCode);
-        $script->setParam('manual_version', $snippet['manual_version']);
-        $snippet['manual_version'] = [$snippet['manual_version']];
+        $script->setParam('manual_version', $version);
+        $script->setParam('major_version', $majorVersion);
+        $snippet['manual_version'] = [$version];
+        $snippet['major_versions'] = [$majorVersion];
+
         $script->setUpsert($snippet);
         $this->elasticIndex->getClient()->updateDocument($documentId, $script, $this->elasticIndex->getName());
     }
@@ -162,6 +171,20 @@ if (ctx._source.manual_version.contains(params.manual_version)) {
         }
     }
 }
+
+def majorVersionParam = params.manual_version.splitOnToken('.')[0];
+def hasOtherWithSameMajorVersion = false;
+for (def version : ctx._source.manual_version) {
+    def majorVersion = version.splitOnToken('.')[0];
+    if (majorVersion.equals(majorVersionParam)) {
+        hasOtherWithSameMajorVersion = true;
+        break;
+    }
+}
+if (!hasOtherWithSameMajorVersion && ctx._source.major_versions.contains(majorVersionParam)) {
+    ctx._source.major_versions.remove(ctx._source.major_versions.indexOf(majorVersionParam));
+}
+
 if (ctx._source.manual_version.size() == 0) {
     ctx.op = "delete";
 }
@@ -288,6 +311,7 @@ EOD;
 
         $elasticaResultSet = $search->search();
         $results = $elasticaResultSet->getResults();
+
         $maxScore = $elasticaResultSet->getMaxScore();
         $aggs = $elasticaResultSet->getAggregations();
         $aggs = $this->sortAggregations($aggs);
@@ -340,31 +364,14 @@ EOD;
         $trackerAggregation->setField('manual_title.raw');
         $catAggregation->addAggregation($trackerAggregation);
 
-        //        $status = new Terms('Status');
-        //        $status->setField('status.name');
-        //        $elasticaQuery->addAggregation($status);
-
-        //        $priority = new Terms('Priority');
-        //        $priority->setField('priority.name');
-        //        $elasticaQuery->addAggregation($priority);
-
         $language = new Terms('Language');
         $language->setField('manual_language');
         $elasticaQuery->addAggregation($language);
 
-        $t3ver = new Terms('Version');
-        $t3ver->setField('manual_version');
-        //        $t3ver->setSize(50);
-        $elasticaQuery->addAggregation($t3ver);
-
-        //
-        //        $targetver = new Terms('Target Version');
-        //        $targetver->setField('fixed_version.name');
-        //        $elasticaQuery->addAggregation($targetver);
-
-        //        $phpVer = new Terms('PHP Version');
-        //        $phpVer->setField('php_version');
-        //        $elasticaQuery->addAggregation($phpVer);
+        $majorVersionsAgg = new Terms('Version');
+        $majorVersionsAgg->setField('major_versions');
+        $majorVersionsAgg->setSize(10);
+        $elasticaQuery->addAggregation($majorVersionsAgg);
     }
 
     /**
@@ -374,9 +381,6 @@ EOD;
     {
         $numPages = ceil($this->totalHits / $this->perPage);
         $i = 0;
-        /*
-         *
-         */
         $maxPages = $numPages;
         if ($numPages > 15 && $currentPage <= 7) {
             $numPages = 15;
