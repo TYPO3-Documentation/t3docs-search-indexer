@@ -16,20 +16,16 @@ parameters:
     assets:
         css:
             header:
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/css/theme.css'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/css/webfonts.css'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/css/fontawesome.css'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/typo3-docs-theme/0.2.32/css/theme.css'
             footer:
         js:
             header:
+                -  'https://typo3.azureedge.net/typo3infrastructure/universe/dist/webcomponents-loader.js'
+                - 'https://typo3.azureedge.net/typo3infrastructure/universe/dist/typo3-universe.js'
             footer:
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/js/jquery.min.js'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/js/underscore.min.js'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/js/doctools.min.js'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/js/popper.min.js'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/js/bootstrap.min.js'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/js/autocomplete.min.js'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.9.0/js/theme.min.js'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/typo3-docs-theme/0.2.32/js/popper.min.js'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/typo3-docs-theme/0.2.32/js/bootstrap.min.js'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/typo3-docs-theme/0.2.32/js/theme.min.js'
 
 services:
     # default configuration for services in *this* file

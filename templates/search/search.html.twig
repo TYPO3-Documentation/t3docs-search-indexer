@@ -33,14 +33,12 @@
             display: block;
         }
         .aggregation-title-text {
-            font-size: 18px;
-            font-weight: bold;
         }
         .aggregation-body {
             padding-left: 20px;
         }
-        .custom-control-label,
-        .custom-control-input {
+        .form-check-label,
+        .form-check-input {
             cursor: pointer;
         }
         .page-item {
@@ -70,7 +68,7 @@
     {% if results.totalResults > 0 %}
         <h4>Showing hits <strong>{{ results.startingAtItem }} </strong>to <strong>{{ results.endingAtItem }}</strong> of <strong>{{ results.totalResults }}</strong></h4>
         <div class="row">
-            <div class="col-md-8 col-lg-9 order-2 order-md-1 mb-4">
+            <div class="{{ (searchScope is empty) ? 'col-md-8 col-lg-9 order-2 order-md-1 mb-4' : 'mb-4' }}">
                 <ul class="list-group">
                     {% for hit in results.results %}
                         <li class="list-group-item list-group-item-action hit">
@@ -79,15 +77,15 @@
                                 {% set versionInSlug = hit.data.manual_version|filter(item => item in slugParts) | first %}
                                 {% set latestVersionSlug = hit.data.manual_slug|replace({ (versionInSlug): sortVersions(hit.data.manual_version, 'desc')|first }) %}
                                 <a class="text-dark" href="https://docs.typo3.org/{{ latestVersionSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ hit.data.snippet_title }}</a>
-                                <small class="text-muted text-decoration-none">{{ hit.data.manual_title }}</small>
-                                <span class="badge badge-secondary text-decoration-none">{{ hit.data.manual_type }}</span>
+                                <small class="text-muted fw-normal">{{ hit.data.manual_title }}</small>
+                                <span class="badge bg-secondary">{{ hit.data.manual_type }}</span>
                                 {% for version in sortVersions(filterVersions(hit.data.manual_version), 'desc') %}
                                     {% if version != versionInSlug %}
                                         {% set versionBadgeSlug = hit.data.manual_slug|replace({ (versionInSlug): version }) %}
                                     {% else %}
                                         {% set versionBadgeSlug = hit.data.manual_slug %}
                                     {% endif %}
-                                    <a class="badge badge-primary text-decoration-none" href="https://docs.typo3.org/{{ versionBadgeSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ version }}</a>
+                                    <a class="badge bg-primary text-decoration-none" href="https://docs.typo3.org/{{ versionBadgeSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ version }}</a>
                                 {% endfor %}
                             </h4>
                             <div class="position-relative">
@@ -102,6 +100,7 @@
                     {% endfor %}
                 </ul>
             </div>
+            {% if searchScope is empty %}
             <div class="col-md-4 col-lg-3 order-1 order-md-2 mb-4">
                 <div class="wy-menuXX wy-menu-verticalXX" data-spy="affix" role="navigation" aria-label="main navigation">
                     <form action="{{ path('searchresult') }}" method="get" class="form">
@@ -110,9 +109,10 @@
                     </form>
                 </div>
             </div>
+            {% endif %}
         </div>
     {% else %}
         <h4>No search results found for: {{ q }}</h4>
     {% endif %}
-    {% include '/partial/paginator.html.twig' with {'result':results, 'arguments': {'q': q, 'filters': filters}} %}
+    {% include '/partial/paginator.html.twig' with {'result':results, 'arguments': {'q': q, 'scope': searchScope|striptags|escape, 'filters': filters}} %}
 {% endblock %}

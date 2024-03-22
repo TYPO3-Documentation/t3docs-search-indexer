@@ -19,15 +19,17 @@ class SearchDemandTest extends TestCase
         $request = Request::create(
             '/search',
             'GET',
-            ['q' => 'TCA', 'page' => '2', 'filters' => ['Document Type' => ['manual' => 'true']]]
+            ['q' => 'TCA', 'scope' => 'p/vendor/package/main/en-us', 'page' => '2', 'filters' => ['Document Type' => ['manual' => 'true']]]
         );
 
         $searchDemand = SearchDemand::createFromRequest($request);
 
         $this->assertSame('TCA', $searchDemand->getQuery());
+        $this->assertSame('p/vendor/package/main/en-us', $searchDemand->getScope());
         $this->assertSame(2, $searchDemand->getPage());
         $this->assertSame([
-            'manual_type' => ['manual']
+            'manual_type' => ['manual'],
+            'manual_slug' => ['p/vendor/package/main/en-us']
         ], $searchDemand->getFilters());
     }
 
@@ -41,6 +43,7 @@ class SearchDemandTest extends TestCase
         $searchDemand = SearchDemand::createFromRequest($request);
 
         $this->assertSame('', $searchDemand->getQuery());
+        $this->assertSame('', $searchDemand->getScope());
         $this->assertSame(1, $searchDemand->getPage());
         $this->assertSame([], $searchDemand->getFilters());
     }
@@ -92,6 +95,18 @@ class SearchDemandTest extends TestCase
         $searchDemand = SearchDemand::createFromRequest($request);
 
         $this->assertSame('test+query+%26+%22something+more%22', $searchDemand->getQuery());
+    }
+
+    /**
+     * @test
+     */
+    public function createFromRequestWithSpecialCharactersInScope(): void
+    {
+        $request = Request::create('/search', 'GET', ['scope' => 'p/news/news+%26+%22something+more%22/main/en-us']);
+
+        $searchDemand = SearchDemand::createFromRequest($request);
+
+        $this->assertSame('p/news/news+%26+%22something+more%22/main/en-us', $searchDemand->getScope());
     }
 
     /**

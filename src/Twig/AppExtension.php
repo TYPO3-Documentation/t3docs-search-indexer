@@ -69,9 +69,9 @@ class AppExtension extends AbstractExtension
         } else {
             $checked = '';
         }
-        return '<div class="custom-control custom-checkbox">'
-            . '<input type="checkbox" class="custom-control-input" id="' . $category . '-' . $index . '" name="filters[' . $category . '][' . $key . ']" ' . $checked . ' value="true" onchange="this.form.submit()">'
-            . '<label class="custom-control-label custom-control-label-hascount" for="' . $category . '-' . $index . '">'
+        return '<div class="form-check">'
+            . '<input type="checkbox" class="form-check-input" id="' . $category . '-' . $index . '" name="filters[' . $category . '][' . $key . ']" ' . $checked . ' value="true" onchange="this.form.submit()">'
+            . '<label class="form-check-label custom-control-label-hascount" for="' . $category . '-' . $index . '">'
             . '<span class="custom-control-label-title">' . $label . '</span> <span class="custom-control-label-count">(' . $docCount . ')</span>'
             . '</label>'
             . '</div>';
