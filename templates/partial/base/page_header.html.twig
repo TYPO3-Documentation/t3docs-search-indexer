@@ -1,20 +1,24 @@
 <div class="page-header">
     <div class="page-header-inner">
         <div class="row">
-            <div class="col-sm-6 col-lg-7">
+            <div class="col-sm-3 col-md-4 col-lg-6">
                 <a class="logo" href="/" title="TYPO3 Documentation">
                     <img alt="TYPO3 Logo" class="logo-image"
                          height="130" src="https://typo3.azureedge.net/typo3documentation/theme/sphinx_typo3_theme/4.5.1/img/typo3-logo.svg" width="484"/>
                 </a>
             </div>
-            <div class="col-sm-6 col-lg-5">
+            <div class="col-sm-9 col-md-8 col-lg-6">
                 <div role="search">
                     <form id="rtd-search-form" class="wy-form" action="{{ path('searchresult') }}" method="get">
                         <div class="input-group mb-3 mt-sm-3">
+                            <select class="form-select search__scope" id="searchscope" name="scope">
+                                <option value="">Search all</option>
+                                {% if searchScope is defined and searchScope is not empty %}
+                                    <option value="{{ searchScope|striptags|escape }}" selected="selected">Search current</option>
+                                {% endif %}
+                            </select>
                             <input type="text" class="form-control shadow-none" name="q" autocomplete="off" placeholder="Search in TYPO3 documentation" id="searchinput" value="{% if q is defined %}{{ q }}{% endif %}">
-                            <div class="input-group-append">
-                                <button class="btn btn-sm btn-primary" type="submit"><i class="fa fa-search"></i>&nbsp;Search</button>
-                            </div>
+                            <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i>&nbsp;<span class="d-none d-md-inline">Search</span></button>
                         </div>
                     </form>
                 </div>

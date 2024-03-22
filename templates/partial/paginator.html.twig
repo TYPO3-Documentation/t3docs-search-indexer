@@ -1,12 +1,13 @@
+{% set filteredArgumnets = arguments|filter(value => value != '') %}
 <ul class="pagination flex-wrap">
     {% for pageDesc, page in result.pagesToLinkTo %}
         {% if result.currentPage == page %}
                 <li class="page-item active">
-                    <a class="page-link"  href="{{ path('searchresult', arguments|merge({'page': page})) }}">{{ page }}</a>
+                    <a class="page-link"  href="{{ path('searchresult', filteredArgumnets|merge({'page': page})) }}">{{ page }}</a>
                 </li>
             {% else %}
                 <li class="page-item">
-                    <a class="page-link"  href="{{ path('searchresult', arguments|merge({'page': page})) }}">{{ page }}</a>
+                    <a class="page-link"  href="{{ path('searchresult', filteredArgumnets|merge({'page': page})) }}">{{ page }}</a>
                 </li>
         {% endif %}
     {% endfor %}

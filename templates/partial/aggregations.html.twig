@@ -1,10 +1,10 @@
 <div class="aggregations" id="aggregations" role="tablist">
     <div class="card">
         <div class="card-header p-0">
-            <h2 class="mb-0">
+            <h2 class="mb-0 d-grid">
                 <button
                         type="button"
-                        class="btn btn-link btn-block text-left pl-3 aggregations-toggle-body"
+                        class="btn text-primary aggregations-toggle-body"
                         data-text-hide="Hide filters"
                         data-text-show="Show filters"
                         onclick="document.getElementById('aggregations').classList.toggle('is-expanded')"
@@ -15,7 +15,7 @@
             {% for title, buckets in aggregations %}
                 <div class="aggregation">
                     <div class="aggregation-title" id="aggregation-title-{{ loop.index }}">
-                        <span class="aggregation-title-text">{{title}}</span>
+                        <span class="fs-4 fw-bold aggregation-title-text">{{title}}</span>
                     </div>
                     <div id="collapse-{{ loop.index }}" class="">
                         <div class="aggregation-body">
