@@ -76,7 +76,7 @@
                                 {% set slugParts = hit.data.manual_slug|split('/') %}
                                 {% set versionInSlug = hit.data.manual_version|filter(item => item in slugParts) | first %}
                                 {% set latestVersionSlug = hit.data.manual_slug|replace({ (versionInSlug): sortVersions(hit.data.manual_version, 'desc')|first }) %}
-                                <a class="text-dark" href="https://docs.typo3.org/{{ latestVersionSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ hit.data.snippet_title }}</a>
+                                <a class="text-dark" href="https://docs.typo3.org/{{ latestVersionSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ hit.data.snippet_title|raw }}</a>
                                 <small class="text-muted fw-normal">{{ hit.data.manual_title }}</small>
                                 <span class="badge bg-secondary">{{ hit.data.manual_type }}</span>
                                 {% for version in sortVersions(filterVersions(hit.data.manual_version), 'desc') %}
