@@ -67,6 +67,71 @@ class DirectoryFinderServiceTest extends TestCase
         self::assertCount(6, $subject->getAllManualDirectories($rootDir->url()));
     }
 
+    /**
+     * @test
+     * @see DirectoryFinderService::isNotIgnoredPath()
+     */
+    public function respectsIgnoredPats(): void
+    {
+        $subject = new DirectoryFinderService(['^m/', '^c/', '^p/'], []);
+
+        $rootDir = vfsStream::setup('_docsFolder', null, [
+            'c' => [
+                'typo3' => [
+                    'cms-core' => [
+                        '10.4' => [
+                            'en-us' => [
+                                'objects.inv.json' => ''
+                            ],
+                        ],
+                        '11.5' => [
+                            'en-us' => [
+                                'objects.inv.json' => ''
+                            ],
+                        ],
+                        'main' => [
+                            'en-us' => [
+                                'objects.inv.json' => ''
+                            ],
+                        ],
+                    ],
+                    'cms-form' => [
+                        '12.4' => [
+                            'en-us' => [
+                                'objects.inv.json' => ''
+                            ],
+                        ],
+                        'main' => [
+                            'en-us' => [
+                                'objects.inv.json' => ''
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'm' => [
+                'typo3' => [
+                    'reference-coreapi' => [
+                        '9.5' => [
+                            'en-us' => [
+                                'objects.inv.json' => ''
+                            ],
+                        ],
+                        'main' => [
+                            'en-us' => [
+                                'objects.inv.json' => ''
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        // since DirectoryFinderService::isNotIgnoredPath() should ignore all versions of typo3/cms-core
+        // except the main version, we should have 5 directories returned
+        self::assertCount(5, $subject->getAllManualDirectories($rootDir->url()));
+    }
+
     public function getAllManualDirectoriesRespectsOnlyDirectoriesWithMetadataFileDataProvider(): array
     {
         return [
