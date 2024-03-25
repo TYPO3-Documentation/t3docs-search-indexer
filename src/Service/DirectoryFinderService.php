@@ -51,13 +51,23 @@ class DirectoryFinderService
     {
         $self = $this;
         return static function (\SplFileInfo $file) use ($self) {
-            return $self->objectsFileExists($file->getPathname());
+            return $self->objectsFileExists($file->getPathname()) && $self->isNotIgnoredPath($file->getPathname());
         };
     }
 
     private function objectsFileExists(string $path): bool
     {
         return \file_exists($path . '/objects.inv') || \file_exists($path . '/objects.inv.json');
+    }
+
+    /**
+     * For c/typo3/cms-core/* we want to exclude anything other than c/typo3/cms-core/main
+     * Only manuals from `main` versions should be indexed as changelogs (according to the
+     * documentation team's decision)
+     */
+    private function isNotIgnoredPath(string $path): bool
+    {
+        return !str_contains($path, '/c/typo3/cms-core/') || str_contains($path, 'c/typo3/cms-core/main');
     }
 
     /**
