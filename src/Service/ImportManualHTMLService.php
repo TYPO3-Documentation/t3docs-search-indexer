@@ -36,6 +36,9 @@ class ImportManualHTMLService
         $this->dispatcher->dispatch(new ManualStart($files), ManualStart::NAME);
 
         foreach ($files as $file) {
+            if ($this->parser->checkIfMetaTagExistsInFile($file, 'x-typo3-indexer', 'noindex')) {
+                continue;
+            }
             $this->importSectionsFromFile($file, $manual);
             $this->dispatcher->dispatch(new ManualAdvance(), ManualAdvance::NAME);
         }

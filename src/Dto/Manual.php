@@ -67,7 +67,7 @@ class Manual
             ->in($this->getAbsolutePath())
             ->name('*.html')
             ->notName(['search.html', 'genindex.html', 'Targets.html', 'Quicklinks.html'])
-            ->notPath(['_buildinfo', '_images', '_panels_static', '_sources', '_static', 'singlehtml', 'Sitemap']);
+            ->notPath(['_buildinfo', '_images', '_panels_static', '_sources', '_static', 'singlehtml']);
 
         if ($this->getTitle() === 'typo3/cms-core') {
             $finder->notPath('Changelog');

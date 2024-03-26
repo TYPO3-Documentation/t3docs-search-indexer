@@ -9,6 +9,22 @@ class ParseDocumentationHTMLService
 {
     private bool $newRendering = true;
 
+    public function checkIfMetaTagExistsInFile(SplFileInfo $file, string $name, string $content = null): bool
+    {
+        $fileContent = $file->getContents();
+
+        $selector = sprintf('meta[name="%s"]', $name);
+
+        if ($content !== null) {
+            $selector .= sprintf('[content="%s"]', $content);
+        }
+
+        $crawler = new Crawler($fileContent);
+        $metaTags = $crawler->filter($selector);
+
+        return (bool) $metaTags->count();
+    }
+
     public function getSectionsFromFile(SplFileInfo $file): array
     {
         $fileContents = $file->getContents();
