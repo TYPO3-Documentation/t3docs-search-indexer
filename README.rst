@@ -119,3 +119,25 @@ Core changelog is treated as a "sub manual" of the core manual. To index it, jus
 To avoid duplicates search is indexing Core changelog only from "main" version/branch of the core documentation.
 E.g. when you run ``./bin/console docsearch:import c/typo3/cms-core/main/`` then the changelog for all versions will be indexed,
 but if you run `./bin/console docsearch:import c/typo3/cms-core/12.4/` the changelog will NOT be indexed.
+
+Excluded and ignored files and folders
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+There are several files and folders that are excluded from indexing by default.
+You can find them in the ``services.yml`` file in the ``docsearch`` section.
+
+If you want to exclude more files or folders, you can add them to the ``excluded_directories`` section.
+
+There are also specific places in the code where files or folders are ignored.
+
+Inside the ``Manual::getFilesWithSections()`` method, the Finder is configured to ignore several files and folders.
+In the same place if teh indexed packages is ``typo3/cms-core`` the ``Changelog`` folder is excluded from indexing,\
+as it wil be indexed as a part of the TYPO3 core manual (``see Manual::getSubManuals()`` for more details).
+
+Since the ``typo3/cms-core`` is a special package for core manuals, only the manuals from the ``main`` versions should be indexed.\
+TO achieve this the ``DirectoryFinderService::getFolderFilter() ... isNotIgnoredPath()`` method is used.
+It wil check if the processed directory is a ``/c/typo3/cms-core/'`` and if the version is not ``main``, the whole directory (other version) will be ignored.
+
+The ``ImportManualHTMLService::importSectionsFromManual()`` method will check if the file contains.\
+``<meta name="x-typo3-indexer" content="noindex">`` meta tag. If such tag exists inside the file, such file will be ignored.
+

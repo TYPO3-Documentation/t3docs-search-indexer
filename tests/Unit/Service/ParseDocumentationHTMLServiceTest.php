@@ -12,6 +12,54 @@ class ParseDocumentationHTMLServiceTest extends TestCase
 {
     use ProphecyTrait;
 
+    public function testMetaTagExistsByNameOnly(): void
+    {
+        $fileContent = '<meta name="x-typo3-indexer" content="index">';
+        $file = $this->prophesize(SplFileInfo::class);
+
+        $file->getContents()->willReturn($fileContent);
+        $subject = new ParseDocumentationHTMLService();
+        $result = $subject->checkIfMetaTagExistsInFile($file->reveal(), 'x-typo3-indexer');
+
+        $this->assertTrue($result);
+    }
+
+    public function testMetaTagExistsByNameAndContent(): void
+    {
+        $fileContent = '<meta name="x-typo3-indexer" content="noindex">';
+        $file = $this->prophesize(SplFileInfo::class);
+
+        $file->getContents()->willReturn($fileContent);
+        $subject = new ParseDocumentationHTMLService();
+        $result = $subject->checkIfMetaTagExistsInFile($file->reveal(), 'x-typo3-indexer', 'noindex');
+
+        $this->assertTrue($result);
+    }
+
+    public function testMetaTagDoesNotExistByName(): void
+    {
+        $fileContent = '<meta name="x-typo3-indexer" content="index">';
+        $file = $this->prophesize(SplFileInfo::class);
+        $file->getContents()->willReturn($fileContent);
+
+        $subject = new ParseDocumentationHTMLService();
+        $result = $subject->checkIfMetaTagExistsInFile($file->reveal(), 'x-typo3-version');
+
+        $this->assertFalse($result);
+    }
+
+    public function testMetaTagDoesNotExistByContent(): void
+    {
+        $fileContent = '<meta name="x-typo3-indexer" content="index">';
+        $file = $this->prophesize(SplFileInfo::class);
+        $file->getContents()->willReturn($fileContent);
+
+        $subject = new ParseDocumentationHTMLService();
+        $result = $subject->checkIfMetaTagExistsInFile($file->reveal(), 'x-typo3-indexer', 'noindex');
+
+        $this->assertFalse($result);
+    }
+
     /**
      * @test
      * @throws Exception
