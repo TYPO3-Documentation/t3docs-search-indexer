@@ -25,6 +25,25 @@ class ParseDocumentationHTMLService
         return (bool) $metaTags->count();
     }
 
+    public function getFileContentAsSingleSection(SplFileInfo $file): array
+    {
+        $allSections = $this->getSectionsFromFile($file);
+        $mergedSnippet = [];
+
+        foreach ($allSections as $index => $section) {
+            if ($index === 0) {
+                $mergedSnippet['fragment'] = $section['fragment'];
+                $mergedSnippet['snippet_title'] = $section['snippet_title'];
+                $mergedSnippet['snippet_content'] = $section['snippet_content'];
+            } else {
+                $mergedSnippet['snippet_content'] .= "\n" . $section['snippet_title'];
+                $mergedSnippet['snippet_content'] .= "\n" . $section['snippet_content'];
+            }
+        }
+
+        return $mergedSnippet;
+    }
+
     public function getSectionsFromFile(SplFileInfo $file): array
     {
         $fileContents = $file->getContents();

@@ -2,20 +2,23 @@
 
 namespace App\Service;
 
+use App\Config\ManualType;
 use App\Dto\Manual;
 use App\Event\ImportManual\ManualAdvance;
 use App\Event\ImportManual\ManualFinish;
 use App\Event\ImportManual\ManualStart;
 use App\Repository\ElasticRepository;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\SplFileInfo;
 
 class ImportManualHTMLService
 {
     public function __construct(
-        private readonly ElasticRepository $elasticRepository,
-        private readonly ParseDocumentationHTMLService $parser,
-        private readonly EventDispatcherInterface $dispatcher,
+        private ElasticRepository $elasticRepository,
+        private ParseDocumentationHTMLService $parser,
+        private EventDispatcherInterface $dispatcher,
+        private LoggerInterface $logger
     ) {
     }
 
@@ -48,7 +51,21 @@ class ImportManualHTMLService
 
     private function importSectionsFromFile(SplFileInfo $file, Manual $manual): void
     {
-        foreach ($this->parser->getSectionsFromFile($file) as $section) {
+        // for the core changelog, we need to treat the whole file as a single section
+        $sections = ($manual->getType() === ManualType::CoreChangelog->value)
+            ? [$this->parser->getFileContentAsSingleSection($file)]
+            : $this->parser->getSectionsFromFile($file);
+
+        foreach ($sections as $section) {
+            // if for some reason the documentation file does not contain a title or content, skip it
+            if (!isset($section['snippet_title']) && !isset($section['snippet_content'])) {
+                $this->logger->warning('Skipping section without title or content', [
+                    'manual' => $manual->getTitle(),
+                    'file' => $file->getPathname(),
+                ]);
+                continue;
+            }
+
             $section['manual_title'] = $manual->getTitle();
             $section['manual_type'] = $manual->getType();
             $section['manual_version'] = $manual->getVersion();
