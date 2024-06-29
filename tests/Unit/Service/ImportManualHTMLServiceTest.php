@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Service;
 
+use App\Config\ManualType;
 use App\Dto\Manual;
 use App\Event\ImportManual\ManualAdvance;
 use App\Event\ImportManual\ManualFinish;
@@ -12,10 +13,10 @@ use App\Service\ParseDocumentationHTMLService;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
-use Symfony\Contracts\EventDispatcher\Event;
 
 class ImportManualHTMLServiceTest extends TestCase
 {
@@ -32,7 +33,8 @@ class ImportManualHTMLServiceTest extends TestCase
         $subject = new ImportManualHTMLService(
             $repo->reveal(),
             $this->prophesize(ParseDocumentationHTMLService::class)->reveal(),
-            $this->prophesize(EventDispatcherInterface::class)->reveal()
+            $this->prophesize(EventDispatcherInterface::class)->reveal(),
+            $this->prophesize(LoggerInterface::class)->reveal(),
         );
 
         $repo->deleteByManual($manual)->shouldBeCalledTimes(1);
@@ -59,6 +61,7 @@ class ImportManualHTMLServiceTest extends TestCase
 
         $repo = $this->prophesize(ElasticRepository::class);
         $parser = $this->prophesize(ParseDocumentationHTMLService::class);
+        $logger = $this->prophesize(LoggerInterface::class);
 
         $file = $this->prophesize(SplFileInfo::class);
         $file->getRelativePathname()->willReturn('c/typo3/cms-core/main/en-us');
@@ -75,6 +78,7 @@ class ImportManualHTMLServiceTest extends TestCase
             'snippet_content' => 'Blog entries are simply pages with a special page type blog entry and can be created and edited via the well-known page module. Creating new entries is as simple as dragging a new entry into the page tree.'
         ];
 
+        $parser->checkIfMetaTagExistsInFile($fileRevealed, 'x-typo3-indexer', 'noindex')->willReturn(false);
         $parser->getSectionsFromFile($fileRevealed)->willReturn([$section1, $section2]);
         $finder->getIterator()->willReturn(new \ArrayIterator([$fileRevealed]));
 
@@ -92,7 +96,7 @@ class ImportManualHTMLServiceTest extends TestCase
             ->shouldBeCalled()
             ->willReturn($this->prophesize(ManualFinish::class)->reveal());
 
-        $subject = new ImportManualHTMLService($repo->reveal(), $parser->reveal(), $eventDispatcher->reveal());
+        $subject = new ImportManualHTMLService($repo->reveal(), $parser->reveal(), $eventDispatcher->reveal(), $logger->reveal());
 
         $repo->addOrUpdateDocument([
             'fragment' => 'features-and-basic-concept',
@@ -119,6 +123,122 @@ class ImportManualHTMLServiceTest extends TestCase
             'manual_keywords' => ['typo3', 'cms', 'core'],
             'relative_url' => 'c/typo3/cms-core/main/en-us',
             'content_hash' => 'a248b5d0798e30e7c9389b81b499c5d9',
+        ])->shouldBeCalledTimes(1);
+
+        $subject->importManual($manualRevealed);
+    }
+
+    /**
+     * @test
+     */
+    public function doNotImportManualWithNoIndexMetaTag(): void
+    {
+        $file = $this->prophesize(SplFileInfo::class);
+        $file->getRelativePathname()->willReturn('c/typo3/cms-core/main/en-us');
+        $fileRevealed = $file->reveal();
+
+        $finder = $this->prophesize(Finder::class);
+        $finder->getIterator()->willReturn(new \ArrayIterator([$fileRevealed]));
+
+        $manual = $this->prophesize(Manual::class);
+        $manual->getFilesWithSections()->willReturn($finder->reveal());
+        $manualRevealed = $manual->reveal();
+
+        $repo = $this->prophesize(ElasticRepository::class);
+        $parser = $this->prophesize(ParseDocumentationHTMLService::class);
+        $logger = $this->prophesize(LoggerInterface::class);
+
+        $parser->checkIfMetaTagExistsInFile($fileRevealed, 'x-typo3-indexer', 'noindex')->willReturn(true);
+
+        $eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
+        $eventDispatcher
+            ->dispatch(Argument::type(ManualStart::class), ManualStart::NAME)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->prophesize(ManualStart::class)->reveal());
+        $eventDispatcher
+            ->dispatch(Argument::type(ManualAdvance::class), ManualAdvance::NAME)
+            ->shouldNotBeCalled();
+        $eventDispatcher
+            ->dispatch(Argument::type(ManualFinish::class), ManualFinish::NAME)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->prophesize(ManualFinish::class)->reveal());
+
+        $subject = new ImportManualHTMLService($repo->reveal(), $parser->reveal(), $eventDispatcher->reveal(), $logger->reveal());
+        $subject->importManual($manualRevealed);
+    }
+
+    /**
+     * @test
+     */
+    public function changelogFileIsTreatedAsASingleSnippet(): void
+    {
+        $finder = $this->prophesize(Finder::class);
+
+        $manual = $this->prophesize(Manual::class);
+        $manual->getTitle()->willReturn('typo3/cms-core');
+        $manual->getType()->willReturn(ManualType::CoreChangelog->value);
+        $manual->getVersion()->willReturn('main');
+        $manual->getLanguage()->willReturn('en-us');
+        $manual->getSlug()->willReturn('slug');
+        $manual->getFilesWithSections()->willReturn($finder->reveal());
+        $manual->getKeywords()->willReturn(['typo3', 'cms', 'core']);
+        $manualRevealed = $manual->reveal();
+
+        $repo = $this->prophesize(ElasticRepository::class);
+        $parser = $this->prophesize(ParseDocumentationHTMLService::class);
+        $logger = $this->prophesize(LoggerInterface::class);
+
+        $file = $this->prophesize(SplFileInfo::class);
+        $file->getRelativePathname()->willReturn('c/typo3/cms-core/main/en-us');
+        $fileRevealed = $file->reveal();
+
+        $section1 = [
+            'fragment' => 'features-and-basic-concept',
+            'snippet_title' => 'Features and Basic Concept',
+            'snippet_content' => 'The main goal for this blog extension was to use TYPO3s core concepts and elements to provide a full-blown blog that users of TYPO3 can instantly understand and use.'
+        ];
+        $section2 = [
+            'fragment' => 'pages-as-blog-entries',
+            'snippet_title' => 'Pages as blog entries',
+            'snippet_content' => 'Blog entries are simply pages with a special page type blog entry and can be created and edited via the well-known page module. Creating new entries is as simple as dragging a new entry into the page tree.'
+        ];
+
+        $parser->checkIfMetaTagExistsInFile($fileRevealed, 'x-typo3-indexer', 'noindex')->willReturn(false);
+        $parser->getFileContentAsSingleSection($fileRevealed)->willReturn([
+            'fragment' => $section1['fragment'],
+            'snippet_title' => $section1['snippet_title'],
+            'snippet_content' => $section1['snippet_content'] . "\n" . $section2['snippet_title'] . "\n" . $section2['snippet_content'],
+        ]);
+        $finder->getIterator()->willReturn(new \ArrayIterator([$fileRevealed]));
+
+        $eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
+        $eventDispatcher
+            ->dispatch(Argument::type(ManualStart::class), ManualStart::NAME)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->prophesize(ManualStart::class)->reveal());
+        $eventDispatcher
+            ->dispatch(Argument::type(ManualAdvance::class), ManualAdvance::NAME)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->prophesize(ManualAdvance::class)->reveal());
+        $eventDispatcher
+            ->dispatch(Argument::type(ManualFinish::class), ManualFinish::NAME)
+            ->shouldBeCalledTimes(1)
+            ->willReturn($this->prophesize(ManualFinish::class)->reveal());
+
+        $subject = new ImportManualHTMLService($repo->reveal(), $parser->reveal(), $eventDispatcher->reveal(), $logger->reveal());
+
+        $repo->addOrUpdateDocument([
+            'fragment' => 'features-and-basic-concept',
+            'snippet_title' => 'Features and Basic Concept',
+            'snippet_content' => $section1['snippet_content'] . "\n" . $section2['snippet_title'] . "\n" . $section2['snippet_content'],
+            'manual_title' => 'typo3/cms-core',
+            'manual_type' => ManualType::CoreChangelog->value,
+            'manual_version' => 'main',
+            'manual_language' => 'en-us',
+            'manual_slug' => 'slug',
+            'manual_keywords' => ['typo3', 'cms', 'core'],
+            'relative_url' => 'c/typo3/cms-core/main/en-us',
+            'content_hash' => 'c03832e65c91c86548ca248379c885d6',
         ])->shouldBeCalledTimes(1);
 
         $subject->importManual($manualRevealed);

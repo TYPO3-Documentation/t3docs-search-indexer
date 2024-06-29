@@ -57,6 +57,8 @@ final class ManualTypeTest extends TestCase
             'm' => ManualType::Typo3Manual->value,
             'changelog' => ManualType::CoreChangelog->value,
             'h' => ManualType::DocsHomePage->value,
+            'other' => ManualType::Typo3Manual->value,
+            'typo3cms' => ManualType::ExceptionReference->value,
         ];
 
         $this->assertEquals($expectedMap, ManualType::getMap());

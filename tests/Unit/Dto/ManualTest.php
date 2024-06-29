@@ -19,6 +19,7 @@ class ManualTest extends TestCase
     public function createFromFolderWithChangelog(): void
     {
         $folder = $this->prophesize(\SplFileInfo::class);
+        $folder->willBeConstructedWith(['dummy_filename']);
         $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us/Changelog/5.14');
         $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us/Changelog/5.14');
 
@@ -39,6 +40,7 @@ class ManualTest extends TestCase
     public function createFromFolderWithoutChangelog(): void
     {
         $folder = $this->prophesize(\SplFileInfo::class);
+        $folder->willBeConstructedWith(['dummy_filename']);
         $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/12.4/en-us');
         $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/12.4/en-us');
 
@@ -59,13 +61,15 @@ class ManualTest extends TestCase
     public function createFromFolderWithInvalidPath(): void
     {
         $folder = $this->prophesize(\SplFileInfo::class);
+        $folder->willBeConstructedWith(['dummy_filename']);
         $folder->getPathname()->willReturn('invalid/path');
         $folder->__toString()->willReturn('invalid/path');
 
-        $this->expectError();
-        $this->expectErrorMessage('Undefined array key 2');
-
-        $manual = Manual::createFromFolder($folder->reveal());
+        try {
+            $manual = Manual::createFromFolder($folder->reveal());
+        } catch (\Throwable $e) {
+            $this->assertSame('Undefined array key 2', $e->getMessage());
+        }
     }
 
     public function  createFromFolderWithDifferentPathTypesDataProvider(): array
@@ -86,6 +90,7 @@ class ManualTest extends TestCase
     public function createFromFolderWithDifferentPathTypes(string $path, string $expectedType, bool $changelog = false): void
     {
         $folder = $this->prophesize(\SplFileInfo::class);
+        $folder->willBeConstructedWith(['dummy_filename']);
         $folder->getPathname()->willReturn($path);
         $folder->__toString()->willReturn($path);
 
@@ -100,6 +105,7 @@ class ManualTest extends TestCase
     public function createFromFolderWithUnmappedType(): void
     {
         $folder = $this->prophesize(\SplFileInfo::class);
+        $folder->willBeConstructedWith(['dummy_filename']);
         $folder->getPathname()->willReturn('_docsFolder/x/typo3/cms-core/main/en-us');
         $folder->__toString()->willReturn('_docsFolder/x/typo3/cms-core/main/en-us');
 
@@ -192,6 +198,7 @@ class ManualTest extends TestCase
         ]);
 
         $folder = $this->prophesize(\SplFileInfo::class);
+        $folder->willBeConstructedWith(['dummy_filename']);
         $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us');
         $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us');
 

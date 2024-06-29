@@ -18,7 +18,7 @@ class IndexCleanerTest extends TestCase
         return [
             'All options' => [
                 [
-                    '--manual-path' => 'm/typo3/reference-coreapi/12.4/en-us',
+                    '--manual-slug' => 'm/typo3/reference-coreapi/12.4/en-us',
                     '--manual-version' => '12.4',
                     '--manual-type' => 'TYPO3 Manual',
                     '--manual-language' => 'en-us'
@@ -27,13 +27,13 @@ class IndexCleanerTest extends TestCase
             ],
             'Some options' => [
                 [
-                    '--manual-path' => 'm/typo3/reference-coreapi/12.4/en-us',
+                    '--manual-slug' => 'm/typo3/reference-coreapi/12.4/en-us',
                     '--manual-type' => 'TYPO3 Manual',
                 ],
                 8
             ],
             'Only path' => [
-                ['--manual-path' => 'm/typo3/reference-coreapi/12.4/en-us'],
+                ['--manual-slug' => 'm/typo3/reference-coreapi/12.4/en-us'],
                 5
             ],
             'Only version' => [
