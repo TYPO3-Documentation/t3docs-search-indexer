@@ -10,10 +10,14 @@ use Elastica\Aggregation\Terms;
 use Elastica\Client;
 use Elastica\Exception\InvalidException;
 use Elastica\Index;
+use Elastica\Multi\Search as MultiSearch;
 use Elastica\Query;
+use Elastica\Result;
 use Elastica\Script\AbstractScript;
 use Elastica\Script\Script;
+use Elastica\Search;
 use Elastica\Util;
+
 use function Symfony\Component\String\u;
 
 class ElasticRepository
@@ -192,32 +196,119 @@ EOD;
         return \str_replace("\n", ' ', $script);
     }
 
-    public function suggest(SearchDemand $searchDemand): array
+    public function suggestScopes(SearchDemand $searchDemand): array
     {
-        $searchTerms = Util::escapeTerm($searchDemand->getQuery());
-        $query = [
-            'query' => [
-                'bool' => [
-                    'must' => [
-                        [
-                            'query_string' => [
-                                'query' => $searchTerms,
+        $suggestions = [];
+        $searchTerms = trim(Util::escapeTerm($searchDemand->getQuery()));
+
+        if ($searchTerms === '') {
+            return [];
+        }
+
+        $limitingScopes = [
+            'manual_vendor' => [
+                'removeIfField' => 'manual_package'
+            ],
+            'manual_package' => [],
+            'option' => [],
+            'manual_version' => []
+        ];
+
+        $multiSearch = new MultiSearch($this->elasticClient);
+
+        foreach ($limitingScopes as $scope => $settings) {
+            $searchValue = $searchDemand->getFilters()[$scope] ?? null;
+            $search = $searchTerms;
+
+            $removeFromSuggestions = ($searchDemand->getFilters()[$settings['removeIfField'] ?? ''] ?? null) !== null;
+
+            if ($searchValue !== null || $removeFromSuggestions) {
+                continue;
+            }
+
+            $singleQuery = [
+                'query' => [
+                    'bool' => [
+                        'must' => [
+                            'multi_match' => [
+                                'query' => $search,
+                                'fields' =>
+                                    [
+                                        $scope,
+                                        $scope . '.small_suggest',
+                                        $scope . '.large_suggest',
+                                    ],
+                                'operator' => 'AND',
                             ],
                         ],
                     ],
                 ],
-            ],
-        ];
+                'highlight' => [
+                    'fields' => [
+                        $scope . '.small_suggest' => (object)[],
+                        $scope . '.large_suggest' => (object)[],
+                    ],
+                ],
+                'aggs' => [
+                    $scope => [
+                        'terms' => [
+                            'field' => $scope,
+                            'size' => 5
+                        ],
+                    ],
+                ],
+                'fields' => [$scope],
+                '_source' => false,
+                'size' => 0
+            ];
 
-        $search = $this->elasticIndex->createSearch($query);
-        $search->getQuery()->setSize($this->perPage);
-        $search->getQuery()->setFrom(0);
+            $searchObj = new Search($this->elasticClient);
 
-        $elasticaResultSet = $search->search();
-        $results = $elasticaResultSet->getResults();
+            $filters = $searchDemand->getFilters();
+
+            if (!empty($filters)) {
+                foreach ($filters as $key => $value) {
+                    if (is_array($value)) {
+                        $singleQuery['query']['bool']['filter'][]['terms'][$key] = $value;
+                    } else {
+                        $singleQuery['query']['bool']['filter'][]['term'][$key] = $value;
+                    }
+                }
+            }
+
+            $searchObj
+                ->setQuery($singleQuery);
+
+            $multiSearch->addSearch($searchObj);
+            $suggestions[$scope] = [];
+        }
+
+        $results = $multiSearch->search();
+
+        $totalTime = 0;
+        $expectedAggregations = array_keys($suggestions);
+
+        foreach ($results as $resultSet) {
+            $totalTime += $resultSet->getTotalTime();
+
+            foreach ($resultSet->getAggregations() as $aggsName => $aggregation) {
+                if (!in_array($aggsName, $expectedAggregations, true)) {
+                    continue;
+                }
+
+                $suggestions[$aggsName] = array_column($aggregation['buckets'], 'key');
+
+                if ($searchDemand->areSuggestionsHighlighted()) {
+                    $suggestions[$aggsName] = array_map(static function ($value) use ($searchTerms) {
+                        return str_ireplace($searchTerms, '<em>' . $searchTerms . '</em>', $value);
+                    }, $suggestions[$aggsName]);
+                }
+            }
+        }
 
         return [
-            'results' => $results,
+            'time' => $totalTime,
+            'suggestions' => $suggestions
         ];
     }
 
@@ -227,79 +318,7 @@ EOD;
      */
     public function findByQuery(SearchDemand $searchDemand): array
     {
-        $searchTerms = Util::escapeTerm($searchDemand->getQuery());
-        $query = [
-            'query' => [
-                'function_score' => [
-                    'query' => [
-                        'bool' => [
-                            'must' => [
-                                [
-                                    'query_string' => [
-                                        'query' => $searchTerms,
-                                        'fields' => [
-                                            'page_title^10',
-                                            'snippet_title^20',
-                                            'snippet_content',
-                                            'manual_title'
-                                        ]
-                                    ],
-                                ],
-                            ],
-                        ],
-                    ],
-                    'functions' => [
-                        [
-                            'script_score' => [
-                                'script' => [
-                                    'source' => "int matchCount = 0; for (String term : params.terms) { if (doc['manual_keywords'].contains(term)) { matchCount++; } } return 10 * matchCount;",
-                                    'params' => [
-                                        'terms' => explode(' ', u($searchTerms)->trim()->toString())
-                                    ]
-                                ]
-                            ]
-                        ],
-                        [
-                            'filter' => [
-                                // query matching core manual pages
-                                'terms' => [
-                                    'manual_type' => [
-                                        \App\Config\ManualType::SystemExtension->value,
-                                        \App\Config\ManualType::Typo3Manual->value,
-                                        \App\Config\ManualType::CoreChangelog->value,
-                                    ],
-                                ],
-                            ],
-                            'weight' => 5
-                        ],
-                        [
-                            'filter' => [
-                                // query matching recent version
-                                'terms' => ['manual_version' => ['main', '12.4', '11.5']]
-                            ],
-                            'weight' => 5
-                        ],
-                    ],
-                    'score_mode' => 'sum',
-                    'boost_mode' => 'multiply'
-                ],
-            ],
-            'highlight' => [
-                'fields' => [
-                    'snippet_content' => [
-                        'fragment_size' => 400,
-                        'number_of_fragments' => 1
-                    ]
-                ],
-                'encoder' => 'html'
-            ]
-        ];
-        $filters = $searchDemand->getFilters();
-        if (!empty($filters)) {
-            foreach ($filters as $key => $value) {
-                $query['post_filter']['bool']['must'][] = ['terms' => [$key => $value]];
-            }
-        }
+        $query = $this->getDefaultSearchQuery($searchDemand);
 
         $currentPage = $searchDemand->getPage();
 
@@ -334,6 +353,24 @@ EOD;
             $out['endingAtItem'] = $this->totalHits;
         }
         return $out;
+    }
+
+    /**
+     * @return array{time: int, results: array<Result>}
+     * @throws InvalidException
+     */
+    public function searchDocumentsForSuggest(SearchDemand $searchDemand): array
+    {
+        $query = $this->getDefaultSearchQuery($searchDemand);
+
+        $search = $this->elasticIndex->createSearch($query);
+        $search->getQuery()->setSize(5);
+        $searchResults = $search->search();
+
+        return [
+            'time' => $searchResults->getTotalTime(),
+            'results' => $searchResults->getResults()
+        ];
     }
 
     private function sortAggregations($aggregations, $direction = 'asc'): array
@@ -405,6 +442,87 @@ EOD;
         }
 
         return $out;
+    }
+
+    private function getDefaultSearchQuery(SearchDemand $searchDemand): array
+    {
+        $searchTerms = Util::escapeTerm($searchDemand->getQuery());
+
+        $query = [
+            'query' => [
+                'function_score' => [
+                    'query' => [
+                        'bool' => [
+                            'must' => [
+                                [
+                                    'query_string' => [
+                                        'query' => $searchTerms,
+                                        'fields' => [
+                                            'page_title^10',
+                                            'snippet_title^20',
+                                            'snippet_content',
+                                            'manual_title'
+                                        ]
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    'functions' => [
+                        [
+                            'script_score' => [
+                                'script' => [
+                                    'source' => "int matchCount = 0; for (String term : params.terms) { if (doc['manual_keywords'].contains(term)) { matchCount++; } } return 10 * matchCount;",
+                                    'params' => [
+                                        'terms' => explode(' ', u($searchTerms)->trim()->toString())
+                                    ]
+                                ]
+                            ]
+                        ],
+                        [
+                            'filter' => [
+                                'term' => [
+                                    'is_core' => true
+                                ],
+                            ],
+                            'weight' => 5
+                        ],
+                        [
+                            'filter' => [
+                                // query matching recent version
+                                'terms' => ['manual_version' => ['main', '12.4', '11.5']]
+                            ],
+                            'weight' => 5
+                        ],
+                    ],
+                    'score_mode' => 'sum',
+                    'boost_mode' => 'multiply'
+                ],
+            ],
+            'highlight' => [
+                'fields' => [
+                    'snippet_content' => [
+                        'fragment_size' => 400,
+                        'number_of_fragments' => 1
+                    ]
+                ],
+                'encoder' => 'html'
+            ]
+        ];
+
+        $filters = $searchDemand->getFilters();
+
+        if (!empty($filters)) {
+            foreach ($filters as $key => $value) {
+                if (!is_array($value)) {
+                    $value = [$value];
+                }
+
+                $query['post_filter']['bool']['must'][] = ['terms' => [$key => $value]];
+            }
+        }
+
+        return $query;
     }
 
     private function getElasticSearchConfig(): array

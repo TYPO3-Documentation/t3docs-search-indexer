@@ -9,12 +9,14 @@ class Manual
 {
     public function __construct(
         private readonly string $absolutePath,
-        private readonly string $title,
+        private readonly string $name,
         private readonly string $type,
         private readonly string $version,
         private readonly string $language,
         private readonly string $slug,
-        private readonly array $keywords
+        private readonly array $keywords,
+        private readonly string $vendor = '',
+        private readonly bool $isCore = false,
     ) {
     }
 
@@ -43,19 +45,23 @@ class Manual
 
         $map = ManualType::getMap();
         $type = $map[$type] ?? $type;
+        $isCore = in_array($type, [ManualType::SystemExtension->value, ManualType::Typo3Manual->value, ManualType::CoreChangelog->value], true);
 
         $keywords = [];
         if ($type === ManualType::SystemExtension->value || $type === ManualType::CommunityExtension->value) {
             $keywords[] = $name;
         }
+
         return new Manual(
             $folder,
-            implode('/', [$vendor, $name]),
+            $name,
             $type,
             $version,
             $language,
             implode('/', $values),
-            $keywords
+            $keywords,
+            $vendor,
+            $isCore,
         );
     }
 
@@ -98,6 +104,7 @@ class Manual
             ->depth(0);
 
         $subManuals = [];
+
         foreach ($finder as $changelogFolder) {
             $subManuals[] = self::createFromFolder($changelogFolder, true);
         }
@@ -111,7 +118,32 @@ class Manual
 
     public function getTitle(): string
     {
-        return $this->title;
+        $titleParts = [];
+
+        if ($this->vendor !== '') {
+            $titleParts[] = $this->vendor;
+        }
+
+        if ($this->name !== '') {
+            $titleParts[] = $this->name;
+        }
+
+        return implode('/', $titleParts);
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getVendor(): string
+    {
+        return $this->vendor;
+    }
+
+    public function isCore(): bool
+    {
+        return $this->isCore ?? false;
     }
 
     public function getType(): string

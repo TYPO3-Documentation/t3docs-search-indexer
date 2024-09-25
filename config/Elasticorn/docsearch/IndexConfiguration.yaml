@@ -1,6 +1,17 @@
 number_of_shards: 4
 number_of_replicas: 1
 analysis:
+  tokenizer:
+    autocomplete_small_tokenizer:
+      type: ngram
+      min_gram: 1
+      max_gram: 2
+      token_chars: ["letter", "digit"]
+    autocomplete_large_tokenizer:
+      type: ngram
+      min_gram: 3
+      max_gram: 4
+      token_chars: ["letter", "digit"]
   filter:
     typo3_stemmer:
       type: stemmer
@@ -17,4 +28,16 @@ analysis:
         - asciifolding
         - typo3_filter
         - typo3_stemmer
+    typo3_autocomplete_small:
+      type: custom
+      tokenizer: autocomplete_small_tokenizer
+      filter:
+        - lowercase
+        - asciifolding
+    typo3_autocomplete_large:
+      type: custom
+      tokenizer: autocomplete_large_tokenizer
+      filter:
+        - lowercase
+        - asciifolding
 

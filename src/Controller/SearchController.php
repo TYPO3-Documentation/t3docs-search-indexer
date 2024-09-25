@@ -5,8 +5,8 @@ namespace App\Controller;
 use App\Dto\SearchDemand;
 use App\Repository\ElasticRepository;
 use Elastica\Exception\InvalidException;
-use JsonException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -36,6 +36,7 @@ class SearchController extends AbstractController
         if ($request->query->get('q', '') === '') {
             return $this->redirectToRoute('index');
         }
+
         $searchDemand = SearchDemand::createFromRequest($request);
 
         return $this->render('search/search.html.twig', [
@@ -48,29 +49,24 @@ class SearchController extends AbstractController
 
     /**
      * @return Response
-     * @throws InvalidException|JsonException
+     * @throws InvalidException
      */
     #[Route(path: '/suggest', name: 'suggest')]
     public function suggest(Request $request): Response
     {
         $searchDemand = SearchDemand::createFromRequest($request);
+        $jsonData = [
+            'demand' => $searchDemand->toArray(),
+            'suggest' => $this->elasticRepository->suggestScopes($searchDemand)
+        ];
 
-        $results = $this->elasticRepository->suggest($searchDemand);
-        $suggestions = [];
-        foreach ($results['results'] as $result) {
-            $hit = $result->getData();
-            $suggestions[] = [
-                'label' => $hit['snippet_title'],
-                'value' => $hit['snippet_title'],
-                'url' => 'https://docs.typo3.org/' . $hit['manual_slug'] . '/' . $hit['relative_url'] . '#' . $hit['fragment'],
-                'group' => $hit['manual_title'],
-                'content' => \mb_substr((string)$hit['snippet_content'], 0, 100)
-            ];
-        }
-        $jsonBody =  \json_encode($suggestions, JSON_THROW_ON_ERROR);
+        $searchResults = $this->elasticRepository->searchDocumentsForSuggest($searchDemand);
+        $jsonData['time'] = $searchResults['time'];
 
-        $response = new Response();
-        $response->setContent($jsonBody);
-        return $response;
+        $jsonData['results'] = array_map(static function ($result) {
+            return $result->getData();
+        }, $searchResults['results']);
+
+        return new JsonResponse($jsonData);
     }
 }

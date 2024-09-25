@@ -22,7 +22,7 @@ class ParseDocumentationHTMLService
         $crawler = new Crawler($fileContent);
         $metaTags = $crawler->filter($selector);
 
-        return (bool) $metaTags->count();
+        return (bool)$metaTags->count();
     }
 
     public function getFileContentAsSingleSection(SplFileInfo $file): array
@@ -71,16 +71,41 @@ class ParseDocumentationHTMLService
         $sectionPieces = [];
         foreach ($sections->filter($this->newRendering ? 'section' : 'div.section') as $section) {
             $foundHeadline = $this->findHeadline($section);
-            if ($foundHeadline === []) {
+            $option = $section->getAttribute('data-search-facet');
+
+            if ($foundHeadline === [] && $option === '') {
                 continue;
             }
 
-            $sectionPiece = [
-                'fragment' => $section->getAttribute('id'),
-                'snippet_title' => $foundHeadline['headlineText'],
-            ];
+            $title = $this->sanitizeTitle($section->getAttribute('data-search-title'));
 
-            $section->removeChild($foundHeadline['node']);
+            if ($option === '') {
+                $sectionPiece = [
+                    'fragment' => $section->getAttribute('id'),
+                    'snippet_title' => $title !== '' ? $title : $foundHeadline['headlineText'],
+                ];
+
+                $section->removeChild($foundHeadline['node']);
+            } else {
+                $id = $section->getAttribute('data-search-id');
+                $optionKeywords = json_decode($section->getAttribute('data-search-keywords'));
+
+                if ($id === '' || $title === '') {
+                    continue;
+                }
+
+                if (!is_array($optionKeywords)) {
+                    $optionKeywords = [$title];
+                }
+
+                $sectionPiece = [
+                    'fragment' => $id,
+                    'snippet_title' => $title,
+                    'option' => $option,
+                    'option_keywords' => $optionKeywords,
+                ];
+            }
+
             $section = $this->stripSubSectionsIfAny($section);
             $section = $this->stripCodeExamples($section);
 
@@ -99,7 +124,7 @@ class ParseDocumentationHTMLService
         $headline = $crawler->filter('h1, h2, h3, h4, h5, h6')->getNode(0);
 
         return $headline instanceof \DOMElement ? [
-            'headlineText' => filter_var(htmlspecialchars($headline->textContent), FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_HIGH),
+            'headlineText' => $this->sanitizeTitle($headline->textContent),
             'node' => $headline,
         ] : [];
     }
@@ -139,6 +164,11 @@ class ParseDocumentationHTMLService
             }
         }
         return $section;
+    }
+
+    private function sanitizeTitle(string $title)
+    {
+        return filter_var(htmlspecialchars($title), FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_HIGH);
     }
 
     private function sanitizeString(string $input): string

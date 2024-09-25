@@ -67,6 +67,9 @@ class ImportManualHTMLService
             }
 
             $section['manual_title'] = $manual->getTitle();
+            $section['manual_vendor'] = $manual->getVendor();
+            $section['manual_extension'] = $manual->getName();
+            $section['manual_package'] = implode('/', [$manual->getVendor(), $manual->getName()]);
             $section['manual_type'] = $manual->getType();
             $section['manual_version'] = $manual->getVersion();
             $section['manual_language'] = $manual->getLanguage();
@@ -74,6 +77,7 @@ class ImportManualHTMLService
             $section['manual_keywords'] = $manual->getKeywords();
             $section['relative_url'] = $file->getRelativePathname();
             $section['content_hash'] = md5($section['snippet_title'] . $section['snippet_content']);
+            $section['is_core'] = $manual->isCore();
 
             $this->elasticRepository->addOrUpdateDocument($section);
         }
