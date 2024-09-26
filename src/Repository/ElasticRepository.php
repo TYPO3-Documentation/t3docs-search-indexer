@@ -222,7 +222,7 @@ EOD;
 
             $removeFromSuggestions = ($searchDemand->getFilters()[$settings['removeIfField'] ?? ''] ?? null) !== null;
 
-            if ($searchValue !== null || $removeFromSuggestions) {
+            if ($searchValue === null || $removeFromSuggestions) {
                 continue;
             }
 
