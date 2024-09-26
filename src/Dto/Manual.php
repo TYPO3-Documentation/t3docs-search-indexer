@@ -143,7 +143,7 @@ class Manual
 
     public function isCore(): bool
     {
-        return $this->isCore ?? false;
+        return $this->isCore;
     }
 
     public function getType(): string
