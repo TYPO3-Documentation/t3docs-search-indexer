@@ -222,7 +222,7 @@ EOD;
 
             $removeFromSuggestions = ($searchDemand->getFilters()[$settings['removeIfField'] ?? ''] ?? null) !== null;
 
-            if ($searchValue === null || $removeFromSuggestions) {
+            if ($searchValue !== null || $removeFromSuggestions) {
                 continue;
             }
 
@@ -281,6 +281,13 @@ EOD;
 
             $multiSearch->addSearch($searchObj);
             $suggestions[$scope] = [];
+        }
+
+        if ($suggestions === []) {
+            return [
+                'time' => 0,
+                'suggestions' => []
+            ];
         }
 
         $results = $multiSearch->search();
