@@ -283,6 +283,10 @@ EOD;
             $suggestions[$scope] = [];
         }
 
+        if (count($suggestions) === count($limitingScopes)) {
+            unset($suggestions['manual_version']);
+        }
+
         if ($suggestions === []) {
             return [
                 'time' => 0,
@@ -303,7 +307,14 @@ EOD;
                     continue;
                 }
 
-                $suggestions[$aggsName] = array_column($aggregation['buckets'], 'key');
+                $suggestionsForCurrentQuery = array_column($aggregation['buckets'], 'key');
+
+                if ($suggestionsForCurrentQuery === []) {
+                    unset($suggestions[$aggsName]);
+                    continue;
+                }
+
+                $suggestions[$aggsName] = $suggestionsForCurrentQuery;
 
                 if ($searchDemand->areSuggestionsHighlighted()) {
                     $suggestions[$aggsName] = array_map(static function ($value) use ($searchTerms) {
