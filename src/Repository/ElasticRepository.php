@@ -423,6 +423,10 @@ EOD;
         $language->setField('manual_language');
         $elasticaQuery->addAggregation($language);
 
+        $option = new Terms('optionaggs');
+        $option->setField('option');
+        $elasticaQuery->addAggregation($option);
+
         $majorVersionsAgg = new Terms('Version');
         $majorVersionsAgg->setField('major_versions');
         $majorVersionsAgg->setSize(10);

@@ -2,6 +2,7 @@
 
 namespace App\Twig;
 
+use App\Config\Labels;
 use App\Helper\VersionFilter;
 use App\Helper\VersionSorter;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -13,7 +14,7 @@ class AppExtension extends AbstractExtension
 {
     public function __construct(
         private readonly ParameterBagInterface $parameterBag,
-        private readonly Environment $twigEnvironment
+        private readonly Environment $twigEnvironment,
     ) {
     }
 
@@ -23,6 +24,7 @@ class AppExtension extends AbstractExtension
             new TwigFunction('render_assets', $this->renderAssets(...)),
             new TwigFunction('render_single_asset', $this->renderSingleAsset(...)),
             new TwigFunction('aggregationBucket', $this->aggregationBucket(...), ['is_safe' => ['html']]),
+            new TwigFunction('getLabelForFilter', $this->getLabelForFilter(...)),
             new TwigFunction('sortVersions', VersionSorter::sortVersions(...)),
             new TwigFunction('filterVersions', VersionFilter::filterVersions(...)),
         ];
@@ -59,6 +61,7 @@ class AppExtension extends AbstractExtension
 
     public function aggregationBucket(string $category, string $index, array $bucket): string
     {
+        $category = strtolower($category);
         $label = $bucket['key_as_string'] ?? $bucket['key'];
         $docCount = $bucket['doc_count'];
         $key = $bucket['key'];
@@ -90,5 +93,10 @@ class AppExtension extends AbstractExtension
         }
 
         return $in;
+    }
+
+    private function getLabelForFilter(string $filter): string
+    {
+        return Labels::getLabelForEsColumn($filter);
     }
 }

@@ -15,7 +15,7 @@
             {% for title, buckets in aggregations %}
                 <div class="aggregation">
                     <div class="aggregation-title" id="aggregation-title-{{ loop.index }}">
-                        <span class="fs-4 fw-bold aggregation-title-text">{{title}}</span>
+                        <span class="fs-4 fw-bold aggregation-title-text">{{ getLabelForFilter(title) }}</span>
                     </div>
                     <div id="collapse-{{ loop.index }}" class="">
                         <div class="aggregation-body">
