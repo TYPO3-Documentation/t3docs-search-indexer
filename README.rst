@@ -141,3 +141,14 @@ It wil check if the processed directory is a ``/c/typo3/cms-core/'`` and if the 
 The ``ImportManualHTMLService::importSectionsFromManual()`` method will check if the file contains.\
 ``<meta name="x-typo3-indexer" content="noindex">`` meta tag. If such tag exists inside the file, such file will be ignored.
 
+Run a Kibana instance
+^^^^^^^^^^^^^^^^^^^^^
+
+To get a local Kibana connected to your local Elasticsearch instance, you can run this Docker command:
+
+.. code-block:: bash
+  docker run -it --rm --name kib01 --net ddev_default -p 5601:5601 -e ELASTICSEARCH_HOSTS='["http://elasticsearch:9200/"]' docker.elastic.co/kibana/kibana:7.17.1
+
+Then, open http://localhost:5601/app/dev_tools#/console to get the Dev Tools.
+
+
