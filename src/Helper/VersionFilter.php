@@ -32,7 +32,7 @@ class VersionFilter
         $highestVersions = [];
 
         foreach ($groupedVersions as $minorVersions) {
-            usort($minorVersions, static function($a, $b) {
+            usort($minorVersions, static function ($a, $b) {
                 return version_compare($b, $a);
             });
             $highestVersions[] = $minorVersions[0];

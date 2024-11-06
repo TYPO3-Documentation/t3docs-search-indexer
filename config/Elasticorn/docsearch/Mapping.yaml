@@ -10,11 +10,56 @@ manual_type:
   type: keyword
 manual_version:
   type: keyword
+  fields:
+    small_suggest:
+      type: search_as_you_type
+      analyzer: typo3_autocomplete_small
+    large_suggest:
+      type: search_as_you_type
+      analyzer: typo3_autocomplete_large
 manual_language:
   type: keyword
 manual_slug:
   type: keyword
 manual_keywords:
+  type: keyword
+manual_vendor:
+  type: keyword
+  fields:
+    small_suggest:
+      type: search_as_you_type
+      analyzer: typo3_autocomplete_small
+    large_suggest:
+      type: search_as_you_type
+      analyzer: typo3_autocomplete_large
+manual_package:
+  type: keyword
+  fields:
+    small_suggest:
+      type: search_as_you_type
+      analyzer: typo3_autocomplete_small
+    large_suggest:
+      type: search_as_you_type
+      analyzer: typo3_autocomplete_large
+manual_extension:
+  type: keyword
+  fields:
+    small_suggest:
+      type: search_as_you_type
+      analyzer: typo3_autocomplete_small
+    large_suggest:
+      type: search_as_you_type
+      analyzer: typo3_autocomplete_large
+option:
+  type: keyword
+  fields:
+    small_suggest:
+      type: search_as_you_type
+      analyzer: typo3_autocomplete_small
+    large_suggest:
+      type: search_as_you_type
+      analyzer: typo3_autocomplete_large
+option_keywords:
   type: keyword
 fragment:
   type: keyword
@@ -35,3 +80,5 @@ content_hash:
   type: keyword
 major_versions:
   type: keyword
+is_core:
+  type: boolean

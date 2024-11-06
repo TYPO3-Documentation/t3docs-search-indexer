@@ -5,7 +5,7 @@ php_version: "8.2"
 webserver_type: nginx-fpm
 router_http_port: "80"
 router_https_port: "443"
-xdebug_enabled: true
+xdebug_enabled: trueent: [ ]
 additional_hostnames: []
 additional_fqdns: []
 use_dns_when_possible: true
@@ -156,7 +156,7 @@ omit_containers: [db]
 # In this case the user must provide all such settings.
 
 # You can inject environment variables into the web container with:
-# web_environment: 
+# web_environment:
 # - SOMEENV=somevalue
 # - SOMEOTHERENV=someothervalue
 
@@ -167,7 +167,7 @@ omit_containers: [db]
 # For advanced users only!
 
 # provider: default # Currently "default", "pantheon", "ddev-live"
-# 
+#
 # Many ddev commands can be extended to run tasks before or after the
 # ddev command is executed, for example "post-start", "post-import-db",
 # "pre-composer", "post-composer"
