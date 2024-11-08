@@ -42,6 +42,15 @@
 
 </head>
 <body>
+{#needed to don't break the js#}
+<div class="d-none" id="generalModal" tabindex="-1"
+     aria-hidden="true">
+</div>
+{#needed to don't break the js#}
+<div class="d-none" id="linkReferenceModal" tabindex="-1"
+     aria-hidden="true">
+</div>
+
 <div class="page">
     {% block topbar %}
         {% include 'partial/base/topbar.html.twig' %}
@@ -53,7 +62,7 @@
 
     <div class="page-main">
         <div class="page-main-inner">
-            {% block navigation %}{% endblock %}
+            {% include 'partial/page_main/navigation.html.twig' %}
 
             <div class="page-main-content">
                 <div class="rst-content">
