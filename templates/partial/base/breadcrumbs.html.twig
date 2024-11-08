@@ -1,4 +1,3 @@
-{%- set howtoEditButton = getHowToEditLink() -%}
 {%- set gitHubLink = getEditOnGitHubLink() -%}
 {%- set reportIssueLink = getReportIssueLink() -%}
 
@@ -14,18 +13,12 @@
         {% endif %}
     </ol>
     <div class="breadcrumb-additions">
-        {%- if (reportIssueLink or howtoEditButton or gitHubLink) %}
+        {%- if (reportIssueLink or gitHubLink) %}
         {%- if reportIssueLink %}
         <a class="btn btn-sm btn-light" href="{{ reportIssueLink }}"
            id="btnReportIssue" rel="nofollow noopener" target="_blank">
             <span class="btn-icon"><i class="fas fa-bug"></i></span>
             <span class="btn-text">Report issue</span>
-        </a>
-        {% endif %}
-        {%- if howtoEditButton %}
-        <a class="btn btn-sm btn-light" href="{{ howtoEditButton }}" id="btnHowToEdit" rel="nofollow noopener" target="_blank">
-            <span class="btn-icon"><span class="fas fa-info-circle"></span></span>
-            <span class="btn-text">How to edit</span>
         </a>
         {% endif %}
         {%- if gitHubLink %}
