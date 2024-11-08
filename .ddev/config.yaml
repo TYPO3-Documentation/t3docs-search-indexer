@@ -5,7 +5,7 @@ php_version: "8.2"
 webserver_type: nginx-fpm
 router_http_port: "80"
 router_https_port: "443"
-xdebug_enabled: trueent: [ ]
+xdebug_enabled: false
 additional_hostnames: []
 additional_fqdns: []
 use_dns_when_possible: true
