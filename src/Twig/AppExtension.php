@@ -29,6 +29,9 @@ class AppExtension extends AbstractExtension
             new TwigFunction('aggregationBucket', $this->aggregationBucket(...), ['is_safe' => ['html']]),
             new TwigFunction('generateLinkWithout', $this->generateLinkWithout(...)),
             new TwigFunction('generateLinkWith', $this->generateLinkWith(...)),
+            new TwigFunction('getReportIssueLink', $this->getReportIssueLink(...)),
+            new TwigFunction('getHowToEditLink', $this->getHowToEditLink(...)),
+            new TwigFunction('getEditOnGitHubLink', $this->getEditOnGitHubLink(...)),
             new TwigFunction('getLabelForFilter', $this->getLabelForFilter(...)),
             new TwigFunction('sortVersions', VersionSorter::sortVersions(...)),
             new TwigFunction('filterVersions', VersionFilter::filterVersions(...)),
@@ -83,6 +86,21 @@ class AppExtension extends AbstractExtension
             . '<span class="custom-control-label-title">' . $label . '</span> <span class="custom-control-label-count">(' . $docCount . ')</span>'
             . '</label>'
             . '</div>';
+    }
+
+    public function getEditOnGitHubLink(): string
+    {
+        return 'https://github.com/TYPO3-Documentation/t3docs-search-indexer';
+    }
+
+    public function getHowToEditLink(): string
+    {
+        return 'https://docs.typo3.org/m/typo3/docs-how-to-document/main/en-us/Howto/EditOnGithub.html';
+    }
+
+    public function getReportIssueLink(): string
+    {
+        return 'https://github.com/TYPO3-Documentation/t3docs-search-indexer/issues/new';
     }
 
     /**

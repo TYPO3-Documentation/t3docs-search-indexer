@@ -1,0 +1,28 @@
+
+{%- set howtoEditButton = getHowToEditLink() -%}
+{%- set gitHubLink = getEditOnGitHubLink() -%}
+{%- set reportIssueLink = getReportIssueLink() -%}
+
+{%- if (reportIssueLink or howtoEditButton or gitHubLink)  %}
+<div aria-label="Meta navigation" class="main_menu  d-block d-lg-none" role="navigation">
+    <hr/>
+    <p class="caption">Contributors Corner</p>
+    <ul class="menu-level-1">
+        {%- if (reportIssueLink)  %}
+            <li><a href="{{ reportIssueLink }}" rel="nofollow noopener" target="_blank">
+                    Report issue
+                </a></li>
+        {% endif -%}
+        {%- if (howtoEditButton)  %}
+            <li><a href="{{ howtoEditButton }}" rel="nofollow noopener" target="_blank">
+                    How to edit
+            </a></li>
+        {% endif -%}
+        {%- if (gitHubLink)  %}
+            <li><a href="{{ gitHubLink }}" rel="nofollow noopener" target="_blank">
+                    Edit current document on GitHub
+            </a></li>
+        {% endif -%}
+    </ul>
+</div>
+{% endif -%}
