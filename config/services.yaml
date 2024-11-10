@@ -23,9 +23,9 @@ parameters:
                 -  'https://typo3.azureedge.net/typo3infrastructure/universe/dist/webcomponents-loader.js'
                 - 'https://typo3.azureedge.net/typo3infrastructure/universe/dist/typo3-universe.js'
             footer:
-                - 'https://typo3.azureedge.net/typo3documentation/theme/typo3-docs-theme/0.17.4/js/popper.min.js'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/typo3-docs-theme/0.17.4/js/bootstrap.min.js'
-                - 'https://typo3.azureedge.net/typo3documentation/theme/typo3-docs-theme/0.17.4/js/theme.min.js'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/typo3-docs-theme/0.18.0/js/popper.min.js'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/typo3-docs-theme/0.18.0/js/bootstrap.min.js'
+                - 'https://typo3.azureedge.net/typo3documentation/theme/typo3-docs-theme/0.18.0/js/theme.min.js'
 
 services:
     # default configuration for services in *this* file
