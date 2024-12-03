@@ -72,6 +72,10 @@ readonly class SearchDemand
         if ($scope) {
             $filters['manual_slug'] = [$scope];
         }
+        $vendor = trim(htmlspecialchars(strip_tags((string)$request->query->get('vendor'))), '/');
+        if ($vendor) {
+            $filters['manual_vendor'] = [$vendor];
+        }
 
         return new self($query, $scope, max($page, 1), $filters, $areSuggestionsHighlighted);
     }

@@ -209,9 +209,13 @@ EOD;
             'manual_vendor' => [
                 'removeIfField' => 'manual_package'
             ],
-            'manual_package' => [],
+            'manual_package' => [
+                'addTopHits' => true,
+            ],
             'option' => [],
-            'manual_version' => []
+            'manual_version' => [
+                'field' => 'major_versions'
+            ]
         ];
 
         $multiSearch = new MultiSearch($this->elasticClient);
@@ -234,6 +238,7 @@ EOD;
                                 'query' => $search,
                                 'fields' =>
                                     [
+                                        $settings['field'] ?? $scope,
                                         $scope,
                                         $scope . '.small_suggest',
                                         $scope . '.large_suggest',
@@ -252,15 +257,23 @@ EOD;
                 'aggs' => [
                     $scope => [
                         'terms' => [
-                            'field' => $scope,
+                            'field' => $settings['field'] ?? $scope,
                             'size' => 5
                         ],
                     ],
                 ],
-                'fields' => [$scope],
                 '_source' => false,
                 'size' => 0
             ];
+
+            if ($settings['addTopHits'] ?? false) {
+                $singleQuery['aggs'][$scope]['aggs']['manual_slug_hits'] = [
+                    'top_hits' => [
+                        'size' => 1,
+                        '_source' => ['manual_version', 'manual_slug']
+                    ]
+                ];
+            }
 
             $searchObj = new Search($this->elasticClient);
 
@@ -295,7 +308,6 @@ EOD;
         }
 
         $results = $multiSearch->search();
-
         $totalTime = 0;
         $expectedAggregations = array_keys($suggestions);
 
@@ -307,7 +319,26 @@ EOD;
                     continue;
                 }
 
-                $suggestionsForCurrentQuery = array_column($aggregation['buckets'], 'key');
+                $suggestionsForCurrentQuery = [];
+
+                foreach ($aggregation['buckets'] as $bucket) {
+                    // Add URL on manual_package
+                    if (isset($bucket['manual_slug_hits']['hits']['hits'][0])) {
+                        if ($searchDemand->getFilters()['major_versions'] ?? null) {
+                            $slug = $bucket['manual_slug_hits']['hits']['hits'][0]['_source']['manual_slug'];
+                        } else {
+                            $version = end($bucket['manual_slug_hits']['hits']['hits'][0]['_source']['manual_version']);
+                            $slug = str_replace($version, 'main', $bucket['manual_slug_hits']['hits']['hits'][0]['_source']['manual_slug']);
+                        }
+
+                        $suggestionsForCurrentQuery[] = [
+                            'slug' => $slug,
+                            'title' => $bucket['key'],
+                        ];
+                    } else {
+                        $suggestionsForCurrentQuery[] = ['title' => $bucket['key']];
+                    }
+                }
 
                 if ($suggestionsForCurrentQuery === []) {
                     unset($suggestions[$aggsName]);
@@ -476,7 +507,7 @@ EOD;
                     'query' => [
                         'bool' => [
                             'must' => [
-                                [
+                                $searchTerms ? [
                                     'query_string' => [
                                         'query' => $searchTerms,
                                         'fields' => [
@@ -486,7 +517,7 @@ EOD;
                                             'manual_title'
                                         ]
                                     ],
-                                ],
+                                ] : ['match_all' => new \stdClass()],
                             ],
                         ],
                     ],

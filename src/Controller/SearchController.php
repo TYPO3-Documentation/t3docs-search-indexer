@@ -33,11 +33,10 @@ class SearchController extends AbstractController
     #[Route(path: '/search', name: 'searchresult')]
     public function search(Request $request): Response
     {
-        if ($request->query->get('q', '') === '') {
+        $searchDemand = SearchDemand::createFromRequest($request);
+        if ($searchDemand->getQuery() === '' && empty($searchDemand->getFilters())) {
             return $this->redirectToRoute('index');
         }
-
-        $searchDemand = SearchDemand::createFromRequest($request);
 
         return $this->render('search/search.html.twig', [
             'q' => $searchDemand->getQuery(),
@@ -59,35 +58,25 @@ class SearchController extends AbstractController
         $searchResults = $this->elasticRepository->searchDocumentsForSuggest($searchDemand);
         $jsonData['time'] = $searchResults['time'];
 
-        $jsonData['results'] = array_map(static function ($result) {
-            return $result->getData();
-        }, $searchResults['results']);
+        $jsonData['results'] = array_map(static function ($result) use ($searchDemand) {
+            $data = $result->getData();
 
-        return new JsonResponse($jsonData);
-    }
+            // If a major version is seeked, replace the version in the slug to match.
+            if ($searchDemand->getFilters()['major_versions'] ?? null) {
+                $targetVersion = null;
+                foreach ($data['manual_version'] as $version) {
+                    if (str_starts_with($version, $searchDemand->getFilters()['major_versions'][0].'.')) {
+                        $targetVersion = $version;
+                        break;
+                    }
+                }
 
-    #[Route(path: '/suggest/list', name: 'suggest-list')]
-    public function suggestList(Request $request): Response
-    {
-        $searchDemand = SearchDemand::createFromRequest($request);
-        $jsonData = [
-            'demand' => $searchDemand->toArray(),
-            'suggest' => $this->elasticRepository->suggestScopes($searchDemand)
-        ];
+                if ($targetVersion) {
+                    $data['manual_slug'] = str_replace($data['manual_version'][0], $targetVersion, $data['manual_slug']);
+                }
+            }
 
-        return new JsonResponse($jsonData);
-    }
-
-    #[Route(path: '/suggest/results', name: 'suggest-results')]
-    public function suggestResults(Request $request): Response
-    {
-        $searchDemand = SearchDemand::createFromRequest($request);
-
-        $searchResults = $this->elasticRepository->searchDocumentsForSuggest($searchDemand);
-        $jsonData['time'] = $searchResults['time'];
-
-        $jsonData['results'] = array_map(static function ($result) {
-            return $result->getData();
+            return $data;
         }, $searchResults['results']);
 
         return new JsonResponse($jsonData);
