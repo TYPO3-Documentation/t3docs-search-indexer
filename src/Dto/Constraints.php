@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Dto;
 
+/**
+ * @deprecated Can be replaced by SearchDemand.
+ */
 readonly class Constraints
 {
     public function __construct(
