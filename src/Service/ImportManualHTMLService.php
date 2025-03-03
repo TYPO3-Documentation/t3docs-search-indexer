@@ -78,6 +78,7 @@ class ImportManualHTMLService
             $section['relative_url'] = $file->getRelativePathname();
             $section['content_hash'] = md5($section['snippet_title'] . $section['snippet_content']);
             $section['is_core'] = $manual->isCore();
+            $section['is_last_versions'] = $manual->isLastVersions();
 
             $this->elasticRepository->addOrUpdateDocument($section);
         }

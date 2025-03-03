@@ -78,6 +78,7 @@ class ElasticRepository
         $urlFragment = str_replace('/', '-', $snippet['manual_title'] . '-' . $snippet['relative_url'] . '-' . $snippet['content_hash']);
         $documentId = $urlFragment . '-' . $snippet['fragment'];
 
+        // Append versions in the array
         $scriptCode = <<<EOD
 if (!ctx._source.manual_version.contains(params.manual_version)) {
     ctx._source.manual_version.add(params.manual_version);
@@ -626,6 +627,24 @@ EOD;
                                         }, Typo3VersionMapping::getLtsVersions())
                                     ]
                                 ]
+                            ]
+                        ]],
+
+                        // it's not core, we want only the last two version
+                        // is_last_versions is a new field, so we test for existence before.
+                        ['bool' => [
+                            'filter' => [
+                                ['term' => ['is_core' => ['value' => false]]],
+                                ['bool' => [
+                                    'should' => [
+                                        ['bool' => [
+                                            'must_not' => [
+                                                ['exists' => ['field' => 'is_last_versions']]
+                                            ]
+                                        ]],
+                                        ['term' => ['is_last_versions' => ['value' => true]]]
+                                    ]
+                                ]],
                             ]
                         ]],
                     ]

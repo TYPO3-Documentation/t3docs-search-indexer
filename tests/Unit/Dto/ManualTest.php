@@ -22,6 +22,7 @@ class ManualTest extends TestCase
         $folder->willBeConstructedWith(['dummy_filename']);
         $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us/Changelog/5.14');
         $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us/Changelog/5.14');
+        $folder->getPath()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us/Changelog/5.14');
 
         $manual = Manual::createFromFolder($folder->reveal(), true);
 
@@ -43,6 +44,7 @@ class ManualTest extends TestCase
         $folder->willBeConstructedWith(['dummy_filename']);
         $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/12.4/en-us');
         $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/12.4/en-us');
+        $folder->getPath()->willReturn('_docsFolder/c/typo3/cms-core/12.4/en-us');
 
         $manual = Manual::createFromFolder($folder->reveal(), false);
 
@@ -64,6 +66,7 @@ class ManualTest extends TestCase
         $folder->willBeConstructedWith(['dummy_filename']);
         $folder->getPathname()->willReturn('invalid/path');
         $folder->__toString()->willReturn('invalid/path');
+        $folder->getPath()->willReturn('invalid/path');
 
         try {
             $manual = Manual::createFromFolder($folder->reveal());
@@ -93,6 +96,7 @@ class ManualTest extends TestCase
         $folder->willBeConstructedWith(['dummy_filename']);
         $folder->getPathname()->willReturn($path);
         $folder->__toString()->willReturn($path);
+        $folder->getPath()->willReturn($path);
 
         $manual = Manual::createFromFolder($folder->reveal(), $changelog);
 
@@ -108,6 +112,7 @@ class ManualTest extends TestCase
         $folder->willBeConstructedWith(['dummy_filename']);
         $folder->getPathname()->willReturn('_docsFolder/x/typo3/cms-core/main/en-us');
         $folder->__toString()->willReturn('_docsFolder/x/typo3/cms-core/main/en-us');
+        $folder->getPath()->willReturn('_docsFolder/x/typo3/cms-core/main/en-us');
 
         $manual = Manual::createFromFolder($folder->reveal());
 
@@ -201,6 +206,7 @@ class ManualTest extends TestCase
         $folder->willBeConstructedWith(['dummy_filename']);
         $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us');
         $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us');
+        $folder->getPath()->willReturn('_docsFolder/c/typo3/cms-core/main/en-us');
 
         $manual = new Manual(
             $rootPath->url() . '/c/typo3/cms-core/main/en-us',

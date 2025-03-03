@@ -82,3 +82,5 @@ major_versions:
   type: keyword
 is_core:
   type: boolean
+is_last_versions:
+  type: boolean
