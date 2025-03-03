@@ -549,11 +549,20 @@ EOD;
                         ],
                         [
                             'filter' => [
-                                // query matching recent version
+                                // query matching LTS versions
                                 'terms' => [
                                     'manual_version' => array_map(function (Typo3VersionMapping $version) {
                                         return $version->getVersion();
-                                    }, $boostedVersions)
+                                    }, Typo3VersionMapping::getLtsVersions())
+                                ]
+                            ],
+                            'weight' => 5
+                        ],
+                        [
+                            'filter' => [
+                                // query matching Main
+                                'term' => [
+                                    'manual_version' => Typo3VersionMapping::Dev->getVersion()
                                 ]
                             ],
                             'weight' => 5
