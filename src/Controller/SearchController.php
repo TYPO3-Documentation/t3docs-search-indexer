@@ -65,7 +65,7 @@ class SearchController extends AbstractController
             if ($searchDemand->getFilters()['major_versions'] ?? null) {
                 $targetVersion = null;
                 foreach ($data['manual_version'] as $version) {
-                    if (str_starts_with($version, $searchDemand->getFilters()['major_versions'][0].'.')) {
+                    if (str_starts_with($version, $searchDemand->getFilters()['major_versions'][0] . '.')) {
                         $targetVersion = $version;
                         break;
                     }

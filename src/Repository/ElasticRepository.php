@@ -19,6 +19,7 @@ use Elastica\Search;
 use Elastica\Util;
 
 use function Symfony\Component\String\u;
+use T3Docs\VersionHandling\Typo3VersionMapping;
 
 class ElasticRepository
 {
@@ -501,6 +502,10 @@ EOD;
     {
         $searchTerms = Util::escapeTerm($searchDemand->getQuery());
 
+        // 2 LTS + Main
+        $ltsVersions = Typo3VersionMapping::getLtsVersions();
+        $ltsVersions[] = Typo3VersionMapping::Dev;
+
         $query = [
             'query' => [
                 'function_score' => [
@@ -543,7 +548,11 @@ EOD;
                         [
                             'filter' => [
                                 // query matching recent version
-                                'terms' => ['manual_version' => ['main', '12.4', '11.5']]
+                                'terms' => [
+                                    'manual_version' => array_map(function (Typo3VersionMapping $version) {
+                                        return $version->getVersion();
+                                    }, $ltsVersions)
+                                ]
                             ],
                             'weight' => 5
                         ],

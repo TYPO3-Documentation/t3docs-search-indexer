@@ -72,7 +72,7 @@ class ManualTest extends TestCase
         }
     }
 
-    public function  createFromFolderWithDifferentPathTypesDataProvider(): array
+    public function createFromFolderWithDifferentPathTypesDataProvider(): array
     {
         return [
             ['_docsFolder/c/typo3/cms-core/main/en-us', ManualType::SystemExtension->value, false],

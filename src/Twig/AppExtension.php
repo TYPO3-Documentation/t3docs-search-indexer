@@ -150,7 +150,6 @@ class AppExtension extends AbstractExtension
         return $this->urlGenerator->generate('search-with-suggest', $filters);
     }
 
-
     /**
      * Generates a frontend link to be used in Twig with the current demand filters, including a specific value
      * in the specified filter

@@ -3,7 +3,6 @@
 namespace App\Tests\Unit\Controller;
 
 use App\Controller\SearchController;
-use App\Dto\SearchDemand;
 use App\Repository\ElasticRepository;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -89,7 +88,7 @@ class SearchControllerTest extends TestCase
 
         $this->view->render(
             Argument::any(),
-            Argument::that(fn(array $variables) => isset($variables['results']) && $variables['results'] === $searchResults)
+            Argument::that(fn (array $variables) => isset($variables['results']) && $variables['results'] === $searchResults)
         )->shouldBeCalledOnce();
 
         $subject->search($request->reveal());

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "189fde76c0145400072eb8b5e0e66d4e",
+    "content-hash": "d3ec91ad80af831fae79bf2159995a41",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -3873,6 +3873,37 @@
             "time": "2023-11-06T11:00:25+00:00"
         },
         {
+            "name": "t3docs/typo3-version-handling",
+            "version": "0.23.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/TYPO3-Documentation/t3docs-typo3-version-handling.git",
+                "reference": "e717116172e0f70b7605d38b272b2bc43cea03f6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/TYPO3-Documentation/t3docs-typo3-version-handling/zipball/e717116172e0f70b7605d38b272b2bc43cea03f6",
+                "reference": "e717116172e0f70b7605d38b272b2bc43cea03f6",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "T3Docs\\VersionHandling\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Version Handling for TYPO3 Documentation",
+            "support": {
+                "issues": "https://github.com/TYPO3-Documentation/t3docs-typo3-version-handling/issues",
+                "source": "https://github.com/TYPO3-Documentation/t3docs-typo3-version-handling/tree/0.23.2"
+            },
+            "time": "2024-12-18T10:51:53+00:00"
+        },
+        {
             "name": "twig/twig",
             "version": "v3.8.0",
             "source": {
@@ -6922,7 +6953,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
@@ -6931,6 +6962,6 @@
         "ext-iconv": "*",
         "ext-json": "*"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }

@@ -35,6 +35,7 @@ if (PHP_SAPI !== 'cli') {
 // Exclude some directories that are excluded by Git anyway to speed up the sniffing
 $finder = (new PhpCsFixer\Finder())
     ->exclude('vendor')
+    ->exclude('var')
     ->exclude('typo3conf')
     ->exclude('typo3temp')
     ->exclude('typo3/sysext/core/Tests/Acceptance/Support/_generated')
@@ -89,7 +90,7 @@ return (new PhpCsFixer\Config())
         'ordered_imports' => true,
         'php_unit_construct' => ['assertions' => ['assertEquals', 'assertSame', 'assertNotEquals', 'assertNotSame']],
         'php_unit_mock_short_will_return' => true,
-        'php_unit_test_case_static_method_calls' => ['call_type' => 'self'],
+        'php_unit_test_case_static_method_calls' => false,
         'phpdoc_no_access' => true,
         'phpdoc_no_empty_return' => true,
         'phpdoc_no_package' => true,

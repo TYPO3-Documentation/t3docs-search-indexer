@@ -597,7 +597,7 @@ elements."
             ],
         ];
     }
-    
+
     public function testGetFileContentAsSingleSection(): void
     {
         $fileContent = $this->getFixtureFileContents('ReturnsSectionsFromFile', 'MarkupWithSubSections');
@@ -629,7 +629,7 @@ elements."
                 'Migration',
                 'Switch to a Symfony Command or provide a custom CLI entry point.',
             ]),
-        ],$result);
+        ], $result);
     }
 
     /**
@@ -646,7 +646,7 @@ elements."
         ]);
 
         if (!file_exists($fixtureFile)) {
-            throw new Exception("Fixture file not found: " . $fixtureFile);
+            throw new Exception('Fixture file not found: ' . $fixtureFile);
         }
 
         return file_get_contents($fixtureFile);

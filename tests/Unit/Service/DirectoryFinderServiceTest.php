@@ -238,8 +238,7 @@ class DirectoryFinderServiceTest extends TestCase
         array $excludedDirectories,
         array $foldersStructure,
         int $expectedDirectories
-    ): void
-    {
+    ): void {
         $vfsStream = vfsStream::setup('_docsFolder', null, $foldersStructure);
         $subject = new DirectoryFinderService($allowedPathsRegexs, $excludedDirectories);
 
@@ -383,8 +382,7 @@ class DirectoryFinderServiceTest extends TestCase
         array $excludedDirectories,
         array $foldersStructure,
         int $expectedDirectories
-    ): void
-    {
+    ): void {
         $vfsStream = vfsStream::setup('_docsFolder', null, $foldersStructure);
         $subject = new DirectoryFinderService($allowedPathsRegexs, $excludedDirectories);
 
