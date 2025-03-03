@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Config\ManualType;
 use App\Dto\Constraints;
 use App\Dto\Manual;
 use App\Dto\SearchDemand;
@@ -597,24 +598,35 @@ EOD;
                                     ]
                                 ],
                                 // Or it has the version requested.
-                                ['terms' => [$key => $value]]
+                                ['terms' => [$key => $value]],
+                                // Or it's a changelog.
+                                ['term' => ['manual_type' => ['value' => ManualType::CoreChangelog->value]]]
                             ]
                         ]
                     ];
                     $query['post_filter']['bool']['must'][] = $boolVersion;
+
+                    // Also boost on the main results
+                    $query['query']['function_score']['functions'][] = [
+                        'filter' => ['terms' => [$key => $value]],
+                        'weight' => 10
+                    ];
                 } else {
                     $query['post_filter']['bool']['must'][] = ['terms' => [$key => $value]];
                 }
             }
         }
 
-        // There was no versioning filter - so we force only LTS for core packages.
+        // There was no versioning filter - so we force latest versions.
         if (!isset($filters['major_versions'])) {
             $query['post_filter']['bool']['must'][] = [
                 'bool' => [
                     'should' => [
                         // it's core but with a different versioning - always allow
                         ['term' => ['manual_vendor' => ['value' => 'typo3fluid']]],
+
+                        // it's a core changelog, ignore versions
+                        ['term' => ['manual_type' => ['value' => ManualType::CoreChangelog->value]]],
 
                         // it's core, allow only LTS
                         ['bool' => [
