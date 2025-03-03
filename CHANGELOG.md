@@ -1,5 +1,19 @@
 # Change Log
+
 Important changes made to the project.
+
+## 2025-03-03
+
+### Changed
+
+- Improve version handling in search results
+
+## 2024-12-03
+
+### Changed
+
+- Improve suggestion endpoint to expose slugs and support vendor
+- Support for the new search modal on the frontend
 
 ## 2024-06-17
 

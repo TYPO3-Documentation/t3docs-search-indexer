@@ -571,7 +571,30 @@ EOD;
                     $value = [$value];
                 }
 
-                $query['post_filter']['bool']['must'][] = ['terms' => [$key => $value]];
+                if ($key === 'major_versions') {
+                    $boolVersion = [
+                        'bool' => [
+                            'should' => [
+                                // Either the doc had ONLY version which is "main" (and no other),
+                                [
+                                    'bool' => [
+                                        'filter' => [
+                                            ['script' => [
+                                                'script' => "doc['$key'].length == 1"
+                                            ]],
+                                            ['terms' => [$key => ['main']]]
+                                        ]
+                                    ]
+                                ],
+                                // Or it has the version requested.
+                                ['terms' => [$key => $value]]
+                            ]
+                        ]
+                    ];
+                    $query['post_filter']['bool']['must'][] = $boolVersion;
+                } else {
+                    $query['post_filter']['bool']['must'][] = ['terms' => [$key => $value]];
+                }
             }
         }
 
