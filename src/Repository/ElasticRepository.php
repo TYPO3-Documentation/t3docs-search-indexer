@@ -503,8 +503,8 @@ EOD;
         $searchTerms = Util::escapeTerm($searchDemand->getQuery());
 
         // 2 LTS + Main
-        $ltsVersions = Typo3VersionMapping::getLtsVersions();
-        $ltsVersions[] = Typo3VersionMapping::Dev;
+        $boostedVersions = Typo3VersionMapping::getLtsVersions();
+        $boostedVersions[] = Typo3VersionMapping::Dev;
 
         $query = [
             'query' => [
@@ -551,7 +551,7 @@ EOD;
                                 'terms' => [
                                     'manual_version' => array_map(function (Typo3VersionMapping $version) {
                                         return $version->getVersion();
-                                    }, $ltsVersions)
+                                    }, $boostedVersions)
                                 ]
                             ],
                             'weight' => 5
@@ -605,6 +605,32 @@ EOD;
                     $query['post_filter']['bool']['must'][] = ['terms' => [$key => $value]];
                 }
             }
+        }
+
+        // There was no versioning filter - so we force only LTS for core packages.
+        if (!isset($filters['major_versions'])) {
+            $query['post_filter']['bool']['must'][] = [
+                'bool' => [
+                    'should' => [
+                        // it's core but with a different versioning - always allow
+                        ['term' => ['manual_vendor' => ['value' => 'typo3fluid']]],
+
+                        // it's core, allow only LTS
+                        ['bool' => [
+                            'filter' => [
+                                ['term' => ['is_core' => ['value' => true]]],
+                                [
+                                    'terms' => [
+                                        'manual_version' => array_map(function (Typo3VersionMapping $version) {
+                                            return $version->getVersion();
+                                        }, Typo3VersionMapping::getLtsVersions())
+                                    ]
+                                ]
+                            ]
+                        ]],
+                    ]
+                ]
+            ];
         }
 
         return $query;
