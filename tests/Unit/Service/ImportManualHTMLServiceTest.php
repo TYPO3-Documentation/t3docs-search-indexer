@@ -59,6 +59,7 @@ class ImportManualHTMLServiceTest extends TestCase
         $manual->getVersion()->willReturn('main');
         $manual->getLanguage()->willReturn('en-us');
         $manual->isCore()->willReturn(true);
+        $manual->isLastVersions()->willReturn(true);
         $manual->getVendor()->willReturn($vendor);
         $manual->getName()->willReturn($extensionName);
         $manual->getSlug()->willReturn('slug');
@@ -121,6 +122,7 @@ class ImportManualHTMLServiceTest extends TestCase
             'relative_url' => 'c/typo3/cms-core/main/en-us',
             'content_hash' => '718ab540920b06f925f6ef7a34d6a5c7',
             'is_core' => true,
+            'is_last_versions' => true,
         ])->shouldBeCalledTimes(1);
         $repo->addOrUpdateDocument([
             'fragment' => 'pages-as-blog-entries',
@@ -138,6 +140,7 @@ class ImportManualHTMLServiceTest extends TestCase
             'relative_url' => 'c/typo3/cms-core/main/en-us',
             'content_hash' => 'a248b5d0798e30e7c9389b81b499c5d9',
             'is_core' => true,
+            'is_last_versions' => true,
         ])->shouldBeCalledTimes(1);
 
         $subject->importManual($manualRevealed);
@@ -200,6 +203,7 @@ class ImportManualHTMLServiceTest extends TestCase
         $manual->getLanguage()->willReturn('en-us');
         $manual->getSlug()->willReturn('slug');
         $manual->isCore()->willReturn(true);
+        $manual->isLastVersions()->willReturn(true);
         $manual->getVendor()->willReturn($vendor);
         $manual->getName()->willReturn($extensionName);
         $manual->getFilesWithSections()->willReturn($finder->reveal());
@@ -265,6 +269,7 @@ class ImportManualHTMLServiceTest extends TestCase
             'relative_url' => 'c/typo3/cms-core/main/en-us',
             'content_hash' => 'c03832e65c91c86548ca248379c885d6',
             'is_core' => true,
+            'is_last_versions' => true,
         ])->shouldBeCalledTimes(1);
 
         $subject->importManual($manualRevealed);

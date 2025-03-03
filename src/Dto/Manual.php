@@ -3,6 +3,8 @@
 namespace App\Dto;
 
 use App\Config\ManualType;
+use App\Helper\VersionFilter;
+use App\Helper\VersionSorter;
 use Symfony\Component\Finder\Finder;
 
 class Manual
@@ -17,6 +19,7 @@ class Manual
         private readonly array $keywords,
         private readonly string $vendor = '',
         private readonly bool $isCore = false,
+        private readonly bool $isLastVersions = true, // Does this Manual entry lives in the last 2 major versions? (+main)
     ) {
     }
 
@@ -52,6 +55,9 @@ class Manual
             $keywords[] = $name;
         }
 
+        $lastVersions = self::getLastVersions($folder, $changelog);
+        $isLastVersions = empty($lastVersions) || in_array($version, $lastVersions, true);
+
         return new Manual(
             $folder,
             $name,
@@ -62,6 +68,7 @@ class Manual
             $keywords,
             $vendor,
             $isCore,
+            $isLastVersions,
         );
     }
 
@@ -79,6 +86,38 @@ class Manual
             $finder->notPath('Changelog');
         }
         return $finder;
+    }
+
+    /**
+     * For a Manual folder, return the last alternatives versions.
+     *
+     * @return array<string>
+     */
+    public static function getLastVersions(\SplFileInfo $folder, bool $changelog): array
+    {
+        // Look up the parent directory to list all versions.
+        if (!file_exists($folder->getPath())) {
+            return [];
+        }
+
+        $finder = new Finder();
+        $directories = $finder
+            ->in($folder->getPath() . ($changelog ? '' : '/..'))
+            ->notName('draft')
+            ->depth(0)
+            ->directories();
+
+        $versions = [];
+        foreach ($directories as $directory) {
+            $versions[] = $directory->getFilename();
+        }
+
+        $versions = VersionSorter::sortVersions($versions);
+        $versions = VersionFilter::filterVersions($versions);
+
+        $size = in_array('main', $versions, true) ? 3 : 2;
+
+        return array_slice($versions, -$size, $size);
     }
 
     /**
@@ -169,5 +208,10 @@ class Manual
     public function getKeywords(): array
     {
         return $this->keywords;
+    }
+
+    public function isLastVersions(): bool
+    {
+        return $this->isLastVersions;
     }
 }

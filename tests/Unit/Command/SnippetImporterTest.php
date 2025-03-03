@@ -82,10 +82,12 @@ class SnippetImporterTest extends TestCase
         $folder->willBeConstructedWith(['dummy_filename']);
         $folder->getPathname()->willReturn('_docsFolder/c/typo3/manual-1/master/en-us');
         $folder->__toString()->willReturn('_docsFolder/c/typo3/manual-1/master/en-us');
+        $folder->getPath()->willReturn('_docsFolder/c/typo3/manual-1/master/en-us');
         $folder2 = $this->prophesize(\SplFileInfo::class);
         $folder2->willBeConstructedWith(['dummy_filename']);
         $folder2->getPathname()->willReturn('_docsFolder/c/typo3/manual-2/master/en-us');
         $folder2->__toString()->willReturn('_docsFolder/c/typo3/manual-2/master/en-us');
+        $folder2->getPath()->willReturn('_docsFolder/c/typo3/manual-2/master/en-us');
 
         $finder = new Finder();
         $finder->append([$folder->reveal(), $folder2->reveal()]);
@@ -120,6 +122,7 @@ class SnippetImporterTest extends TestCase
         $folder->willBeConstructedWith(['dummy_filename']);
         $folder->getPathname()->willReturn('_docsFolder/c/typo3/cms-core/master/en-us');
         $folder->__toString()->willReturn('_docsFolder/c/typo3/cms-core/master/en-us');
+        $folder->getPath()->willReturn('_docsFolder/c/typo3/cms-core/master/en-us');
 
         $finder = new Finder();
         $finder->append([$folder->reveal()]);
