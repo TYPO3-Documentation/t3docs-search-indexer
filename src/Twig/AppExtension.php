@@ -4,6 +4,7 @@ namespace App\Twig;
 
 use App\Config\Labels;
 use App\Dto\SearchDemand;
+use App\Helper\SlugBuilder;
 use App\Helper\VersionFilter;
 use App\Helper\VersionSorter;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -35,6 +36,7 @@ class AppExtension extends AbstractExtension
             new TwigFunction('getLabelForFilter', $this->getLabelForFilter(...)),
             new TwigFunction('sortVersions', VersionSorter::sortVersions(...)),
             new TwigFunction('filterVersions', VersionFilter::filterVersions(...)),
+            new TwigFunction('buildSlug', SlugBuilder::build(...)),
         ];
     }
 

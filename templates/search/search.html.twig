@@ -73,21 +73,12 @@
                     {% for hit in results.results %}
                         <li class="list-group-item list-group-item-action hit">
                             <h4>
-                                {% set slugs = hit.data.manual_slug is iterable ? hit.data.manual_slug : [hit.data.manual_slug] %}
-                                {% set bestVersion = sortVersions(hit.data.manual_version, 'desc')|first %}
-                                {% set bestSlug = slugs|filter(slug => bestVersion in slug)|first %}
-                                {% if not bestSlug %}{% set bestSlug = slugs|first %}{% endif %}{# Fallback #}
-
+                                {% set bestSlug = buildSlug(hit.data, searchDemand) %}
                                 <a class="text-dark" href="https://docs.typo3.org/{{ bestSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ hit.data.snippet_title|raw }}</a>
                                 <small class="text-muted fw-normal">{{ hit.data.manual_title }}</small>
                                 <span class="badge bg-secondary">{{ hit.data.manual_type }}</span>
                                 {% for version in sortVersions(filterVersions(hit.data.manual_version), 'desc') %}
-                                    {% if version != bestVersion %}
-                                        {% set versionBadgeSlug = slugs|filter(slug => version in slug)|first %}
-                                        {% if not versionBadgeSlug %}{% set versionBadgeSlug = slugs|first %}{% endif %}{# Fallback #}
-                                    {% else %}
-                                        {% set versionBadgeSlug = bestSlug %}
-                                    {% endif %}
+                                    {% set versionBadgeSlug = buildSlug(hit.data, searchDemand, version) %}
                                     <a class="badge bg-primary text-decoration-none" href="https://docs.typo3.org/{{ versionBadgeSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ version }}</a>
                                 {% endfor %}
                             </h4>

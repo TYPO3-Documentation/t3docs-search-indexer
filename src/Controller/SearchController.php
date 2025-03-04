@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Dto\SearchDemand;
+use App\Helper\SlugBuilder;
 use App\Repository\ElasticRepository;
 use Elastica\Exception\InvalidException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -42,6 +43,7 @@ class SearchController extends AbstractController
             'q' => $searchDemand->getQuery(),
             'searchScope' => $searchDemand->getScope(),
             'searchFilter' => $searchDemand->getCurrentFilters(),
+            'searchDemand' => $searchDemand,
             'filters' => $request->get('filters', []),
             'results' => $this->elasticRepository->findByQuery($searchDemand),
         ]);
@@ -61,22 +63,7 @@ class SearchController extends AbstractController
 
         $jsonData['results'] = array_map(static function ($result) use ($searchDemand) {
             $data = $result->getData();
-
-            // If a major version is seeked, replace the version in the slug to match.
-            if ($searchDemand->getFilters()['major_versions'] ?? null) {
-                $targetVersion = null;
-                foreach ($data['manual_version'] as $version) {
-                    if (str_starts_with($version, $searchDemand->getFilters()['major_versions'][0] . '.')) {
-                        $targetVersion = $version;
-                        break;
-                    }
-                }
-
-                if ($targetVersion) {
-                    $data['manual_slug'] = str_replace($data['manual_version'][0], $targetVersion, $data['manual_slug']);
-                }
-            }
-
+            $data['manual_slug'] = SlugBuilder::build($data, $searchDemand);
             return $data;
         }, $searchResults['results']);
 
