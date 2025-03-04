@@ -2,6 +2,7 @@
 
 namespace App\Dto;
 
+use App\Config\ManualType;
 use Symfony\Component\HttpFoundation\Request;
 
 readonly class SearchDemand
@@ -70,7 +71,13 @@ readonly class SearchDemand
         // scope points to given manual version and language
         $scope = trim(htmlspecialchars(strip_tags((string)$request->query->get('scope'))), '/');
         if ($scope) {
-            $filters['manual_slug'] = [$scope];
+            // special treatment for the Changelog scope because version is "wrong" here
+            // @see https://github.com/TYPO3-Documentation/t3docs-search-indexer/issues/89#issuecomment-2696410395
+            if (str_contains($scope, 'c/typo3/cms-core/main/en-us/Changelog') && empty($filters['manual_type'])) {
+                $filters['manual_type'] = ManualType::CoreChangelog->value;
+            } else {
+                $filters['manual_slug'] = [$scope];
+            }
         }
         $vendor = trim(htmlspecialchars(strip_tags((string)$request->query->get('vendor'))), '/');
         if ($vendor) {
