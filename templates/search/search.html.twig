@@ -73,17 +73,20 @@
                     {% for hit in results.results %}
                         <li class="list-group-item list-group-item-action hit">
                             <h4>
-                                {% set slugParts = hit.data.manual_slug|split('/') %}
-                                {% set versionInSlug = hit.data.manual_version|filter(item => item in slugParts) | first %}
-                                {% set latestVersionSlug = hit.data.manual_slug|replace({ (versionInSlug): sortVersions(hit.data.manual_version, 'desc')|first }) %}
-                                <a class="text-dark" href="https://docs.typo3.org/{{ latestVersionSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ hit.data.snippet_title|raw }}</a>
+                                {% set slugs = hit.data.manual_slug is iterable ? hit.data.manual_slug : [hit.data.manual_slug] %}
+                                {% set bestVersion = sortVersions(hit.data.manual_version, 'desc')|first %}
+                                {% set bestSlug = slugs|filter(slug => bestVersion in slug)|first %}
+                                {% if not bestSlug %}{% set bestSlug = slugs|first %}{% endif %}{# Fallback #}
+
+                                <a class="text-dark" href="https://docs.typo3.org/{{ bestSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ hit.data.snippet_title|raw }}</a>
                                 <small class="text-muted fw-normal">{{ hit.data.manual_title }}</small>
                                 <span class="badge bg-secondary">{{ hit.data.manual_type }}</span>
                                 {% for version in sortVersions(filterVersions(hit.data.manual_version), 'desc') %}
-                                    {% if version != versionInSlug %}
-                                        {% set versionBadgeSlug = hit.data.manual_slug|replace({ (versionInSlug): version }) %}
+                                    {% if version != bestVersion %}
+                                        {% set versionBadgeSlug = slugs|filter(slug => version in slug)|first %}
+                                        {% if not versionBadgeSlug %}{% set versionBadgeSlug = slugs|first %}{% endif %}{# Fallback #}
                                     {% else %}
-                                        {% set versionBadgeSlug = hit.data.manual_slug %}
+                                        {% set versionBadgeSlug = bestSlug %}
                                     {% endif %}
                                     <a class="badge bg-primary text-decoration-none" href="https://docs.typo3.org/{{ versionBadgeSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ version }}</a>
                                 {% endfor %}
@@ -94,7 +97,7 @@
                                 {% else %}
                                     <p class="summary">{{ hit.data.snippet_content|slice(0, 400) }}...</p>
                                 {% endif %}
-                                <a class="stretched-link" href="https://docs.typo3.org/{{ latestVersionSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}"></a>
+                                <a class="stretched-link" href="https://docs.typo3.org/{{ bestSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}"></a>
                             </div>
                         </li>
                     {% endfor %}

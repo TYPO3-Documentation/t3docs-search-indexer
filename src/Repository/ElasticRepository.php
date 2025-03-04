@@ -81,6 +81,13 @@ class ElasticRepository
 
         // Append versions in the array
         $scriptCode = <<<EOD
+if (!(ctx._source.manual_slug instanceof List)) {
+    ctx._source.manual_slug = [ctx._source.manual_slug];
+}
+if (!ctx._source.manual_slug.contains(params.manual_slug)) {
+    ctx._source.manual_slug.add(params.manual_slug);
+}
+
 if (!ctx._source.manual_version.contains(params.manual_version)) {
     ctx._source.manual_version.add(params.manual_version);
 }
@@ -104,9 +111,11 @@ EOD;
         $script = new Script($scriptCode);
         // For UPDATE
         $script->setParam('manual_version', $version);
+        $script->setParam('manual_slug', $snippet['manual_slug']);
         $script->setParam('major_versions', $majorVersions);
 
         // For INSERT
+        $snippet['manual_slug'] = [$snippet['manual_slug']];
         $snippet['manual_version'] = [$version];
         $snippet['major_versions'] = $majorVersions;
 
