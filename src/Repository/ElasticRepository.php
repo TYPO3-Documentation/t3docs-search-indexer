@@ -504,10 +504,6 @@ EOD;
     {
         $searchTerms = Util::escapeTerm($searchDemand->getQuery());
 
-        // 2 LTS + Main
-        $boostedVersions = Typo3VersionMapping::getLtsVersions();
-        $boostedVersions[] = Typo3VersionMapping::Dev;
-
         $query = [
             'query' => [
                 'function_score' => [
