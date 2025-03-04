@@ -64,6 +64,7 @@ readonly class SearchDemand
                 }
             }
         }
+
         $page = (int)$request->query->get('page', '1');
         $query = $request->query->get('q', '');
         $areSuggestionsHighlighted = (bool)$request->query->get('suggest-highlight');
@@ -79,9 +80,15 @@ readonly class SearchDemand
                 $filters['manual_slug'] = [$scope];
             }
         }
+
         $vendor = trim(htmlspecialchars(strip_tags((string)$request->query->get('vendor'))), '/');
         if ($vendor) {
             $filters['manual_vendor'] = [$vendor];
+        }
+
+        // default version is "latest"
+        if (empty($filters['major_versions'])) {
+            $filters['major_versions'] = ['latest'];
         }
 
         return new self($query, $scope, max($page, 1), $filters, $areSuggestionsHighlighted);
