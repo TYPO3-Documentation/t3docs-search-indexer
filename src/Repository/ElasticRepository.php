@@ -6,6 +6,7 @@ use App\Config\ManualType;
 use App\Dto\Constraints;
 use App\Dto\Manual;
 use App\Dto\SearchDemand;
+use App\Helper\SlugBuilder;
 use App\QueryBuilder\ElasticQueryBuilder;
 use Elastica\Aggregation\Terms;
 use Elastica\Client;
@@ -349,15 +350,8 @@ EOD;
                 foreach ($aggregation['buckets'] as $bucket) {
                     // Add URL on manual_package
                     if (isset($bucket['manual_slug_hits']['hits']['hits'][0])) {
-                        if ($searchDemand->getFilters()['major_versions'] ?? null) {
-                            $slug = $bucket['manual_slug_hits']['hits']['hits'][0]['_source']['manual_slug'];
-                        } else {
-                            $version = end($bucket['manual_slug_hits']['hits']['hits'][0]['_source']['manual_version']);
-                            $slug = str_replace($version, 'main', $bucket['manual_slug_hits']['hits']['hits'][0]['_source']['manual_slug']);
-                        }
-
                         $suggestionsForCurrentQuery[] = [
-                            'slug' => $slug,
+                            'slug' => SlugBuilder::build($bucket['manual_slug_hits']['hits']['hits'][0]['_source'], $searchDemand),
                             'title' => $bucket['key'],
                         ];
                     } else {
