@@ -29,7 +29,8 @@ class SearchDemandTest extends TestCase
         $this->assertSame(2, $searchDemand->getPage());
         $this->assertSame([
             'manual_type' => ['manual'],
-            'manual_slug' => ['p/vendor/package/main/en-us']
+            'manual_slug' => ['p/vendor/package/main/en-us'],
+            'major_versions' => ['latest']
         ], $searchDemand->getFilters());
     }
 
@@ -45,7 +46,9 @@ class SearchDemandTest extends TestCase
         $this->assertSame('', $searchDemand->getQuery());
         $this->assertSame('', $searchDemand->getScope());
         $this->assertSame(1, $searchDemand->getPage());
-        $this->assertSame([], $searchDemand->getFilters());
+        $this->assertSame([
+            'major_versions' => ['latest']
+        ], $searchDemand->getFilters());
     }
 
     /**
@@ -57,7 +60,9 @@ class SearchDemandTest extends TestCase
 
         $searchDemand = SearchDemand::createFromRequest($request);
 
-        $this->assertSame([], $searchDemand->getFilters());
+        $this->assertSame([
+            'major_versions' => ['latest']
+        ], $searchDemand->getFilters());
     }
 
     /**
@@ -122,7 +127,9 @@ class SearchDemandTest extends TestCase
 
         $searchDemand = SearchDemand::createFromRequest($request);
 
-        $this->assertSame([], $searchDemand->getFilters());
+        $this->assertSame([
+            'major_versions' => ['latest']
+        ], $searchDemand->getFilters());
     }
 
     /**

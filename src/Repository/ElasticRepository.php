@@ -6,6 +6,7 @@ use App\Config\ManualType;
 use App\Dto\Constraints;
 use App\Dto\Manual;
 use App\Dto\SearchDemand;
+use App\Helper\SlugBuilder;
 use App\QueryBuilder\ElasticQueryBuilder;
 use Elastica\Aggregation\Terms;
 use Elastica\Client;
@@ -81,21 +82,43 @@ class ElasticRepository
 
         // Append versions in the array
         $scriptCode = <<<EOD
+if (!(ctx._source.manual_slug instanceof List)) {
+    ctx._source.manual_slug = [ctx._source.manual_slug];
+}
+if (!ctx._source.manual_slug.contains(params.manual_slug)) {
+    ctx._source.manual_slug.add(params.manual_slug);
+}
+
 if (!ctx._source.manual_version.contains(params.manual_version)) {
     ctx._source.manual_version.add(params.manual_version);
 }
-if (!ctx._source.major_versions.contains(params.major_version)) {
-    ctx._source.major_versions.add(params.major_version);
+
+for (int i = 0; i < params.major_versions.length; i++) {
+    if (!ctx._source.major_versions.contains(params.major_versions[i])) {
+        ctx._source.major_versions.add(params.major_versions[i]);
+    }
 }
 EOD;
         $version = $snippet['manual_version'];
         $majorVersion = explode('.', $version)[0];
 
+        // Add "last" as a version for facet filtering
+        $majorVersions = [$majorVersion, 'all'];
+        // Add "latest" version for LTS / two last version
+        if ($snippet['is_last_versions']) {
+            $majorVersions[] = 'latest';
+        }
+
         $script = new Script($scriptCode);
+        // For UPDATE
         $script->setParam('manual_version', $version);
-        $script->setParam('major_version', $majorVersion);
+        $script->setParam('manual_slug', $snippet['manual_slug']);
+        $script->setParam('major_versions', $majorVersions);
+
+        // For INSERT
+        $snippet['manual_slug'] = [$snippet['manual_slug']];
         $snippet['manual_version'] = [$version];
-        $snippet['major_versions'] = [$majorVersion];
+        $snippet['major_versions'] = $majorVersions;
 
         $script->setUpsert($snippet);
         $this->elasticIndex->getClient()->updateDocument($documentId, $script, $this->elasticIndex->getName());
@@ -327,15 +350,8 @@ EOD;
                 foreach ($aggregation['buckets'] as $bucket) {
                     // Add URL on manual_package
                     if (isset($bucket['manual_slug_hits']['hits']['hits'][0])) {
-                        if ($searchDemand->getFilters()['major_versions'] ?? null) {
-                            $slug = $bucket['manual_slug_hits']['hits']['hits'][0]['_source']['manual_slug'];
-                        } else {
-                            $version = end($bucket['manual_slug_hits']['hits']['hits'][0]['_source']['manual_version']);
-                            $slug = str_replace($version, 'main', $bucket['manual_slug_hits']['hits']['hits'][0]['_source']['manual_slug']);
-                        }
-
                         $suggestionsForCurrentQuery[] = [
-                            'slug' => $slug,
+                            'slug' => SlugBuilder::build($bucket['manual_slug_hits']['hits']['hits'][0]['_source'], $searchDemand),
                             'title' => $bucket['key'],
                         ];
                     } else {
@@ -440,6 +456,28 @@ EOD;
         if ($direction === 'desc') {
             $aggregations = \array_reverse($aggregations);
         }
+
+        // Move special "all" and "latest" to the top
+        if (isset($aggregations['Version'])) {
+            usort($aggregations['Version']['buckets'], function ($a, $b) {
+                // Define the order of special keys
+                $order = ['all' => 0, 'latest' => 1];
+                if (isset($order[$a['key']]) && isset($order[$b['key']])) {
+                    return $order[$a['key']] <=> $order[$b['key']];
+                }
+
+                if (isset($order[$a['key']])) {
+                    return -1;
+                }
+
+                if (isset($order[$b['key']])) {
+                    return 1;
+                }
+
+                return $b['doc_count'] <=> $a['doc_count'];
+            });
+        }
+
         return $aggregations;
     }
 
@@ -605,7 +643,7 @@ EOD;
                                 // Or it has the version requested.
                                 ['terms' => [$key => $value]],
                                 // Or it's a changelog.
-                                ['term' => ['manual_type' => ['value' => ManualType::CoreChangelog->value]]]
+                                ['term' => ['manual_type' => ['value' => ManualType::CoreChangelog->value]]],
                             ]
                         ]
                     ];
@@ -620,53 +658,6 @@ EOD;
                     $query['post_filter']['bool']['must'][] = ['terms' => [$key => $value]];
                 }
             }
-        }
-
-        // There was no versioning filter - so we force latest versions.
-        if (!isset($filters['major_versions'])) {
-            $query['post_filter']['bool']['must'][] = [
-                'bool' => [
-                    'should' => [
-                        // it's core but with a different versioning - always allow
-                        ['term' => ['manual_vendor' => ['value' => 'typo3fluid']]],
-
-                        // it's a core changelog, ignore versions
-                        ['term' => ['manual_type' => ['value' => ManualType::CoreChangelog->value]]],
-
-                        // it's core, allow only LTS
-                        ['bool' => [
-                            'filter' => [
-                                ['term' => ['is_core' => ['value' => true]]],
-                                [
-                                    'terms' => [
-                                        'manual_version' => array_map(function (Typo3VersionMapping $version) {
-                                            return $version->getVersion();
-                                        }, Typo3VersionMapping::getLtsVersions())
-                                    ]
-                                ]
-                            ]
-                        ]],
-
-                        // it's not core, we want only the last two version
-                        // is_last_versions is a new field, so we test for existence before.
-                        ['bool' => [
-                            'filter' => [
-                                ['term' => ['is_core' => ['value' => false]]],
-                                ['bool' => [
-                                    'should' => [
-                                        ['bool' => [
-                                            'must_not' => [
-                                                ['exists' => ['field' => 'is_last_versions']]
-                                            ]
-                                        ]],
-                                        ['term' => ['is_last_versions' => ['value' => true]]]
-                                    ]
-                                ]],
-                            ]
-                        ]],
-                    ]
-                ]
-            ];
         }
 
         return $query;

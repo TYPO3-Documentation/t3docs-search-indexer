@@ -4,6 +4,7 @@ namespace App\Twig;
 
 use App\Config\Labels;
 use App\Dto\SearchDemand;
+use App\Helper\SlugBuilder;
 use App\Helper\VersionFilter;
 use App\Helper\VersionSorter;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -35,6 +36,7 @@ class AppExtension extends AbstractExtension
             new TwigFunction('getLabelForFilter', $this->getLabelForFilter(...)),
             new TwigFunction('sortVersions', VersionSorter::sortVersions(...)),
             new TwigFunction('filterVersions', VersionFilter::filterVersions(...)),
+            new TwigFunction('buildSlug', SlugBuilder::build(...)),
         ];
     }
 
@@ -67,7 +69,7 @@ class AppExtension extends AbstractExtension
         return $assetsConfig[$assetType][$assetLocation] ?? [];
     }
 
-    public function aggregationBucket(string $category, string $index, array $bucket): string
+    public function aggregationBucket(string $category, string $index, array $bucket, array $searchFilter): string
     {
         $category = strtolower($category);
         $label = $bucket['key_as_string'] ?? $bucket['key'];
@@ -75,11 +77,12 @@ class AppExtension extends AbstractExtension
         $key = $bucket['key'];
 
         // check if checkbox has been set
-        if (isset($_GET['filters'][$category][$key]) && $_GET['filters'][$category][$key] === 'true') {
+        if (isset($searchFilter[$category][$key]) && $searchFilter[$category][$key] === 'true') {
             $checked = ' checked';
         } else {
             $checked = '';
         }
+
         return '<div class="form-check">'
             . '<input type="checkbox" class="form-check-input" id="' . $category . '-' . $index . '" name="filters[' . $category . '][' . $key . ']" ' . $checked . ' value="true" onchange="this.form.submit()">'
             . '<label class="form-check-label custom-control-label-hascount" for="' . $category . '-' . $index . '">'

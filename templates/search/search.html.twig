@@ -73,18 +73,12 @@
                     {% for hit in results.results %}
                         <li class="list-group-item list-group-item-action hit">
                             <h4>
-                                {% set slugParts = hit.data.manual_slug|split('/') %}
-                                {% set versionInSlug = hit.data.manual_version|filter(item => item in slugParts) | first %}
-                                {% set latestVersionSlug = hit.data.manual_slug|replace({ (versionInSlug): sortVersions(hit.data.manual_version, 'desc')|first }) %}
-                                <a class="text-dark" href="https://docs.typo3.org/{{ latestVersionSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ hit.data.snippet_title|raw }}</a>
+                                {% set bestSlug = buildSlug(hit.data, searchDemand) %}
+                                <a class="text-dark" href="https://docs.typo3.org/{{ bestSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ hit.data.snippet_title|raw }}</a>
                                 <small class="text-muted fw-normal">{{ hit.data.manual_title }}</small>
                                 <span class="badge bg-secondary">{{ hit.data.manual_type }}</span>
                                 {% for version in sortVersions(filterVersions(hit.data.manual_version), 'desc') %}
-                                    {% if version != versionInSlug %}
-                                        {% set versionBadgeSlug = hit.data.manual_slug|replace({ (versionInSlug): version }) %}
-                                    {% else %}
-                                        {% set versionBadgeSlug = hit.data.manual_slug %}
-                                    {% endif %}
+                                    {% set versionBadgeSlug = buildSlug(hit.data, searchDemand, version) %}
                                     <a class="badge bg-primary text-decoration-none" href="https://docs.typo3.org/{{ versionBadgeSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}">{{ version }}</a>
                                 {% endfor %}
                             </h4>
@@ -94,7 +88,7 @@
                                 {% else %}
                                     <p class="summary">{{ hit.data.snippet_content|slice(0, 400) }}...</p>
                                 {% endif %}
-                                <a class="stretched-link" href="https://docs.typo3.org/{{ latestVersionSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}"></a>
+                                <a class="stretched-link" href="https://docs.typo3.org/{{ bestSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}"></a>
                             </div>
                         </li>
                     {% endfor %}
@@ -105,7 +99,7 @@
                 <div class="wy-menuXX wy-menu-verticalXX" data-spy="affix" role="navigation" aria-label="main navigation">
                     <form action="{{ path('searchresult') }}" method="get" class="form">
                         <input type="hidden" name="q" value="{{ (q is defined) ? q : '' }}">
-                        {% include 'partial/aggregations.html.twig' with {'aggregations': results.aggs, 'query': q} only %}
+                        {% include 'partial/aggregations.html.twig' with {'aggregations': results.aggs, 'query': q, 'searchFilter': searchFilter} only %}
                     </form>
                 </div>
             </div>
