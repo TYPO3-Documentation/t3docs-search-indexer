@@ -7,6 +7,7 @@ Important changes made to the project.
 ### Changed
 
 - Improve version handling in search results
+- Add search-time "all" and "latest" versions for aggregations
 
 ## 2024-12-03
 

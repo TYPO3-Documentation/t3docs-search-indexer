@@ -21,7 +21,7 @@
                         <div class="aggregation-body">
                             {% for index, bucket in buckets.buckets %}
                                 {% if bucket.doc_count > 0 %}
-                                    {{ aggregationBucket(title, index, bucket) }}
+                                    {{ aggregationBucket(title, index, bucket, searchFilter) }}
                                 {% endif %}
                             {% endfor %}
                         </div>

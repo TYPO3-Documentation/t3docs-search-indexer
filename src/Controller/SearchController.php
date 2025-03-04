@@ -41,6 +41,7 @@ class SearchController extends AbstractController
         return $this->render('search/search.html.twig', [
             'q' => $searchDemand->getQuery(),
             'searchScope' => $searchDemand->getScope(),
+            'searchFilter' => $searchDemand->getCurrentFilters(),
             'filters' => $request->get('filters', []),
             'results' => $this->elasticRepository->findByQuery($searchDemand),
         ]);
