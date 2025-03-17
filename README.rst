@@ -151,4 +151,9 @@ To get a local Kibana connected to your local Elasticsearch instance, you can ru
 
 Then, open http://localhost:5601/app/dev_tools#/console to get the Dev Tools.
 
+Running the tests / Fix CS
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. code-block:: bash
+  ddev exec composer ci:test:unit
+  ddev exec composer fix:php:cs-fixer
