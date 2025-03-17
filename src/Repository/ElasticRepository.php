@@ -589,18 +589,16 @@ EOD;
                         ],
                         [
                             'filter' => [
-                                // query matching LTS versions
-                                'terms' => [
-                                    'manual_version' => array_map(function (Typo3VersionMapping $version) {
-                                        return $version->getVersion();
-                                    }, Typo3VersionMapping::getLtsVersions())
+                                // query matching stable major version
+                                'term' => [
+                                    'manual_version' => Typo3VersionMapping::Stable->getVersion()
                                 ]
                             ],
                             'weight' => 5
                         ],
                         [
                             'filter' => [
-                                // query matching Main
+                                // query matching main
                                 'term' => [
                                     'manual_version' => Typo3VersionMapping::Dev->getVersion()
                                 ]
