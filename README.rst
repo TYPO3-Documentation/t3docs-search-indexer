@@ -96,7 +96,8 @@ If you want to remove selected manuals from index, you can use chrome extensions
 
 .. code-block:: bash
 
-  --manual-slug - slug of the manual to remove from index
+  --manual-slug - slug of the manual to remove from index (full slug with locale)
+  --manual-package - vendor and manual name (`typo3/reference-coreapi`) to remove from index
   --manual-version - version of the manual to remove from index
   --manual-type - type of the manual to remove from index
   --manual-language - language of the manual to remove from index
@@ -105,7 +106,12 @@ execute it with:
 
 .. code-block:: bash
 
-  ddev exec ./bin/console docsearch:index:delete --manual-slug= --manual-version=9.5 --manual-type=Extension --manual-language=en-us
+  # Remove version 9.5 from all extensions!
+  ddev exec ./bin/console docsearch:index:delete --manual-version=9.5 --manual-type="System extension" --manual-language=en-us
+  ddev exec ./bin/console docsearch:index:delete --manual-version=9.5 --manual-type=c
+
+  # Remove `typo3/reference-coreapi` version 11.5 only
+  ddev exec ./bin/console docsearch:index:delete --manual-type=c --manual-package=typo3/reference-coreapi --manual-version=11.5
 
 .. note::
    If you set the ``--manual-version`` option, manuals with this version will be updated by removing

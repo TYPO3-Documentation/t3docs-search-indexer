@@ -28,7 +28,8 @@ class IndexCleaner extends Command
      */
     protected function configure(): void
     {
-        $this->addOption('manual-slug', 'ms', InputArgument::OPTIONAL, 'Manula path', '');
+        $this->addOption('manual-slug', 'ms', InputArgument::OPTIONAL, 'Manual path', '');
+        $this->addOption('manual-package', 'mp', InputArgument::OPTIONAL, 'Manual package', '');
         $this->addOption('manual-version', 'mv', InputArgument::OPTIONAL, 'Manual version', '');
         $this->addOption('manual-type', 'mt', InputArgument::OPTIONAL, 'Manual type', '');
         $this->addOption('manual-language', 'ml', InputArgument::OPTIONAL, 'Manual language', '');
@@ -54,7 +55,8 @@ class IndexCleaner extends Command
             $input->getOption('manual-slug'),
             $input->getOption('manual-version'),
             $input->getOption('manual-type'),
-            $input->getOption('manual-language')
+            $input->getOption('manual-language'),
+            $input->getOption('manual-package')
         );
 
         $deletedManualsCount = $this->elasticRepository->deleteByConstraints($constraints);
