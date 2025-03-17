@@ -13,7 +13,8 @@ readonly class Constraints
         private string $slug = '',
         private string $version = '',
         private string $type = '',
-        private string $language = ''
+        private string $language = '',
+        private string $package = ''
     ) {
     }
 
@@ -35,5 +36,10 @@ readonly class Constraints
     public function getLanguage(): string
     {
         return $this->language;
+    }
+
+    public function getPackage(): string
+    {
+        return $this->package;
     }
 }

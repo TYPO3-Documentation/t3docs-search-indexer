@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\QueryBuilder;
 
+use App\Config\ManualType;
 use App\Dto\Constraints;
 use Elastica\Query;
 
@@ -17,12 +18,22 @@ class ElasticQueryBuilder
             $query['bool']['must'][] = ['match' => ['manual_slug' => $constraints->getSlug()]];
         }
 
+        if ($constraints->getPackage() !== '') {
+            $query['bool']['must'][] = ['match' => ['manual_package' => $constraints->getPackage()]];
+        }
+
         if ($constraints->getVersion() !== '') {
             $query['bool']['must'][] = ['match' => ['manual_version' => $constraints->getVersion()]];
         }
 
         if ($constraints->getType() !== '') {
-            $query['bool']['must'][] = ['match' => ['manual_type' => $constraints->getType()]];
+            $type = $constraints->getType();
+            $map = ManualType::getMap();
+            if (isset($map[$constraints->getType()])) {
+                $type = $map[$constraints->getType()];
+            }
+
+            $query['bool']['must'][] = ['match' => ['manual_type' => $type]];
         }
 
         if ($constraints->getLanguage() !== '') {
