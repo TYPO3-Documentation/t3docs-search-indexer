@@ -200,6 +200,12 @@ if (ctx._source.manual_version.contains(params.manual_version)) {
             ctx._source.manual_version.remove(i);
         }
     }
+    
+    for (int i=ctx._source.manual_slug.length-1; i>=0; i--) {
+        if (ctx._source.manual_slug[i].contains(params.manual_version)) {
+            ctx._source.manual_slug.remove(i);
+        }
+    }
 }
 
 def majorVersionParam = params.manual_version.splitOnToken('.')[0];
