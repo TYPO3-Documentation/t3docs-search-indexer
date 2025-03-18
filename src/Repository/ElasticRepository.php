@@ -555,17 +555,31 @@ EOD;
                         'bool' => [
                             'must' => [
                                 $searchTerms ? [
-                                    'query_string' => [
+                                    'multi_match' => [
                                         'query' => $searchTerms,
+                                        'type' => 'most_fields',
                                         'fields' => [
                                             'page_title^10',
-                                            'snippet_title^20',
-                                            'snippet_content',
+                                            'snippet_title^10',
+                                            'snippet_content^5',
                                             'manual_title'
                                         ]
                                     ],
                                 ] : ['match_all' => new \stdClass()],
                             ],
+                            // Boost documents with ALL the terms
+                            'should' => [
+                                $searchTerms ? [
+                                    'multi_match' => [
+                                        'query' => $searchTerms,
+                                        'operator' => 'and',
+                                        'fields' => [
+                                            'page_title^5',
+                                            'snippet_content^5',
+                                        ]
+                                    ],
+                                ] : ['match_all' => new \stdClass()],
+                            ]
                         ],
                     ],
                     'functions' => [
@@ -613,8 +627,8 @@ EOD;
             'highlight' => [
                 'fields' => [
                     'snippet_content' => [
-                        'fragment_size' => 400,
-                        'number_of_fragments' => 1
+                        'fragment_size' => 200,
+                        'number_of_fragments' => 2
                     ]
                 ],
                 'encoder' => 'html'
