@@ -8,6 +8,7 @@ Important changes made to the project.
 
 - Improve search pertinence, give more power to multi-words matches, show more fragments
 - Boost only the Stable version
+- Added support for `data-keywords` attribute on `<section>` to boost searches
 
 ## 2025-03-03
 

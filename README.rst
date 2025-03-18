@@ -1,6 +1,9 @@
 TYPO3 Documentation Search
 ==========================
 
+- Parse HTML rendered documentation to index each `<section>` in Elasticsearch
+- Provide frontend and API for end-user documentation search
+
 Install locally
 ---------------
 

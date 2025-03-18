@@ -35,9 +35,12 @@ class ParseDocumentationHTMLService
                 $mergedSnippet['fragment'] = $section['fragment'];
                 $mergedSnippet['snippet_title'] = $section['snippet_title'];
                 $mergedSnippet['snippet_content'] = $section['snippet_content'];
+                $mergedSnippet['keywords'] = $section['keywords'] ?? [];
             } else {
                 $mergedSnippet['snippet_content'] .= "\n" . $section['snippet_title'];
                 $mergedSnippet['snippet_content'] .= "\n" . $section['snippet_content'];
+                $mergedSnippet['keywords'] = array_merge($mergedSnippet['keywords'], $section['keywords'] ?? []);
+                $mergedSnippet['keywords'] = array_values(array_unique($mergedSnippet['keywords']));
             }
         }
 
@@ -88,21 +91,14 @@ class ParseDocumentationHTMLService
                 $section->removeChild($foundHeadline['node']);
             } else {
                 $id = $section->getAttribute('data-search-id');
-                $optionKeywords = json_decode($section->getAttribute('data-search-keywords'));
-
                 if ($id === '' || $title === '') {
                     continue;
-                }
-
-                if (!is_array($optionKeywords)) {
-                    $optionKeywords = [$title];
                 }
 
                 $sectionPiece = [
                     'fragment' => $id,
                     'snippet_title' => $title,
                     'option' => $option,
-                    'option_keywords' => $optionKeywords,
                 ];
             }
 
@@ -112,6 +108,13 @@ class ParseDocumentationHTMLService
             $sectionPiece['snippet_content'] = $this->sanitizeString(
                 $section->textContent
             );
+
+            $keywords = $section->getAttribute('data-keywords');
+            if ($keywords) {
+                $sectionPiece['keywords'] = array_map('trim', explode(",", $keywords));
+                $sectionPiece['keywords'] = array_values(array_unique($sectionPiece['keywords']));
+            }
+
             $sectionPieces[] = $sectionPiece;
         }
 

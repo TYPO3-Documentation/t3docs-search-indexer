@@ -562,7 +562,8 @@ EOD;
                                             'page_title^10',
                                             'snippet_title^10',
                                             'snippet_content^5',
-                                            'manual_title'
+                                            'manual_title',
+                                            'keywords^4'
                                         ]
                                     ],
                                 ] : ['match_all' => new \stdClass()],

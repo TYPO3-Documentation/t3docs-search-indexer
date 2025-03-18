@@ -515,7 +515,10 @@ elements."
                     [
                         'fragment' => 'deprecation-88839-cli-lowlevel-request-handlers',
                         'snippet_title' => 'Deprecation: #88839 - CLI lowlevel request handlers',
-                        'snippet_content' => 'See Issue #88839'
+                        'snippet_content' => 'See Issue #88839',
+                        'keywords' => [
+                            'testKeywordTopLevel'
+                        ]
                     ],
                     [
                         'fragment' => 'description',
@@ -529,6 +532,9 @@ elements."
                             'a wrapper around Symfony Console. All logic is now located in the Application, and thus, the interface and',
                             'the class have been marked as deprecated.',
                         ]),
+                        'keywords' => [
+                            'testKeywordSubSection'
+                        ],
                     ],
                     [
                         'fragment' => 'impact',
@@ -629,6 +635,10 @@ elements."
                 'Migration',
                 'Switch to a Symfony Command or provide a custom CLI entry point.',
             ]),
+            'keywords' => [
+                'testKeywordTopLevel',
+                'testKeywordSubSection'
+            ],
         ], $result);
     }
 

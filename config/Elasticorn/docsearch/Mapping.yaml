@@ -59,8 +59,6 @@ option:
     large_suggest:
       type: search_as_you_type
       analyzer: typo3_autocomplete_large
-option_keywords:
-  type: keyword
 fragment:
   type: keyword
 page_title:
@@ -84,3 +82,7 @@ is_core:
   type: boolean
 is_last_versions:
   type: boolean
+# Keyword of the section, added via data-keywords attribute, used to boost search.
+keywords:
+  type: text
+  analyzer: typo3_analyzer
