@@ -16,7 +16,7 @@ class Manual
         private readonly string $version,
         private readonly string $language,
         private readonly string $slug,
-        private readonly array $keywords,
+        private readonly array $keywords, // Keywords on the Manual level
         private readonly string $vendor = '',
         private readonly bool $isCore = false,
         private readonly bool $isLastVersions = true, // Does this Manual entry lives in the last 2 major versions? (+main)
