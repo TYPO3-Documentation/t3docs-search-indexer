@@ -20,8 +20,7 @@ class Manual
         private readonly string $vendor = '',
         private readonly bool $isCore = false,
         private readonly bool $isLastVersions = true, // Does this Manual entry lives in the last 2 major versions? (+main)
-    ) {
-    }
+    ) {}
 
     public static function createFromFolder(\SplFileInfo $folder, $changelog = false): Manual
     {

@@ -21,6 +21,7 @@ use Elastica\Search;
 use Elastica\Util;
 
 use function Symfony\Component\String\u;
+
 use T3Docs\VersionHandling\Typo3VersionMapping;
 
 class ElasticRepository
@@ -156,7 +157,7 @@ EOD;
                     ],
                 ],
             ],
-            'source' => $this->getDeleteQueryScript()
+            'source' => $this->getDeleteQueryScript(),
         ];
         $deleteQuery = new Query($query);
         $script = new Script($this->getDeleteQueryScript(), ['manual_version' => $manual->getVersion()], AbstractScript::LANG_PAINLESS);
@@ -239,15 +240,15 @@ EOD;
 
         $limitingScopes = [
             'manual_vendor' => [
-                'removeIfField' => 'manual_package'
+                'removeIfField' => 'manual_package',
             ],
             'manual_package' => [
                 'addTopHits' => true,
             ],
             'option' => [],
             'manual_version' => [
-                'field' => 'major_versions'
-            ]
+                'field' => 'major_versions',
+            ],
         ];
 
         $multiSearch = new MultiSearch($this->elasticClient);
@@ -290,20 +291,20 @@ EOD;
                     $scope => [
                         'terms' => [
                             'field' => $settings['field'] ?? $scope,
-                            'size' => 5
+                            'size' => 5,
                         ],
                     ],
                 ],
                 '_source' => false,
-                'size' => 0
+                'size' => 0,
             ];
 
             if ($settings['addTopHits'] ?? false) {
                 $singleQuery['aggs'][$scope]['aggs']['manual_slug_hits'] = [
                     'top_hits' => [
                         'size' => 1,
-                        '_source' => ['manual_version', 'manual_slug']
-                    ]
+                        '_source' => ['manual_version', 'manual_slug'],
+                    ],
                 ];
             }
 
@@ -335,7 +336,7 @@ EOD;
         if ($suggestions === []) {
             return [
                 'time' => 0,
-                'suggestions' => []
+                'suggestions' => [],
             ];
         }
 
@@ -382,7 +383,7 @@ EOD;
 
         return [
             'time' => $totalTime,
-            'suggestions' => $suggestions
+            'suggestions' => $suggestions,
         ];
     }
 
@@ -443,7 +444,7 @@ EOD;
 
         return [
             'time' => $searchResults->getTotalTime(),
-            'results' => $searchResults->getResults()
+            'results' => $searchResults->getResults(),
         ];
     }
 
@@ -563,8 +564,8 @@ EOD;
                                             'snippet_title^10',
                                             'snippet_content^5',
                                             'manual_title',
-                                            'keywords^4'
-                                        ]
+                                            'keywords^4',
+                                        ],
                                     ],
                                 ] : ['match_all' => new \stdClass()],
                             ],
@@ -577,10 +578,10 @@ EOD;
                                         'fields' => [
                                             'page_title^5',
                                             'snippet_content^5',
-                                        ]
+                                        ],
                                     ],
                                 ] : ['match_all' => new \stdClass()],
-                            ]
+                            ],
                         ],
                     ],
                     'functions' => [
@@ -589,51 +590,51 @@ EOD;
                                 'script' => [
                                     'source' => "int matchCount = 0; for (String term : params.terms) { if (doc['manual_keywords'].contains(term)) { matchCount++; } } return 10 * matchCount;",
                                     'params' => [
-                                        'terms' => explode(' ', u($searchTerms)->trim()->toString())
-                                    ]
-                                ]
-                            ]
+                                        'terms' => explode(' ', u($searchTerms)->trim()->toString()),
+                                    ],
+                                ],
+                            ],
                         ],
                         [
                             'filter' => [
                                 'term' => [
-                                    'is_core' => true
+                                    'is_core' => true,
                                 ],
                             ],
-                            'weight' => 5
+                            'weight' => 5,
                         ],
                         [
                             'filter' => [
                                 // query matching stable major version
                                 'term' => [
-                                    'manual_version' => Typo3VersionMapping::Stable->getVersion()
-                                ]
+                                    'manual_version' => Typo3VersionMapping::Stable->getVersion(),
+                                ],
                             ],
-                            'weight' => 5
+                            'weight' => 5,
                         ],
                         [
                             'filter' => [
                                 // query matching main
                                 'term' => [
-                                    'manual_version' => Typo3VersionMapping::Dev->getVersion()
-                                ]
+                                    'manual_version' => Typo3VersionMapping::Dev->getVersion(),
+                                ],
                             ],
-                            'weight' => 5
+                            'weight' => 5,
                         ],
                     ],
                     'score_mode' => 'sum',
-                    'boost_mode' => 'multiply'
+                    'boost_mode' => 'multiply',
                 ],
             ],
             'highlight' => [
                 'fields' => [
                     'snippet_content' => [
                         'fragment_size' => 200,
-                        'number_of_fragments' => 2
-                    ]
+                        'number_of_fragments' => 2,
+                    ],
                 ],
-                'encoder' => 'html'
-            ]
+                'encoder' => 'html',
+            ],
         ];
 
         $filters = $searchDemand->getFilters();
@@ -653,25 +654,25 @@ EOD;
                                     'bool' => [
                                         'filter' => [
                                             ['script' => [
-                                                'script' => "doc['$key'].length == 1"
+                                                'script' => "doc['$key'].length == 1",
                                             ]],
-                                            ['terms' => [$key => ['main']]]
-                                        ]
-                                    ]
+                                            ['terms' => [$key => ['main']]],
+                                        ],
+                                    ],
                                 ],
                                 // Or it has the version requested.
                                 ['terms' => [$key => $value]],
                                 // Or it's a changelog.
                                 ['term' => ['manual_type' => ['value' => ManualType::CoreChangelog->value]]],
-                            ]
-                        ]
+                            ],
+                        ],
                     ];
                     $query['post_filter']['bool']['must'][] = $boolVersion;
 
                     // Also boost on the main results
                     $query['query']['function_score']['functions'][] = [
                         'filter' => ['terms' => [$key => $value]],
-                        'weight' => 10
+                        'weight' => 10,
                     ];
                 } else {
                     $query['post_filter']['bool']['must'][] = ['terms' => [$key => $value]];
