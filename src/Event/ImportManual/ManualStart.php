@@ -9,9 +9,7 @@ class ManualStart extends Event
 {
     final public const NAME = 'importManual.start';
 
-    public function __construct(private readonly Finder $files)
-    {
-    }
+    public function __construct(private readonly Finder $files) {}
 
     public function getFiles(): Finder
     {

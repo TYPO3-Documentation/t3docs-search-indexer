@@ -13,8 +13,7 @@ readonly class SearchDemand
         private int $page,
         private array $filters,
         private bool $suggestionsHighlighted = false
-    ) {
-    }
+    ) {}
 
     public static function createFromRequest(Request $request): SearchDemand
     {
@@ -138,35 +137,35 @@ readonly class SearchDemand
             ],
             'language' => [
                 'field' => 'manual_language',
-                'type' => 'array'
+                'type' => 'array',
             ],
             'version' => [
                 'field' => 'major_versions',
-                'type' => 'array'
+                'type' => 'array',
             ],
             'option' => [
                 'field' => 'option',
-                'type' => 'string'
+                'type' => 'string',
             ],
             'optionaggs' => [
                 'field' => 'option',
-                'type' => 'array'
+                'type' => 'array',
             ],
             'sversion' => [
                 'field' => 'manual_version',
-                'type' => 'string'
+                'type' => 'string',
             ],
             'vendor' => [
                 'field' => 'manual_vendor',
-                'type' => 'string'
+                'type' => 'string',
             ],
             'package' => [
                 'field' => 'manual_package',
-                'type' => 'string'
+                'type' => 'string',
             ],
             'core' => [
                 'field' => 'is_core',
-                'type' => 'bool'
+                'type' => 'bool',
             ],
         ];
     }

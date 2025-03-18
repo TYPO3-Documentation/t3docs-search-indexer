@@ -15,8 +15,7 @@ readonly class Constraints
         private string $type = '',
         private string $language = '',
         private string $package = ''
-    ) {
-    }
+    ) {}
 
     public function getSlug(): string
     {

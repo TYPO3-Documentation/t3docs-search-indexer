@@ -9,8 +9,7 @@ class DirectoryFinderService
     public function __construct(
         private readonly array $allowedPaths,
         private readonly array $excludedDirectories
-    ) {
-    }
+    ) {}
 
     /**
      * Finds all directories containing documentation under rootPath (DOCS_ROOT_PATH)
@@ -30,7 +29,7 @@ class DirectoryFinderService
      */
     public function getDirectoriesByPath(string $docRootPath, string $packagePath = ''): Finder
     {
-        $combinedPath = $docRootPath . ($packagePath ?  '/' . $packagePath : '');
+        $combinedPath = $docRootPath . ($packagePath ? '/' . $packagePath : '');
 
         $finder = new Finder();
 
@@ -75,6 +74,6 @@ class DirectoryFinderService
      */
     private function wrapValuesWithPregDelimiters(array $regexs): array
     {
-        return array_map(static fn ($value) => "#{$value}#", $regexs);
+        return array_map(static fn($value) => "#{$value}#", $regexs);
     }
 }

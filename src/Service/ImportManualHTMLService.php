@@ -19,8 +19,7 @@ class ImportManualHTMLService
         private ParseDocumentationHTMLService $parser,
         private EventDispatcherInterface $dispatcher,
         private LoggerInterface $logger
-    ) {
-    }
+    ) {}
 
     public function deleteManual(Manual $manual): void
     {

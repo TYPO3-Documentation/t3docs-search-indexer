@@ -19,8 +19,7 @@ class AppExtension extends AbstractExtension
         private readonly ParameterBagInterface $parameterBag,
         private readonly Environment $twigEnvironment,
         private readonly UrlGeneratorInterface $urlGenerator,
-    ) {
-    }
+    ) {}
 
     public function getFunctions(): array
     {

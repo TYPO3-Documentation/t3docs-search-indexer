@@ -14,9 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class SearchController extends AbstractController
 {
-    public function __construct(private readonly ElasticRepository $elasticRepository)
-    {
-    }
+    public function __construct(private readonly ElasticRepository $elasticRepository) {}
 
     /**
      * @return Response
@@ -55,7 +53,7 @@ class SearchController extends AbstractController
         $searchDemand = SearchDemand::createFromRequest($request);
         $jsonData = [
             'demand' => $searchDemand->toArray(),
-            'suggest' => $this->elasticRepository->suggestScopes($searchDemand)
+            'suggest' => $this->elasticRepository->suggestScopes($searchDemand),
         ];
 
         $searchResults = $this->elasticRepository->searchDocumentsForSuggest($searchDemand);
