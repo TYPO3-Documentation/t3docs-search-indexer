@@ -84,7 +84,9 @@
                             </h4>
                             <div class="position-relative">
                                 {% if hit.highlights and hit.highlights.snippet_content and hit.highlights.snippet_content[0] %}
-                                    <p class="summary">{{ hit.highlights.snippet_content[0] | raw }}...</p>
+                                    <p class="summary">
+                                        {% for content in hit.highlights.snippet_content %}{{ content | raw }}...{% endfor %}
+                                    </p>
                                 {% else %}
                                     <p class="summary">{{ hit.data.snippet_content|slice(0, 400) }}...</p>
                                 {% endif %}
