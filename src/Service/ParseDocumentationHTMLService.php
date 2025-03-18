@@ -111,7 +111,7 @@ class ParseDocumentationHTMLService
 
             $keywords = $section->getAttribute('data-keywords');
             if ($keywords) {
-                $sectionPiece['keywords'] = array_map('trim', explode(",", $keywords));
+                $sectionPiece['keywords'] = array_map('trim', explode(',', $keywords));
                 $sectionPiece['keywords'] = array_values(array_unique($sectionPiece['keywords']));
             }
 
