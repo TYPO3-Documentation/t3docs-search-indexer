@@ -20,9 +20,9 @@ use Elastica\Script\Script;
 use Elastica\Search;
 use Elastica\Util;
 
-use function Symfony\Component\String\u;
-
 use T3Docs\VersionHandling\Typo3VersionMapping;
+
+use function Symfony\Component\String\u;
 
 class ElasticRepository
 {

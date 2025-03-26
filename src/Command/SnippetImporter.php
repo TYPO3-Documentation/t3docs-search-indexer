@@ -8,8 +8,6 @@ use App\Event\ImportManual\ManualFinish;
 use App\Event\ImportManual\ManualStart;
 use App\Service\DirectoryFinderService;
 use App\Service\ImportManualHTMLService;
-use LogicException;
-use RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
@@ -54,8 +52,8 @@ class SnippetImporter extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int
-     * @throws LogicException
-     * @throws RuntimeException
+     * @throws \LogicException
+     * @throws \RuntimeException
      * @throws \InvalidArgumentException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int

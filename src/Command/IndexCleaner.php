@@ -4,8 +4,6 @@ namespace App\Command;
 
 use App\Dto\Constraints;
 use App\Repository\ElasticRepository;
-use LogicException;
-use RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
@@ -39,8 +37,8 @@ class IndexCleaner extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int
-     * @throws LogicException
-     * @throws RuntimeException
+     * @throws \LogicException
+     * @throws \RuntimeException
      * @throws \InvalidArgumentException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
