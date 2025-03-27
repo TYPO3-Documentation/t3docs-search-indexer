@@ -16,16 +16,16 @@ parameters:
     assets:
         css:
             header:
-                - 'https://cdn.typo3.com/typo3documentation/theme/typo3-docs-theme/0.24.0/css/theme.css'
+                - 'https://cdn.typo3.com/typo3documentation/theme/typo3-docs-theme/0.27.0/css/theme.css'
             footer:
         js:
             header:
                 -  'https://cdn.typo3.com/typo3infrastructure/universe/dist/webcomponents-loader.js'
                 - 'https://cdn.typo3.com/typo3infrastructure/universe/dist/typo3-universe.js'
             footer:
-                - 'https://cdn.typo3.com/typo3documentation/theme/typo3-docs-theme/0.24.0/js/popper.min.js'
-                - 'https://cdn.typo3.com/typo3documentation/theme/typo3-docs-theme/0.24.0/js/bootstrap.min.js'
-                - 'https://cdn.typo3.com/typo3documentation/theme/typo3-docs-theme/0.24.0/js/theme.min.js'
+                - 'https://cdn.typo3.com/typo3documentation/theme/typo3-docs-theme/0.27.0/js/popper.min.js'
+                - 'https://cdn.typo3.com/typo3documentation/theme/typo3-docs-theme/0.27.0/js/bootstrap.min.js'
+                - 'https://cdn.typo3.com/typo3documentation/theme/typo3-docs-theme/0.27.0/js/theme.min.js'
 
 services:
     # default configuration for services in *this* file
