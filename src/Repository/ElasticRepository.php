@@ -302,8 +302,10 @@ EOD;
             if ($settings['addTopHits'] ?? false) {
                 $singleQuery['aggs'][$scope]['aggs']['manual_slug_hits'] = [
                     'top_hits' => [
-                        'size' => 1,
-                        '_source' => ['manual_version', 'manual_slug'],
+                        // Fetch multiple candidates to allow PHP-side version selection
+                        // Fixes #121: Suggest links pointed to outdated versions
+                        'size' => 5,
+                        '_source' => ['manual_version', 'manual_slug', 'is_last_versions'],
                     ],
                 ];
             }
@@ -357,8 +359,11 @@ EOD;
                 foreach ($aggregation['buckets'] as $bucket) {
                     // Add URL on manual_package
                     if (isset($bucket['manual_slug_hits']['hits']['hits'][0])) {
+                        // Select the best hit, preferring documents marked as latest versions
+                        // Fixes #121: Suggest links pointed to outdated versions
+                        $bestHit = $this->selectBestHitForSuggestion($bucket['manual_slug_hits']['hits']['hits']);
                         $suggestionsForCurrentQuery[] = [
-                            'slug' => SlugBuilder::build($bucket['manual_slug_hits']['hits']['hits'][0]['_source'], $searchDemand),
+                            'slug' => SlugBuilder::build($bestHit['_source'], $searchDemand),
                             'title' => $bucket['key'],
                         ];
                     } else {
@@ -695,5 +700,24 @@ EOD;
         $config['password'] = $_ENV['ELASTICA_PASSWORD'] ?? self::ELASTICA_DEFAULT_CONFIGURATION['password'];
 
         return $config;
+    }
+
+    /**
+     * Select the best hit for suggestion URL generation.
+     * Prefers documents marked as latest versions (is_last_versions=true).
+     * Falls back to first hit if none are marked as latest.
+     *
+     * @param array<int, array<string, mixed>> $hits
+     * @return array<string, mixed>
+     */
+    private function selectBestHitForSuggestion(array $hits): array
+    {
+        foreach ($hits as $hit) {
+            if (!empty($hit['_source']['is_last_versions'])) {
+                return $hit;
+            }
+        }
+        // Fallback to first hit (original behavior)
+        return $hits[0];
     }
 }
