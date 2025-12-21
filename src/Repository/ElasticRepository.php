@@ -304,6 +304,12 @@ EOD;
                     'top_hits' => [
                         'size' => 1,
                         '_source' => ['manual_version', 'manual_slug'],
+                        // Sort by is_last_versions to prefer latest documentation versions
+                        // Fixes #121: Suggest links pointed to outdated versions
+                        'sort' => [
+                            ['is_last_versions' => ['order' => 'desc']],
+                            ['_score' => ['order' => 'desc']],
+                        ],
                     ],
                 ];
             }
