@@ -90,7 +90,7 @@
                                 {% else %}
                                     <p class="summary">{{ hit.data.snippet_content|slice(0, 400) }}...</p>
                                 {% endif %}
-                                <a class="stretched-link" href="https://docs.typo3.org/{{ bestSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}"></a>
+                                <a class="stretched-link" href="https://docs.typo3.org/{{ bestSlug }}/{{ hit.data.relative_url }}#{{ hit.data.fragment }}" aria-hidden="true" tabindex="-1"></a>
                             </div>
                         </li>
                     {% endfor %}
