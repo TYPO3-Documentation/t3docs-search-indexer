@@ -43,13 +43,15 @@
 </head>
 <body>
 <div class="page">
-    {% block topbar %}
-        {% include 'partial/base/topbar.html.twig' %}
-    {% endblock %}
+    <header>
+        {% block topbar %}
+            {% include 'partial/base/topbar.html.twig' %}
+        {% endblock %}
 
-    {% block page_header %}
-        {% include 'partial/base/page_header.html.twig' %}
-    {% endblock %}
+        {% block page_header %}
+            {% include 'partial/base/page_header.html.twig' %}
+        {% endblock %}
+    </header>
 
     <div class="page-main">
         <div class="page-main-inner">
