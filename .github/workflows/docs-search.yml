@@ -60,7 +60,7 @@ jobs:
           /home/runner/.composer/vendor/bin/mage deploy main -vvv
 
       - name: Archive Logs
-        uses:actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         if: always()
         with:
           name: logs
