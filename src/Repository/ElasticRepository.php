@@ -201,7 +201,10 @@ if (ctx._source.manual_version.contains(params.manual_version)) {
             ctx._source.manual_version.remove(i);
         }
     }
-    
+
+    if (!(ctx._source.manual_slug instanceof List)) {
+        ctx._source.manual_slug = [ctx._source.manual_slug];
+    }
     for (int i=ctx._source.manual_slug.length-1; i>=0; i--) {
         if (ctx._source.manual_slug[i].contains(params.manual_version)) {
             ctx._source.manual_slug.remove(i);
