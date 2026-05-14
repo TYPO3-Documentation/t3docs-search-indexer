@@ -22,7 +22,7 @@
         "symfony/stopwatch": "^6.4",
         "symfony/twig-bundle": "^6.4",
         "symfony/yaml": "^6.4",
-        "t3docs/typo3-version-handling": "^0.23.2"
+        "t3docs/typo3-version-handling": "^0.38.0"
     },
     "require-dev": {
         "mikey179/vfsstream": "^1.6",

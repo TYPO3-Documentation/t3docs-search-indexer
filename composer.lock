@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b0e5d692b5b80afb3219593bab5c4269",
+    "content-hash": "2d2655338d2a1c9c955c7e487298b5ff",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -3865,17 +3865,21 @@
         },
         {
             "name": "t3docs/typo3-version-handling",
-            "version": "0.23.2",
+            "version": "0.38.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/TYPO3-Documentation/t3docs-typo3-version-handling.git",
-                "reference": "e717116172e0f70b7605d38b272b2bc43cea03f6"
+                "reference": "3d4e883aa1bf0348c321792b7e711834f59103ff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/TYPO3-Documentation/t3docs-typo3-version-handling/zipball/e717116172e0f70b7605d38b272b2bc43cea03f6",
-                "reference": "e717116172e0f70b7605d38b272b2bc43cea03f6",
+                "url": "https://api.github.com/repos/TYPO3-Documentation/t3docs-typo3-version-handling/zipball/3d4e883aa1bf0348c321792b7e711834f59103ff",
+                "reference": "3d4e883aa1bf0348c321792b7e711834f59103ff",
                 "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "php": "^8.2"
             },
             "type": "library",
             "autoload": {
@@ -3890,9 +3894,9 @@
             "description": "Version Handling for TYPO3 Documentation",
             "support": {
                 "issues": "https://github.com/TYPO3-Documentation/t3docs-typo3-version-handling/issues",
-                "source": "https://github.com/TYPO3-Documentation/t3docs-typo3-version-handling/tree/0.23.2"
+                "source": "https://github.com/TYPO3-Documentation/t3docs-typo3-version-handling/tree/0.38.0"
             },
-            "time": "2024-12-18T10:51:53+00:00"
+            "time": "2026-05-14T04:58:34+00:00"
         },
         {
             "name": "twig/twig",
