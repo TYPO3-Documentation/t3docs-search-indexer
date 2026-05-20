@@ -222,4 +222,49 @@ class SearchDemandTest extends TestCase
         $this->assertSame(['c/typo3/cms-form/main/en-us'], $filters['manual_slug'] ?? null);
         $this->assertArrayNotHasKey('manual_type', $filters);
     }
+
+    /**
+     * Boundary test: the trailing slash in the `c/typo3/cms-core/` prefix
+     * matters. A hypothetical extension named `cms-core-extras` must NOT be
+     * misclassified as Core changelog.
+     *
+     * @test
+     */
+    public function createFromRequestUsesSlugFilterForCmsCorePrefixedExtension(): void
+    {
+        $request = Request::create(
+            '/search',
+            'GET',
+            ['scope' => '/c/typo3/cms-core-extras/main/en-us/']
+        );
+
+        $searchDemand = SearchDemand::createFromRequest($request);
+
+        $filters = $searchDemand->getFilters();
+        $this->assertSame(['c/typo3/cms-core-extras/main/en-us'], $filters['manual_slug'] ?? null);
+        $this->assertArrayNotHasKey('manual_type', $filters);
+    }
+
+    /**
+     * If the user has already chosen a Document Type filter, the changelog
+     * scope detection must NOT override it. The user's explicit choice wins.
+     *
+     * @test
+     */
+    public function createFromRequestPreservesExplicitDocumentTypeFilterForCmsCoreScope(): void
+    {
+        $request = Request::create(
+            '/search',
+            'GET',
+            [
+                'scope' => '/c/typo3/cms-core/main/en-us/',
+                'filters' => ['Document Type' => ['manual' => 'true']],
+            ]
+        );
+
+        $searchDemand = SearchDemand::createFromRequest($request);
+
+        $filters = $searchDemand->getFilters();
+        $this->assertSame(['manual'], $filters['manual_type'] ?? null);
+    }
 }
