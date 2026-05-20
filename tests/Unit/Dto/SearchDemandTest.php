@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Dto;
 
+use App\Config\ManualType;
 use App\Dto\SearchDemand;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -154,5 +155,71 @@ class SearchDemandTest extends TestCase
         $searchDemand = SearchDemand::createFromRequest($request);
 
         $this->assertSame(3, $searchDemand->getPage());
+    }
+
+    /**
+     * Regression test for issue #128: searching from the Core Changelog
+     * landing page sends scope=/c/typo3/cms-core/main/en-us/ (without the
+     * "Changelog" segment). The detection must still recognise this as a
+     * changelog scope and apply the Core changelog type filter instead of
+     * the (never-matching) slug filter.
+     *
+     * @test
+     */
+    public function createFromRequestUsesChangelogTypeFilterForCmsCoreManualRoot(): void
+    {
+        $request = Request::create(
+            '/search',
+            'GET',
+            ['q' => 'form', 'scope' => '/c/typo3/cms-core/main/en-us/']
+        );
+
+        $searchDemand = SearchDemand::createFromRequest($request);
+
+        $filters = $searchDemand->getFilters();
+        $this->assertSame(ManualType::CoreChangelog->value, $filters['manual_type'] ?? null);
+        $this->assertArrayNotHasKey('manual_slug', $filters);
+    }
+
+    /**
+     * Regression test for PR #108 / issue #89: the original fix for the deep
+     * Changelog scope must keep working.
+     *
+     * @test
+     */
+    public function createFromRequestUsesChangelogTypeFilterForDeepChangelogScope(): void
+    {
+        $request = Request::create(
+            '/search',
+            'GET',
+            ['q' => 'feature', 'scope' => '/c/typo3/cms-core/main/en-us/Changelog/12.4/']
+        );
+
+        $searchDemand = SearchDemand::createFromRequest($request);
+
+        $filters = $searchDemand->getFilters();
+        $this->assertSame(ManualType::CoreChangelog->value, $filters['manual_type'] ?? null);
+        $this->assertArrayNotHasKey('manual_slug', $filters);
+    }
+
+    /**
+     * Other system-extension scopes (e.g. cms-form) must continue to use the
+     * slug-based filter and not be misclassified as Core changelog.
+     *
+     * @test
+     */
+    public function createFromRequestUsesSlugFilterForNonCmsCoreScope(): void
+    {
+        $request = Request::create(
+            '/search',
+            'GET',
+            ['q' => 'form', 'scope' => '/c/typo3/cms-form/main/en-us/']
+        );
+
+        $searchDemand = SearchDemand::createFromRequest($request);
+
+        $filters = $searchDemand->getFilters();
+        $this->assertSame(['c/typo3/cms-form/main/en-us'], $filters['manual_slug'] ?? null);
+        $this->assertArrayNotHasKey('manual_type', $filters);
     }
 }
