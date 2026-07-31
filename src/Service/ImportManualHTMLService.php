@@ -29,6 +29,9 @@ class ImportManualHTMLService
     public function importManual(Manual $manual): void
     {
         $this->importSectionsFromManual($manual);
+        // Re-derive 'latest' facet membership for the whole manual from its current
+        // last-versions set, so tags left over from when an old version was newest are dropped.
+        $this->elasticRepository->recalculateLatestVersions($manual);
     }
 
     private function importSectionsFromManual(Manual $manual): void

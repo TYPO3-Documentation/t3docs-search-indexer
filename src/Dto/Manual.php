@@ -20,6 +20,7 @@ class Manual
         private readonly string $vendor = '',
         private readonly bool $isCore = false,
         private readonly bool $isLastVersions = true, // Does this Manual entry lives in the last 2 major versions? (+main)
+        private readonly array $lastVersions = [], // The manual's current last-versions set (highest per major, +main)
     ) {}
 
     public static function createFromFolder(\SplFileInfo $folder, $changelog = false): Manual
@@ -68,6 +69,7 @@ class Manual
             $vendor,
             $isCore,
             $isLastVersions,
+            $lastVersions,
         );
     }
 
@@ -212,5 +214,16 @@ class Manual
     public function isLastVersions(): bool
     {
         return $this->isLastVersions;
+    }
+
+    /**
+     * The manual's current last-versions set (highest version per major, plus main),
+     * as used to decide 'latest' facet membership.
+     *
+     * @return array<string>
+     */
+    public function getLastVersionsList(): array
+    {
+        return $this->lastVersions;
     }
 }
