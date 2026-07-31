@@ -17,7 +17,7 @@
                                 <select class="form-select search__scope" id="searchscope" name="scope">
                                     <option value="">Search all</option>
                                 </select>
-                                <input autocomplete="off" class="form-control shadow-none" id="globalsearchinput" name="q" placeholder="TYPO3 documentation..." type="text" value="">
+                                <input autocomplete="off" class="form-control shadow-none" id="globalsearchinput" name="q" placeholder="TYPO3 documentation..." type="text" value="{{ q is defined ? q : '' }}">
                                 <button class="btn btn-light" type="submit"><i class="fa fa-search"></i>&nbsp;<span class="d-none d-md-inline">Search</span></button>
                             </div>
                         </form>
