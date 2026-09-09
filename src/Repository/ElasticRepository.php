@@ -126,6 +126,60 @@ EOD;
     }
 
     /**
+     * Recompute the 'latest' state for every snippet of a manual.
+     *
+     * Two pieces of 'latest' state are written at index time and never revised afterwards, because
+     * old versions are never re-rendered/re-indexed:
+     *   - the 'latest' token in major_versions (the "latest" filter facet, see addOrUpdateDocument);
+     *   - the is_last_versions boolean field (the suggest top_hits sort, #121).
+     * Both are only ever added when a version was the newest, so they keep leaking obsolete
+     * versions once newer ones exist.
+     *
+     * This re-derives both from the manual's *current* last-versions set: a snippet is 'latest' iff
+     * at least one of the versions it appears in is still a last version. Run after importing any
+     * version, so re-rendering the newest version (or main) self-heals stale state.
+     */
+    public function recalculateLatestVersions(Manual $manual): void
+    {
+        $lastVersions = array_values($manual->getLastVersionsList());
+        // If the last-versions set cannot be determined, leave the index untouched.
+        if ($lastVersions === []) {
+            return;
+        }
+
+        $query = new Query([
+            'query' => [
+                'bool' => [
+                    'must' => [
+                        ['term' => ['manual_title.raw' => $manual->getTitle()]],
+                        ['term' => ['manual_type' => $manual->getType()]],
+                        ['term' => ['manual_language' => $manual->getLanguage()]],
+                    ],
+                ],
+            ],
+        ]);
+
+        $scriptCode = <<<'EOD'
+boolean isLatest = false;
+for (def v : ctx._source.manual_version) {
+    if (params.lastVersions.contains(v)) { isLatest = true; break; }
+}
+int idx = ctx._source.major_versions.indexOf('latest');
+if (isLatest) {
+    if (idx < 0) { ctx._source.major_versions.add('latest'); }
+} else if (idx >= 0) {
+    ctx._source.major_versions.remove(idx);
+}
+ctx._source.is_last_versions = isLatest;
+EOD;
+
+        $script = new Script($scriptCode, ['lastVersions' => $lastVersions], AbstractScript::LANG_PAINLESS);
+        $this->elasticIndex->refresh();
+        $this->elasticIndex->updateByQuery($query, $script, ['wait_for_completion' => true, 'conflicts' => 'proceed']);
+        $this->elasticIndex->refresh();
+    }
+
+    /**
      * Removes manual_version from all snippets and if it's the last version, remove the whole snippet
      */
     public function deleteByManual(Manual $manual): void
