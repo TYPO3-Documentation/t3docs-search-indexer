@@ -683,6 +683,13 @@ EOD;
                         'filter' => ['terms' => [$key => $value]],
                         'weight' => 10,
                     ];
+                } elseif ($key === 'manual_slug') {
+                    // The scope (manual_slug) must constrain the aggregations too, so apply it to
+                    // the main query rather than the post_filter. As a post_filter (like the other
+                    // facets) the facet counts would ignore the scope and span all manuals, which
+                    // is why the sidebar used to be hidden for scoped searches (issue #47 /
+                    // commit 51eabd4).
+                    $query['query']['function_score']['query']['bool']['must'][] = ['terms' => [$key => $value]];
                 } else {
                     $query['post_filter']['bool']['must'][] = ['terms' => [$key => $value]];
                 }
