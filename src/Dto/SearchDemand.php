@@ -71,9 +71,18 @@ readonly class SearchDemand
         // scope points to given manual version and language
         $scope = trim(htmlspecialchars(strip_tags((string)$request->query->get('scope'))), '/');
         if ($scope) {
-            // special treatment for the Changelog scope because version is "wrong" here
-            // @see https://github.com/TYPO3-Documentation/t3docs-search-indexer/issues/89#issuecomment-2696410395
-            if (str_contains($scope, 'c/typo3/cms-core/main/en-us/Changelog') && empty($filters['manual_type'])) {
+            // Special treatment for cms-core scopes: the Core Changelog is
+            // indexed as one CoreChangelog sub-manual per version under
+            // c/typo3/cms-core/main/en-us/Changelog/<version>/. The search
+            // modal on the changelog landing page sends the manual root
+            // (c/typo3/cms-core/main/en-us) as scope; a slug filter for the
+            // root matches none of these sub-manual slugs and yields zero
+            // results. Route any cms-core scope through the type filter so
+            // the changelog corpus is searchable from the landing page.
+            // Pre-existing user filters on Document Type take precedence.
+            // @see https://github.com/TYPO3-Documentation/t3docs-search-indexer/issues/89
+            // @see https://github.com/TYPO3-Documentation/t3docs-search-indexer/issues/128
+            if (str_starts_with($scope, 'c/typo3/cms-core/') && empty($filters['manual_type'])) {
                 $filters['manual_type'] = ManualType::CoreChangelog->value;
             } else {
                 $filters['manual_slug'] = [$scope];
