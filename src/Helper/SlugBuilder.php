@@ -33,6 +33,9 @@ class SlugBuilder
                     break;
                 }
             }
+            // No exact match (e.g. the "all" pseudo-filter, or a version not present in this
+            // section): link to the newest version instead of an arbitrary one.
+            $targetVersion ??= $allVersion[0];
         } else {
             $targetVersion = $allVersion[0];
         }

@@ -8,6 +8,7 @@ use App\Dto\Manual;
 use App\Dto\SearchDemand;
 use App\Helper\SlugBuilder;
 use App\QueryBuilder\ElasticQueryBuilder;
+use Elastica\Aggregation\Cardinality;
 use Elastica\Aggregation\Terms;
 use Elastica\Client;
 use Elastica\Exception\InvalidException;
@@ -413,13 +414,17 @@ EOD;
         $this->addAggregations($search->getQuery());
 
         $elasticaResultSet = $search->search();
-        $results = $elasticaResultSet->getResults();
+        $results = $this->mergeCollapsedVersions($elasticaResultSet->getResults());
 
         $maxScore = $elasticaResultSet->getMaxScore();
         $aggs = $elasticaResultSet->getAggregations();
+        // With collapse, getTotalHits() counts documents; use the distinct-section
+        // cardinality so the result count and pagination reflect the collapsed hits.
+        $sectionCount = $aggs['section_count']['value'] ?? null;
+        unset($aggs['section_count']);
         $aggs = $this->sortAggregations($aggs);
 
-        $this->totalHits = $elasticaResultSet->getTotalHits();
+        $this->totalHits = $sectionCount ?? $elasticaResultSet->getTotalHits();
 
         $out = [
             'pagesToLinkTo' => $this->getPages($currentPage),
@@ -437,6 +442,39 @@ EOD;
             $out['endingAtItem'] = $this->totalHits;
         }
         return $out;
+    }
+
+    /**
+     * Merge the versions of the collapsed inner hits into each result, so a section that
+     * fragmented across versions shows all of its versions (and links to the newest one)
+     * instead of only the representative document's. The plain array shape keeps the
+     * template's `hit.data` / `hit.highlights` access working unchanged.
+     *
+     * @param Result[] $results
+     * @return array<int, array{data: array<string, mixed>, highlights: array<mixed>}>
+     */
+    private function mergeCollapsedVersions(array $results): array
+    {
+        $merged = [];
+        foreach ($results as $result) {
+            $data = $result->getData();
+            $versions = $data['manual_version'] ?? [];
+            $slugs = is_array($data['manual_slug'] ?? null) ? $data['manual_slug'] : array_filter([$data['manual_slug'] ?? null]);
+
+            $innerHits = $result->getParam('inner_hits')['versions']['hits']['hits'] ?? [];
+            foreach ($innerHits as $innerHit) {
+                $source = $innerHit['_source'] ?? [];
+                $versions = array_merge($versions, $source['manual_version'] ?? []);
+                $innerSlugs = $source['manual_slug'] ?? [];
+                $slugs = array_merge($slugs, is_array($innerSlugs) ? $innerSlugs : [$innerSlugs]);
+            }
+
+            $data['manual_version'] = array_values(array_unique($versions));
+            $data['manual_slug'] = array_values(array_unique($slugs));
+            $merged[] = ['data' => $data, 'highlights' => $result->getHighlights()];
+        }
+
+        return $merged;
     }
 
     /**
@@ -499,6 +537,11 @@ EOD;
 
     private function addAggregations(Query $elasticaQuery): void
     {
+        // Count distinct sections (collapse groups) so the total reflects the collapsed hits.
+        $sectionCount = new Cardinality('section_count');
+        $sectionCount->setField('snippet_id');
+        $elasticaQuery->addAggregation($sectionCount);
+
         $catAggregation = new Terms('Document Type');
         $catAggregation->setField('manual_type');
         $elasticaQuery->addAggregation($catAggregation);
@@ -688,6 +731,18 @@ EOD;
                 }
             }
         }
+
+        // PoC (ADR-0002): collapse hits by section so a section that fragmented across
+        // versions is returned once instead of once per version; inner_hits carry the
+        // per-version documents (for version badges / newest-version link selection).
+        $query['collapse'] = [
+            'field' => 'snippet_id',
+            'inner_hits' => [
+                'name' => 'versions',
+                'size' => 20,
+                '_source' => ['manual_version', 'manual_slug'],
+            ],
+        ];
 
         return $query;
     }

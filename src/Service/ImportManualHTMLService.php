@@ -75,6 +75,9 @@ class ImportManualHTMLService
             $section['manual_slug'] = $manual->getSlug();
             $section['manual_keywords'] = $manual->getKeywords();
             $section['relative_url'] = $file->getRelativePathname();
+            // PoC (ADR-0002): stable per-section key across versions, used as the collapse field
+            // so a section that diverged between versions is shown once instead of once per version.
+            $section['snippet_id'] = $section['relative_url'] . '#' . $section['fragment'];
             $section['content_hash'] = md5($section['snippet_title'] . $section['snippet_content']);
             $section['is_core'] = $manual->isCore();
             $section['is_last_versions'] = $manual->isLastVersions();
