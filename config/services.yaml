@@ -19,9 +19,7 @@ parameters:
                 - 'https://cdn.typo3.com/typo3documentation/theme/typo3-docs-theme/0.38.0/css/theme.css'
             footer:
         js:
-            header:
-                - 'https://cdn.typo3.com/typo3infrastructure/universe/dist/webcomponents-loader.js'
-                - 'https://cdn.typo3.com/typo3infrastructure/universe/dist/typo3-universe.js'
+            header: []
             footer:
                 - 'https://cdn.typo3.com/typo3documentation/theme/typo3-docs-theme/0.38.0/js/popper.min.js'
                 - 'https://cdn.typo3.com/typo3documentation/theme/typo3-docs-theme/0.38.0/js/bootstrap.min.js'
