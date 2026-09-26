@@ -78,6 +78,9 @@
         "ci:test:unit": [
             "php bin/phpunit -c phpunit.xml.dist"
         ],
+        "ci:test:integration": [
+            "php bin/phpunit -c phpunit.integration.xml"
+        ],
         "fix:php:cs-fixer": [
             "php-cs-fixer fix src -v --using-cache no"
         ]

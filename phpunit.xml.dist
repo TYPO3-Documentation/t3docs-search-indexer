@@ -19,7 +19,8 @@
 
     <testsuites>
         <testsuite name="Project Test Suite">
-            <directory>./tests/</directory>
+            <!-- Unit tests only; integration tests need a real ES and run via phpunit.integration.xml -->
+            <directory>./tests/Unit</directory>
         </testsuite>
     </testsuites>
 

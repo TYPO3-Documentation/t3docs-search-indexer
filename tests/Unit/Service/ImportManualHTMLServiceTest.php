@@ -142,6 +142,7 @@ class ImportManualHTMLServiceTest extends TestCase
             'is_core' => true,
             'is_last_versions' => true,
         ])->shouldBeCalledTimes(1);
+        $repo->recalculateLatestVersions($manualRevealed)->shouldBeCalledTimes(1);
 
         $subject->importManual($manualRevealed);
     }
@@ -271,6 +272,7 @@ class ImportManualHTMLServiceTest extends TestCase
             'is_core' => true,
             'is_last_versions' => true,
         ])->shouldBeCalledTimes(1);
+        $repo->recalculateLatestVersions($manualRevealed)->shouldBeCalledTimes(1);
 
         $subject->importManual($manualRevealed);
     }
