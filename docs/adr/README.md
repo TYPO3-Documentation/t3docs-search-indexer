@@ -10,3 +10,4 @@ using lightweight [MADR](https://adr.github.io/madr/)-style records.
 | ADR | Title | Status |
 |-----|-------|--------|
 | [0001](0001-version-facet-and-latest-for-a-heterogeneous-corpus.md) | Version facet and `latest` semantics for a heterogeneous corpus | Proposed |
+| [0002](0002-cross-version-deduplication-of-search-results.md) | Cross-version de-duplication of search results | Proposed |
