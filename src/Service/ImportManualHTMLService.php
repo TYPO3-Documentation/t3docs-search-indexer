@@ -7,6 +7,7 @@ use App\Dto\Manual;
 use App\Event\ImportManual\ManualAdvance;
 use App\Event\ImportManual\ManualFinish;
 use App\Event\ImportManual\ManualStart;
+use App\Helper\SnippetId;
 use App\Repository\ElasticRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -75,6 +76,9 @@ class ImportManualHTMLService
             $section['manual_slug'] = $manual->getSlug();
             $section['manual_keywords'] = $manual->getKeywords();
             $section['relative_url'] = $file->getRelativePathname();
+            // ADR-0002: per-section key across versions, used as the collapse field so a
+            // section that diverged between versions is shown once instead of once per version.
+            $section['snippet_id'] = SnippetId::fromSection($section);
             $section['content_hash'] = md5($section['snippet_title'] . $section['snippet_content']);
             $section['is_core'] = $manual->isCore();
             $section['is_last_versions'] = $manual->isLastVersions();
