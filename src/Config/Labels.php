@@ -14,8 +14,8 @@ class Labels
         'manual_type' => 'Document Type',
         'major_versions' => 'Major Version',
         'manual_language' => 'Language',
-        'option' => 'Option',
-        'optionaggs' => 'Option',
+        'option' => 'Reference type',
+        'optionaggs' => 'Reference type',
     ];
 
     public static function getLabelForEsColumn(string $filter, string $default = ''): string
