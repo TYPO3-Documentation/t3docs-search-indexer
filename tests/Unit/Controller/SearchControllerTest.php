@@ -114,6 +114,35 @@ class SearchControllerTest extends TestCase
         $subject->search($request->reveal());
     }
 
+    /**
+     * The suggest endpoint gets merged hits (data + highlights), like the results page, and
+     * links each one with SlugBuilder, so the modal links to the same version as the page.
+     *
+     * @test
+     */
+    public function suggestActionLinksMergedHits(): void
+    {
+        $elasticRepository = $this->prophesize(ElasticRepository::class);
+        $elasticRepository->suggestScopes(Argument::any())->willReturn([]);
+        $elasticRepository->searchDocumentsForSuggest(Argument::any())->willReturn([
+            'time' => 1,
+            'results' => [[
+                'data' => [
+                    'manual_version' => ['main', '0.25'],
+                    'manual_slug' => ['p/netresearch/nr-llm/main/en-us', 'p/netresearch/nr-llm/0.25/en-us'],
+                    'is_core' => false,
+                ],
+                'highlights' => [],
+            ]],
+        ]);
+        $subject = new SearchController($elasticRepository->reveal());
+
+        $response = $subject->suggest(Request::create('/suggest', 'GET', ['q' => 'openai']));
+        $json = json_decode((string)$response->getContent(), true);
+
+        self::assertSame('p/netresearch/nr-llm/0.25/en-us', $json['results'][0]['manual_slug']);
+    }
+
     private function setProperty($instance, string $property, $value)
     {
         $propertyReflection = new \ReflectionProperty($instance, $property);
