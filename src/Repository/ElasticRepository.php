@@ -6,6 +6,7 @@ use App\Config\ManualType;
 use App\Dto\Constraints;
 use App\Dto\Manual;
 use App\Dto\SearchDemand;
+use App\Helper\CollapsedHitMerger;
 use App\Helper\SlugBuilder;
 use App\QueryBuilder\ElasticQueryBuilder;
 use Elastica\Aggregation\Terms;
@@ -14,7 +15,6 @@ use Elastica\Exception\InvalidException;
 use Elastica\Index;
 use Elastica\Multi\Search as MultiSearch;
 use Elastica\Query;
-use Elastica\Result;
 use Elastica\Script\AbstractScript;
 use Elastica\Script\Script;
 use Elastica\Search;
@@ -41,6 +41,12 @@ class ElasticRepository
     private int $perPage = 10;
 
     private int $totalHits = 0;
+
+    /**
+     * Elasticsearch's default index.max_result_window: from + size beyond it is rejected,
+     * so no page link may point past it.
+     */
+    private const RESULT_WINDOW = 10000;
 
     private readonly Client $elasticClient;
 
@@ -81,6 +87,16 @@ class ElasticRepository
         $urlFragment = str_replace('/', '-', $snippet['manual_title'] . '-' . $snippet['relative_url'] . '-' . $snippet['content_hash']);
         $documentId = $urlFragment . '-' . $snippet['fragment'];
 
+        $script = $this->buildUpsertScript($snippet);
+        $this->elasticIndex->getClient()->updateDocument($documentId, $script, $this->elasticIndex->getName());
+    }
+
+    /**
+     * Update script for a document that already exists (shared by several versions), with the
+     * snippet as the upsert for a new one.
+     */
+    private function buildUpsertScript(array $snippet): Script
+    {
         // Append versions in the array
         $scriptCode = <<<EOD
 if (!(ctx._source.manual_slug instanceof List)) {
@@ -92,6 +108,10 @@ if (!ctx._source.manual_slug.contains(params.manual_slug)) {
 
 if (!ctx._source.manual_version.contains(params.manual_version)) {
     ctx._source.manual_version.add(params.manual_version);
+}
+
+if (params.snippet_id != null) {
+    ctx._source.snippet_id = params.snippet_id;
 }
 
 for (int i = 0; i < params.major_versions.length; i++) {
@@ -115,6 +135,9 @@ EOD;
         $script->setParam('manual_version', $version);
         $script->setParam('manual_slug', $snippet['manual_slug']);
         $script->setParam('major_versions', $majorVersions);
+        // ADR-0002: a document kept from an earlier import (shared by several versions) must
+        // get snippet_id too, or it falls into the collapse group of documents without the key.
+        $script->setParam('snippet_id', $snippet['snippet_id'] ?? null);
 
         // For INSERT
         $snippet['manual_slug'] = [$snippet['manual_slug']];
@@ -122,7 +145,8 @@ EOD;
         $snippet['major_versions'] = $majorVersions;
 
         $script->setUpsert($snippet);
-        $this->elasticIndex->getClient()->updateDocument($documentId, $script, $this->elasticIndex->getName());
+
+        return $script;
     }
 
     /**
@@ -306,7 +330,7 @@ EOD;
                 $singleQuery['aggs'][$scope]['aggs']['manual_slug_hits'] = [
                     'top_hits' => [
                         'size' => 1,
-                        '_source' => ['manual_version', 'manual_slug'],
+                        '_source' => ['manual_version', 'manual_slug', 'is_core'],
                         // Sort by is_last_versions to prefer latest documentation versions
                         // Fixes #121: Suggest links pointed to outdated versions
                         'sort' => [
@@ -402,7 +426,7 @@ EOD;
      */
     public function findByQuery(SearchDemand $searchDemand): array
     {
-        $query = $this->getDefaultSearchQuery($searchDemand);
+        $query = $this->withSectionCount($this->getDefaultSearchQuery($searchDemand));
 
         $currentPage = $searchDemand->getPage();
 
@@ -413,19 +437,23 @@ EOD;
         $this->addAggregations($search->getQuery());
 
         $elasticaResultSet = $search->search();
-        $results = $elasticaResultSet->getResults();
+        $results = CollapsedHitMerger::merge($elasticaResultSet->getResults(), $searchDemand);
 
         $maxScore = $elasticaResultSet->getMaxScore();
         $aggs = $elasticaResultSet->getAggregations();
+        // With collapse, getTotalHits() counts documents; use the distinct-section
+        // cardinality so the result count and pagination reflect the collapsed hits.
+        $sectionCount = $aggs['section_count']['sections']['value'] ?? null;
+        unset($aggs['section_count']);
         $aggs = $this->sortAggregations($aggs);
 
-        $this->totalHits = $elasticaResultSet->getTotalHits();
+        $this->totalHits = $sectionCount ?? $elasticaResultSet->getTotalHits();
 
         $out = [
             'pagesToLinkTo' => $this->getPages($currentPage),
             'currentPage' => $currentPage,
             'prev' => $currentPage - 1,
-            'next' => $currentPage < ceil($this->totalHits / $this->perPage) ? $currentPage + 1 : 0,
+            'next' => $currentPage < $this->pageCount() ? $currentPage + 1 : 0,
             'totalResults' => $this->totalHits,
             'startingAtItem' => ($currentPage * $this->perPage) - ($this->perPage - 1),
             'endingAtItem' => $currentPage * $this->perPage,
@@ -440,7 +468,7 @@ EOD;
     }
 
     /**
-     * @return array{time: int, results: array<Result>}
+     * @return array{time: int, results: array<int, array{data: array<string, mixed>, highlights: array<mixed>}>}
      * @throws InvalidException
      */
     public function searchDocumentsForSuggest(SearchDemand $searchDemand): array
@@ -453,7 +481,7 @@ EOD;
 
         return [
             'time' => $searchResults->getTotalTime(),
-            'results' => $searchResults->getResults(),
+            'results' => CollapsedHitMerger::merge($searchResults->getResults(), $searchDemand),
         ];
     }
 
@@ -522,11 +550,20 @@ EOD;
     }
 
     /**
+     * Pages that can be fetched. The section count (ADR-0002) is not capped at the result
+     * window the way getTotalHits() is, so the cap applies here; "N results" stays uncapped.
+     */
+    private function pageCount(): int
+    {
+        return (int)ceil(min($this->totalHits, self::RESULT_WINDOW) / $this->perPage);
+    }
+
+    /**
      * @return array
      */
     protected function getPages($currentPage): array
     {
-        $numPages = ceil($this->totalHits / $this->perPage);
+        $numPages = $this->pageCount();
         $i = 0;
         $maxPages = $numPages;
         if ($numPages > 15 && $currentPage <= 7) {
@@ -689,7 +726,56 @@ EOD;
             }
         }
 
+        // ADR-0002: collapse hits by section so a section that fragmented across versions
+        // is returned once instead of once per version; inner_hits carry the per-version
+        // documents (version badges, and the text of the representative version).
+        if (self::isSectionCollapseEnabled()) {
+            $query['collapse'] = [
+                'field' => 'snippet_id',
+                'inner_hits' => [
+                    'name' => CollapsedHitMerger::INNER_HITS_NAME,
+                    'size' => 20,
+                    '_source' => ['manual_version', 'manual_slug', 'snippet_title', 'snippet_content', 'content_hash'],
+                    'highlight' => $query['highlight'],
+                ],
+            ];
+        }
+
         return $query;
+    }
+
+    /**
+     * With the collapse on, count distinct sections (collapse groups) so the result count and
+     * the pagination reflect the collapsed hits. Aggregations ignore the post_filter, so the
+     * count runs inside a filter aggregation that carries the same post_filter.
+     */
+    private function withSectionCount(array $query): array
+    {
+        if (!self::isSectionCollapseEnabled()) {
+            return $query;
+        }
+
+        $query['aggs']['section_count'] = [
+            'filter' => $query['post_filter'] ?? ['match_all' => new \stdClass()],
+            'aggs' => [
+                'sections' => [
+                    'cardinality' => ['field' => 'snippet_id', 'precision_threshold' => 40000],
+                ],
+            ],
+        ];
+
+        return $query;
+    }
+
+    /**
+     * The collapse needs snippet_id on every document, which only a full re-import with this
+     * importer provides. Before that, documents without the field share one collapse group
+     * and the search shows no results, so the collapse stays off until SEARCH_COLLAPSE_SECTIONS
+     * is set after the re-import.
+     */
+    private static function isSectionCollapseEnabled(): bool
+    {
+        return filter_var($_ENV['SEARCH_COLLAPSE_SECTIONS'] ?? false, FILTER_VALIDATE_BOOL);
     }
 
     private function getElasticSearchConfig(): array
