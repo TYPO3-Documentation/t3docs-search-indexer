@@ -18,14 +18,17 @@ class SlugBuilder
         $allSlugs = is_array($data['manual_slug']) ? $data['manual_slug'] : [$data['manual_slug']];
         $requestedVersion = $forceVersion ?: ($searchDemand->getFilters()['major_versions'][0] ?? null);
 
-        if ($requestedVersion === 'latest') {
-            $requestedVersion = $allVersion[0];
-        }
+        // Without a specific version, link to the representative version (ADR-0002):
+        // current stable for core documentation, newest non-main release for extensions.
+        $representativeVersion = RepresentativeVersion::select($allVersion, (bool)($data['is_core'] ?? false));
 
-        $requestedVersion = explode('.', $requestedVersion)[0];
-
-        // If a major version is seeked, replace the version in the slug to match.
-        if ($requestedVersion) {
+        if ($requestedVersion && in_array($requestedVersion, $allVersion, true)) {
+            // An exact version of this hit (e.g. a version badge): link to exactly that one,
+            // not to another minor of the same major.
+            $targetVersion = $requestedVersion;
+        } elseif ($requestedVersion && $requestedVersion !== 'latest') {
+            // If a major version is seeked, replace the version in the slug to match.
+            $requestedVersion = explode('.', $requestedVersion)[0];
             $targetVersion = null;
             foreach ($allVersion as $version) {
                 if (str_starts_with($version, $requestedVersion . '.') or $version === $requestedVersion) {
@@ -33,8 +36,11 @@ class SlugBuilder
                     break;
                 }
             }
+            // No exact match (e.g. the "all" pseudo-filter, or a version not present in this
+            // section): link to the representative version instead of an arbitrary one.
+            $targetVersion ??= $representativeVersion;
         } else {
-            $targetVersion = $allVersion[0];
+            $targetVersion = $representativeVersion;
         }
 
         if ($targetVersion) {

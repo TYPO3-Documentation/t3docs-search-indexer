@@ -6,8 +6,10 @@ use App\Config\ManualType;
 use App\Dto\Constraints;
 use App\Dto\Manual;
 use App\Dto\SearchDemand;
+use App\Helper\CollapsedHitMerger;
 use App\Helper\SlugBuilder;
 use App\QueryBuilder\ElasticQueryBuilder;
+use Elastica\Aggregation\Cardinality;
 use Elastica\Aggregation\Terms;
 use Elastica\Client;
 use Elastica\Exception\InvalidException;
@@ -306,7 +308,7 @@ EOD;
                 $singleQuery['aggs'][$scope]['aggs']['manual_slug_hits'] = [
                     'top_hits' => [
                         'size' => 1,
-                        '_source' => ['manual_version', 'manual_slug'],
+                        '_source' => ['manual_version', 'manual_slug', 'is_core'],
                         // Sort by is_last_versions to prefer latest documentation versions
                         // Fixes #121: Suggest links pointed to outdated versions
                         'sort' => [
@@ -413,13 +415,17 @@ EOD;
         $this->addAggregations($search->getQuery());
 
         $elasticaResultSet = $search->search();
-        $results = $elasticaResultSet->getResults();
+        $results = CollapsedHitMerger::merge($elasticaResultSet->getResults());
 
         $maxScore = $elasticaResultSet->getMaxScore();
         $aggs = $elasticaResultSet->getAggregations();
+        // With collapse, getTotalHits() counts documents; use the distinct-section
+        // cardinality so the result count and pagination reflect the collapsed hits.
+        $sectionCount = $aggs['section_count']['value'] ?? null;
+        unset($aggs['section_count']);
         $aggs = $this->sortAggregations($aggs);
 
-        $this->totalHits = $elasticaResultSet->getTotalHits();
+        $this->totalHits = $sectionCount ?? $elasticaResultSet->getTotalHits();
 
         $out = [
             'pagesToLinkTo' => $this->getPages($currentPage),
@@ -499,6 +505,11 @@ EOD;
 
     private function addAggregations(Query $elasticaQuery): void
     {
+        // Count distinct sections (collapse groups) so the total reflects the collapsed hits.
+        $sectionCount = new Cardinality('section_count');
+        $sectionCount->setField('snippet_id');
+        $elasticaQuery->addAggregation($sectionCount);
+
         $catAggregation = new Terms('Document Type');
         $catAggregation->setField('manual_type');
         $elasticaQuery->addAggregation($catAggregation);
@@ -688,6 +699,19 @@ EOD;
                 }
             }
         }
+
+        // ADR-0002: collapse hits by section so a section that fragmented across versions
+        // is returned once instead of once per version; inner_hits carry the per-version
+        // documents (version badges, and the text of the representative version).
+        $query['collapse'] = [
+            'field' => 'snippet_id',
+            'inner_hits' => [
+                'name' => CollapsedHitMerger::INNER_HITS_NAME,
+                'size' => 20,
+                '_source' => ['manual_version', 'manual_slug', 'snippet_title', 'snippet_content', 'content_hash'],
+                'highlight' => $query['highlight'],
+            ],
+        ];
 
         return $query;
     }
