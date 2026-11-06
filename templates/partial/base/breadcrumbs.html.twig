@@ -1,11 +1,10 @@
 {%- set gitHubLink = getEditOnGitHubLink() -%}
 {%- set reportIssueLink = getReportIssueLink() -%}
 
-
-<div class="breadcrumb-bar" aria-label="breadcrumbs navigation" role="navigation">
+<nav aria-label="breadcrumbs navigation" class="breadcrumb-bar" role="navigation">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/">Start</a></li>
-        <li class="breadcrumb-item"><a href="#">Search results</a></li>
+        <li class="breadcrumb-item"><a href="https://docs.typo3.org/">Start</a></li>
+        <li class="breadcrumb-item"><a href="{{ path('index') }}">Search</a></li>
         {% if breadcrumb_title is defined %}
             <li aria-current="page" class="breadcrumb-item active">
                 {{ breadcrumb_title }}
@@ -13,20 +12,17 @@
         {% endif %}
     </ol>
     <div class="breadcrumb-additions">
-        {%- if (reportIssueLink or gitHubLink) %}
         {%- if reportIssueLink %}
-        <a class="btn btn-sm btn-light" href="{{ reportIssueLink }}"
-           id="btnReportIssue" rel="nofollow noopener" target="_blank">
-            <span class="btn-icon"><i class="fas fa-bug"></i></span>
-            <span class="btn-text">Report issue</span>
-        </a>
-        {% endif %}
+            <a class="btn btn-sm btn-light" href="{{ reportIssueLink }}" id="btnReportIssue" rel="nofollow noopener" target="_blank">
+                <span class="btn-icon"><i class="fa-solid fa-comment-dots"></i></span>
+                <span class="btn-text">Give feedback</span>
+            </a>
+        {% endif -%}
         {%- if gitHubLink %}
-        <a class="btn btn-sm btn-secondary" href="{{ gitHubLink }}" id="btnEditOnGitHub" rel="nofollow noopener" target="_blank">
-            <span class="btn-icon"><span class="fab fa-github"></span></span>
-            <span class="btn-text">Edit on GitHub</span>
-        </a>
-        {% endif %}
-        {% endif %}
+            <a class="btn btn-sm btn-secondary" href="{{ gitHubLink }}" id="btnEditOnGitHub" rel="nofollow noopener" target="_blank">
+                <span class="btn-icon"><span class="fa-brands fa-github"></span></span>
+                <span class="btn-text">Edit on GitHub</span>
+            </a>
+        {% endif -%}
     </div>
-</div>
+</nav>

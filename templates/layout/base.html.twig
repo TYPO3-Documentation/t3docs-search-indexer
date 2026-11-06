@@ -11,33 +11,11 @@
     {{ render_assets('js', 'header') | raw }}
 
     {% block stylesheets %}{% endblock %}
-    <style>
-        .autocomplete {
-            z-index: 2;
-            overflow: auto;
-        }
-        .autocomplete .group {
-            border-bottom: 1px solid darkgrey;
-            font-size: 1.1rem;
-        }
-        .autocomplete .suggest-item-title {
-            font-weight: bold;
-        }
-        .autocomplete .suggest-item-content {
-            font-size: 0.9rem;
-        }
-        .autocomplete a, .autocomplete span {
-            display: block;
-        }
-    </style>
-
-    <!-- UNIVERSE BAR START -->
     <script src="https://cdn.typo3.com/typo3infrastructure/universe/dist/webcomponents-loader.js"></script>
     <script src="https://cdn.typo3.com/typo3infrastructure/universe/dist/typo3-universe.js" type="module"></script>
-    <!-- UNIVERSE BAR END -->
 
     {% block link_tags %}
-        {% include 'partial/base/linktags.html.twig' %}
+        <link href="https://docs.typo3.org/search/" rel="search" title="Search">
     {% endblock %}
 
 </head>
@@ -53,7 +31,7 @@
         {% endblock %}
     </header>
 
-    <div class="page-main">
+    <main class="page-main">
         <div class="page-main-inner">
             {% include 'partial/page_main/navigation.html.twig' %}
 
@@ -63,7 +41,15 @@
                         {% include 'partial/base/breadcrumbs.html.twig' %}
                     {% endblock %}
 
-                    <div id="global-search-results" class="w-50"></div>
+                    {# The theme replaces the form with its search field. The form stays for browsers without JavaScript. #}
+                    <div id="global-search-results" class="w-50">
+                        <form action="{{ path('searchresult') }}" method="get">
+                            <div class="input-group mb-3 mt-sm-3">
+                                <input aria-label="Search the TYPO3 documentation" autocomplete="off" class="form-control shadow-none" name="q" placeholder="TYPO3 documentation..." type="text" value="{{ q is defined ? q : '' }}">
+                                <button class="btn btn-light" type="submit"><i class="fa-solid fa-magnifying-glass"></i>&nbsp;<span class="d-none d-md-inline">Search</span></button>
+                            </div>
+                        </form>
+                    </div>
 
                     <div class="document" itemscope="itemscope" itemtype="http://schema.org/Article" role="main">
                         <div itemprop="articleBody">
@@ -73,7 +59,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
     {% block page_footer %}
         {% include 'partial/base/page_footer.html.twig' %}
@@ -81,72 +67,6 @@
 </div>
 
 {{ render_assets('js', 'footer') | raw }}
-
-<script type="text/javascript">
-    let DOCUMENTATION_OPTIONS = {
-        URL_ROOT: './',
-        VERSION: 'main',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE: true
-    };
-
-    /*
-    var input = document.getElementById("searchinput");
-
-    autocomplete({
-        input: input,
-        fetch: function(text, update) {
-            json ='';
-            fetch('{{ path('suggest') }}' + '?q=' + encodeURIComponent(text)).then(function (response) {
-                return response.json();
-            }).then(function (data) {
-                update(data);
-            }).catch(function (err) {
-                // There was an error
-                console.warn('Something went wrong.', err);
-            });
-        },
-        // onSelect: function(item) {
-        //     input.value = item.label;
-        // },
-
-        emptyMsg: 'No elements found',
-        render: function(item, currentValue) {
-            var div = document.createElement("div");
-            div.className = 'suggest-item';
-
-            var anhor = document.createElement("a");
-            anhor.href = item.url;
-            anhor.className = 'text-reset';
-
-            var title = document.createElement("span");
-            title.textContent = item.label;
-            title.className = 'suggest-item-title';
-            anhor.appendChild(title);
-
-            var content = document.createElement("span");
-            content.textContent = item.content;
-            content.className = 'suggest-item-content';
-            anhor.appendChild(content);
-
-            div.appendChild(anhor);
-
-            return div;
-        },
-        renderGroup: function(groupName, currentValue) {
-            var div = document.createElement("div");
-            div.textContent = groupName;
-            return div;
-        },
-        disableAutoSelect: true,
-        debounceWaitMs: 200,
-        minLength: 3
-
-    });
-    */
-</script>
-
 
 <script>
     if (typeof searchCount != 'undefined') {

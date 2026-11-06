@@ -52,8 +52,11 @@ Configure assets
   ``{{ render_assets(assetType, assetLocation) | raw }}``, where ``assetType``
   is ``js`` or ``css`` and ``assetLocation`` is ``header`` or ``footer``.
 
-* The CSS and JS files of the documentation theme are pinned to one CDN
-  version and have to be raised together.
+* The CSS, the JS, and the logo of the documentation theme are loaded from
+  the CDN version in the ``theme_url`` parameter of ``config/services.yaml``.
+  Raise it to the version of the theme that docs.typo3.org uses. When the
+  header or the footer of the theme changes, update the templates in
+  ``templates/partial/base/`` to match.
 
 Usage
 -----
