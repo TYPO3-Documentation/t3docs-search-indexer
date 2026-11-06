@@ -13,17 +13,19 @@ parameters:
                 - draft
                 - extensions
     .container.dumper.inline_class_loader: true
+    # The theme of docs.typo3.org. Raise the version to the one that
+    # render-guides deploys; the CSS, the JS, and the logo follow it.
+    theme_url: 'https://cdn.typo3.com/typo3documentation/theme/typo3-docs-theme/0.47.3'
     assets:
         css:
             header:
-                - 'https://cdn.typo3.com/typo3documentation/theme/typo3-docs-theme/0.38.0/css/theme.css'
+                - '%theme_url%/css/theme.css'
             footer:
         js:
             header: []
             footer:
-                - 'https://cdn.typo3.com/typo3documentation/theme/typo3-docs-theme/0.38.0/js/popper.min.js'
-                - 'https://cdn.typo3.com/typo3documentation/theme/typo3-docs-theme/0.38.0/js/bootstrap.min.js'
-                - 'https://cdn.typo3.com/typo3documentation/theme/typo3-docs-theme/0.38.0/js/theme.min.js'
+                - '%theme_url%/js/bootstrap.min.js'
+                - '%theme_url%/js/theme.min.js'
 
 services:
     # default configuration for services in *this* file

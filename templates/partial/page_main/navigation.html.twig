@@ -1,22 +1,10 @@
-<div class="page-main-navigation d-lg-none d-block">
+<div class="page-main-navigation d-lg-none">
     <nav>
-        <div class="toc-header">
-            <div class="toc-title">
-                <a class="toc-title-project" href="/">Search</a>
-            </div>
-
-            <div class="toc-actions">
-                <button id="toc-toggle" class="btn btn-light d-block d-lg-none" tabindex="0"
-                        aria-controls="toc-collapse" aria-expanded="false">
-                    Menu
-                </button>
-            </div>
-        </div>
         <div id="toc-collapse">
             <div aria-label="main navigation" class="toc"
                  role="navigation">
-                {% include "partial/page_main/meta-menu.html.twig" %}
                 <all-documentations-menu-mobile></all-documentations-menu-mobile>
+                {% include "partial/page_main/meta-menu.html.twig" %}
             </div>
         </div>
     </nav>
