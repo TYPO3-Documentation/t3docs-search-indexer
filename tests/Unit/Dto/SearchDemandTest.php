@@ -182,12 +182,13 @@ class SearchDemandTest extends TestCase
     }
 
     /**
-     * Regression test for PR #108 / issue #89: the original fix for the deep
-     * Changelog scope must keep working.
+     * Regression test for PR #108 / issue #89 and issue #160: a scope that names
+     * one changelog version keeps the Core changelog type filter and is
+     * restricted to that version's sub-manual.
      *
      * @test
      */
-    public function createFromRequestUsesChangelogTypeFilterForDeepChangelogScope(): void
+    public function createFromRequestRestrictsDeepChangelogScopeToItsVersion(): void
     {
         $request = Request::create(
             '/search',
@@ -198,6 +199,44 @@ class SearchDemandTest extends TestCase
         $searchDemand = SearchDemand::createFromRequest($request);
 
         $filters = $searchDemand->getFilters();
+        $this->assertSame(ManualType::CoreChangelog->value, $filters['manual_type'] ?? null);
+        $this->assertSame(['c/typo3/cms-core/main/en-us/Changelog/12.4'], $filters['manual_slug'] ?? null);
+    }
+
+    /**
+     * Issue #160: a scope below a changelog version (a single changelog page)
+     * is restricted to the version's sub-manual, the slug that is indexed.
+     *
+     * @test
+     */
+    public function createFromRequestRestrictsChangelogPageScopeToItsVersion(): void
+    {
+        $request = Request::create(
+            '/search',
+            'GET',
+            ['q' => 'cache', 'scope' => '/c/typo3/cms-core/main/en-us/Changelog/13.4/Feature-12345-Something.html']
+        );
+
+        $filters = SearchDemand::createFromRequest($request)->getFilters();
+
+        $this->assertSame(['c/typo3/cms-core/main/en-us/Changelog/13.4'], $filters['manual_slug'] ?? null);
+    }
+
+    /**
+     * The changelog root (issue #128) still searches all versions.
+     *
+     * @test
+     */
+    public function createFromRequestKeepsChangelogRootScopeOverAllVersions(): void
+    {
+        $request = Request::create(
+            '/search',
+            'GET',
+            ['q' => 'cache', 'scope' => '/c/typo3/cms-core/main/en-us/Changelog/']
+        );
+
+        $filters = SearchDemand::createFromRequest($request)->getFilters();
+
         $this->assertSame(ManualType::CoreChangelog->value, $filters['manual_type'] ?? null);
         $this->assertArrayNotHasKey('manual_slug', $filters);
     }
