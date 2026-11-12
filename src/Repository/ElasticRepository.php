@@ -683,6 +683,11 @@ EOD;
                         'filter' => ['terms' => [$key => $value]],
                         'weight' => 10,
                     ];
+                } elseif (in_array($key, $searchDemand->getScopeFilterKeys(), true)) {
+                    // A scope must constrain the aggregations too, so it goes into the main query
+                    // instead of the post_filter, where the facet counts would span all manuals.
+                    // Filter context: it narrows the hits without changing their score.
+                    $query['query']['function_score']['query']['bool']['filter'][] = ['terms' => [$key => $value]];
                 } else {
                     $query['post_filter']['bool']['must'][] = ['terms' => [$key => $value]];
                 }
