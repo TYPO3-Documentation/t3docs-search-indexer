@@ -2,6 +2,7 @@
 
 namespace App\Tests\Unit\Dto;
 
+use App\Config\ManualType;
 use App\Dto\SearchDemand;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -154,5 +155,116 @@ class SearchDemandTest extends TestCase
         $searchDemand = SearchDemand::createFromRequest($request);
 
         $this->assertSame(3, $searchDemand->getPage());
+    }
+
+    /**
+     * Regression test for issue #128: searching from the Core Changelog
+     * landing page sends scope=/c/typo3/cms-core/main/en-us/ (without the
+     * "Changelog" segment). The detection must still recognise this as a
+     * changelog scope and apply the Core changelog type filter instead of
+     * the (never-matching) slug filter.
+     *
+     * @test
+     */
+    public function createFromRequestUsesChangelogTypeFilterForCmsCoreManualRoot(): void
+    {
+        $request = Request::create(
+            '/search',
+            'GET',
+            ['q' => 'form', 'scope' => '/c/typo3/cms-core/main/en-us/']
+        );
+
+        $searchDemand = SearchDemand::createFromRequest($request);
+
+        $filters = $searchDemand->getFilters();
+        $this->assertSame(ManualType::CoreChangelog->value, $filters['manual_type'] ?? null);
+        $this->assertArrayNotHasKey('manual_slug', $filters);
+    }
+
+    /**
+     * Regression test for PR #108 / issue #89: the original fix for the deep
+     * Changelog scope must keep working.
+     *
+     * @test
+     */
+    public function createFromRequestUsesChangelogTypeFilterForDeepChangelogScope(): void
+    {
+        $request = Request::create(
+            '/search',
+            'GET',
+            ['q' => 'feature', 'scope' => '/c/typo3/cms-core/main/en-us/Changelog/12.4/']
+        );
+
+        $searchDemand = SearchDemand::createFromRequest($request);
+
+        $filters = $searchDemand->getFilters();
+        $this->assertSame(ManualType::CoreChangelog->value, $filters['manual_type'] ?? null);
+        $this->assertArrayNotHasKey('manual_slug', $filters);
+    }
+
+    /**
+     * Other system-extension scopes (e.g. cms-form) must continue to use the
+     * slug-based filter and not be misclassified as Core changelog.
+     *
+     * @test
+     */
+    public function createFromRequestUsesSlugFilterForNonCmsCoreScope(): void
+    {
+        $request = Request::create(
+            '/search',
+            'GET',
+            ['q' => 'form', 'scope' => '/c/typo3/cms-form/main/en-us/']
+        );
+
+        $searchDemand = SearchDemand::createFromRequest($request);
+
+        $filters = $searchDemand->getFilters();
+        $this->assertSame(['c/typo3/cms-form/main/en-us'], $filters['manual_slug'] ?? null);
+        $this->assertArrayNotHasKey('manual_type', $filters);
+    }
+
+    /**
+     * Boundary test: the trailing slash in the `c/typo3/cms-core/` prefix
+     * matters. A hypothetical extension named `cms-core-extras` must NOT be
+     * misclassified as Core changelog.
+     *
+     * @test
+     */
+    public function createFromRequestUsesSlugFilterForCmsCorePrefixedExtension(): void
+    {
+        $request = Request::create(
+            '/search',
+            'GET',
+            ['scope' => '/c/typo3/cms-core-extras/main/en-us/']
+        );
+
+        $searchDemand = SearchDemand::createFromRequest($request);
+
+        $filters = $searchDemand->getFilters();
+        $this->assertSame(['c/typo3/cms-core-extras/main/en-us'], $filters['manual_slug'] ?? null);
+        $this->assertArrayNotHasKey('manual_type', $filters);
+    }
+
+    /**
+     * If the user has already chosen a Document Type filter, the changelog
+     * scope detection must NOT override it. The user's explicit choice wins.
+     *
+     * @test
+     */
+    public function createFromRequestPreservesExplicitDocumentTypeFilterForCmsCoreScope(): void
+    {
+        $request = Request::create(
+            '/search',
+            'GET',
+            [
+                'scope' => '/c/typo3/cms-core/main/en-us/',
+                'filters' => ['Document Type' => ['manual' => 'true']],
+            ]
+        );
+
+        $searchDemand = SearchDemand::createFromRequest($request);
+
+        $filters = $searchDemand->getFilters();
+        $this->assertSame(['manual'], $filters['manual_type'] ?? null);
     }
 }
