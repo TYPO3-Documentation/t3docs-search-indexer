@@ -22,12 +22,16 @@ time from `explode('.', $version)[0]`, plus two synthetic tokens: `all` and `lat
 (`Manual::getLastVersions()` → `VersionFilter::filterVersions()`). A snippet is tagged `latest`
 iff its version is in that set at index time (`ElasticRepository::addOrUpdateDocument`).
 
-Contrary to how it may look, this is **not** a core rule blindly applied to extensions. The "only
+Contrary to how it may look, this did **not** start as a core rule applied to extensions. The "only
 show the last two versions" restriction was introduced *specifically for third-party documentation*
-(commit `3d25e20`, gated on `is_core = false`); core manuals are treated differently — a ranking
-boost for `is_core` and for the current TYPO3 stable/dev version via `Typo3VersionMapping`. And
-version aggregation has been major-granular since #14 (2023): `latest` has always meant "the highest
-version per major", never "the single newest version".
+(commit `3d25e20`, a query-time filter gated on `is_core = false`, while core manuals were limited to
+the LTS versions). One day later, commit `78c1f87` replaced both filters with the `latest` facet
+token, which `addOrUpdateDocument` sets by the same last-versions rule for every manual, core
+included. Since then the version filter treats core and community manuals alike, except that core
+changelogs always pass it; otherwise core manuals differ in ranking — a boost for `is_core` and for
+the current TYPO3 stable/dev version via `Typo3VersionMapping`. And version aggregation has been major-granular
+since #14 (2023): `latest` has always meant "the highest version per major", never "the single newest
+version".
 
 The real mismatch is therefore **granularity, not core-vs-extension**: "last two *majors*" is right
 for extensions with genuine SemVer majors (e.g. `georgringer/news`: 9 / 11 / 12), but collapses for
