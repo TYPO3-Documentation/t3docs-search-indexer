@@ -26,6 +26,9 @@
         .aggregations .card-body {
             display: none;
         }
+        .aggregations .aggregations-scopes {
+            display: block;
+        }
         .aggregations.is-expanded .card-header {
             border-bottom-width: 1px;
         }
@@ -65,6 +68,16 @@
     <script>
         var searchCount = {{ results.totalResults }};
     </script>
+    {% set activeScopes = [] %}
+    {% if searchScope is not empty %}
+        {% set activeScopes = activeScopes|merge([{'name': 'scope', 'title': 'Scope', 'value': searchScope|striptags}]) %}
+    {% endif %}
+    {% if searchFilter.package is defined %}
+        {% set activeScopes = activeScopes|merge([{'name': 'filters[package]', 'title': 'Manual', 'value': searchFilter.package}]) %}
+    {% endif %}
+    {% if searchFilter.vendor is defined %}
+        {% set activeScopes = activeScopes|merge([{'name': 'filters[vendor]', 'title': 'Vendor', 'value': searchFilter.vendor}]) %}
+    {% endif %}
     {% if results.totalResults > 0 %}
         <h4>Showing hits <strong>{{ results.startingAtItem }} </strong>to <strong>{{ results.endingAtItem }}</strong> of <strong>{{ results.totalResults }}</strong></h4>
         <div class="row">
@@ -100,16 +113,6 @@
                 <div class="wy-menuXX wy-menu-verticalXX" data-spy="affix" role="navigation" aria-label="main navigation">
                     <form action="{{ path('searchresult') }}" method="get" class="form">
                         <input type="hidden" name="q" value="{{ (q is defined) ? q : '' }}">
-                        {% set activeScopes = [] %}
-                        {% if searchScope is not empty %}
-                            {% set activeScopes = activeScopes|merge([{'name': 'scope', 'title': 'Scope', 'value': searchScope|striptags}]) %}
-                        {% endif %}
-                        {% if searchFilter.package is defined %}
-                            {% set activeScopes = activeScopes|merge([{'name': 'filters[package]', 'title': 'Manual', 'value': searchFilter.package}]) %}
-                        {% endif %}
-                        {% if searchFilter.vendor is defined %}
-                            {% set activeScopes = activeScopes|merge([{'name': 'filters[vendor]', 'title': 'Vendor', 'value': searchFilter.vendor}]) %}
-                        {% endif %}
                         {% include 'partial/aggregations.html.twig' with {
                             'aggregations': results.aggs,
                             'query': q,
@@ -122,6 +125,27 @@
         </div>
     {% else %}
         <h4>No search results found for: {{ q }}</h4>
+        {% if activeScopes is not empty %}
+            {# A scope that is too narrow is a common cause of no hits, so keep it removable here. #}
+            <form action="{{ path('searchresult') }}" method="get" class="form">
+                <input type="hidden" name="q" value="{{ (q is defined) ? q : '' }}">
+                {# Keep the ticked facets; only the unchecked scope is dropped. #}
+                {% for filterName, filterValue in searchFilter|filter((value, name) => name not in ['package', 'vendor']) %}
+                    {% if filterValue is iterable %}
+                        {% for key, state in filterValue %}
+                            <input type="hidden" name="filters[{{ filterName }}][{{ key }}]" value="{{ state }}">
+                        {% endfor %}
+                    {% else %}
+                        <input type="hidden" name="filters[{{ filterName }}]" value="{{ filterValue }}">
+                    {% endif %}
+                {% endfor %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        {% include 'partial/scopes.html.twig' with {'activeScopes': activeScopes} only %}
+                    </div>
+                </div>
+            </form>
+        {% endif %}
     {% endif %}
     {% include '/partial/paginator.html.twig' with {'result':results, 'arguments': {'q': q, 'scope': searchScope|striptags|escape, 'vendor': searchFilter.vendor ?? '', 'filters': filters}} %}
 {% endblock %}
