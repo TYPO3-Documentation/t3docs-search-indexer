@@ -142,7 +142,8 @@ class ImportManualHTMLServiceTest extends TestCase
             'is_core' => true,
             'is_last_versions' => true,
         ])->shouldBeCalledTimes(1);
-        $repo->recalculateLatestVersions($manualRevealed)->shouldBeCalledTimes(1);
+        $repo->recalculateLatestVersions($manualRevealed)->shouldBeCalledTimes(1)->willReturn(0);
+        $logger->warning(Argument::cetera())->shouldNotBeCalled();
 
         $subject->importManual($manualRevealed);
     }
@@ -168,6 +169,7 @@ class ImportManualHTMLServiceTest extends TestCase
         $logger = $this->prophesize(LoggerInterface::class);
 
         $parser->checkIfMetaTagExistsInFile($fileRevealed, 'x-typo3-indexer', 'noindex')->willReturn(true);
+        $repo->recalculateLatestVersions($manualRevealed)->willReturn(0);
 
         $eventDispatcher = $this->prophesize(EventDispatcherInterface::class);
         $eventDispatcher
@@ -272,7 +274,8 @@ class ImportManualHTMLServiceTest extends TestCase
             'is_core' => true,
             'is_last_versions' => true,
         ])->shouldBeCalledTimes(1);
-        $repo->recalculateLatestVersions($manualRevealed)->shouldBeCalledTimes(1);
+        $repo->recalculateLatestVersions($manualRevealed)->shouldBeCalledTimes(1)->willReturn(3);
+        $logger->warning(Argument::containingString('latest state'), Argument::withEntry('sections', 3))->shouldBeCalledTimes(1);
 
         $subject->importManual($manualRevealed);
     }
