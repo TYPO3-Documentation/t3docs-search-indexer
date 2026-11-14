@@ -12,12 +12,14 @@ readonly class SearchDemand
         private string $scope,
         private int $page,
         private array $filters,
-        private bool $suggestionsHighlighted = false
+        private bool $suggestionsHighlighted = false,
+        private array $scopeFilterKeys = []
     ) {}
 
     public static function createFromRequest(Request $request): SearchDemand
     {
         $filters = [];
+        $scopeFilterKeys = [];
         $requestFilters = $request->query->all()['filters'] ?? [];
 
         if (is_string($requestFilters)) {
@@ -77,6 +79,7 @@ readonly class SearchDemand
             // @see https://github.com/TYPO3-Documentation/t3docs-search-indexer/issues/89#issuecomment-2696410395
             if (str_contains($scope, 'c/typo3/cms-core/main/en-us/Changelog') && empty($filters['manual_type'])) {
                 $filters['manual_type'] = ManualType::CoreChangelog->value;
+                $scopeFilterKeys[] = 'manual_type';
             } else {
                 $filters['manual_slug'] = [$scope];
             }
@@ -87,12 +90,20 @@ readonly class SearchDemand
             $filters['manual_vendor'] = [$vendor];
         }
 
+        // A scope is a hard boundary, unlike a facet the user ticks: the manual (slug),
+        // package and vendor filters, and the document type a Changelog scope sets.
+        foreach (['manual_slug', 'manual_package', 'manual_vendor'] as $scopeFilterKey) {
+            if (isset($filters[$scopeFilterKey])) {
+                $scopeFilterKeys[] = $scopeFilterKey;
+            }
+        }
+
         // default version is "latest"
         if (empty($filters['major_versions'])) {
             $filters['major_versions'] = ['latest'];
         }
 
-        return new self($query, $scope, max($page, 1), $filters, $areSuggestionsHighlighted);
+        return new self($query, $scope, max($page, 1), $filters, $areSuggestionsHighlighted, $scopeFilterKeys);
     }
 
     public function getQuery(): string
@@ -113,6 +124,16 @@ readonly class SearchDemand
     public function getFilters(): array
     {
         return $this->filters;
+    }
+
+    /**
+     * Keys of the filters that come from a search scope rather than from a facet.
+     *
+     * @return string[]
+     */
+    public function getScopeFilterKeys(): array
+    {
+        return $this->scopeFilterKeys;
     }
 
     public function areSuggestionsHighlighted(): bool
@@ -288,7 +309,15 @@ readonly class SearchDemand
 
     public function getCurrentFilters(): array
     {
-        return $this->processFiltersIntoGetParams($this->getFilters());
+        $filters = $this->getFilters();
+
+        // The document type a Changelog scope sets is not a ticked facet. Sent back by the
+        // facet form, it would count as one and replace the scope on the next request.
+        if (in_array('manual_type', $this->scopeFilterKeys, true)) {
+            unset($filters['manual_type']);
+        }
+
+        return $this->processFiltersIntoGetParams($filters);
     }
 
     public function toArray(): array
