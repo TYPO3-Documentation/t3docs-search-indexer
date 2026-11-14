@@ -46,7 +46,9 @@ readonly class SearchDemand
                         }
                         break;
                     case 'string':
-                        $filters[$searchField] = $value;
+                        if (is_string($value)) {
+                            $filters[$searchField] = $value;
+                        }
                         break;
                     case 'array':
                         if (!is_array($value)) {
