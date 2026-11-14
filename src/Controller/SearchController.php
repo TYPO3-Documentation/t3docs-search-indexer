@@ -59,8 +59,8 @@ class SearchController extends AbstractController
         $searchResults = $this->elasticRepository->searchDocumentsForSuggest($searchDemand);
         $jsonData['time'] = $searchResults['time'];
 
-        $jsonData['results'] = array_map(static function ($result) use ($searchDemand) {
-            $data = $result->getData();
+        $jsonData['results'] = array_map(static function (array $result) use ($searchDemand) {
+            $data = $result['data'];
             $data['manual_slug'] = SlugBuilder::build($data, $searchDemand);
             return $data;
         }, $searchResults['results']);
