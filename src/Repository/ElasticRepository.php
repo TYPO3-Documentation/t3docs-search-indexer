@@ -138,13 +138,19 @@ EOD;
      * This re-derives both from the manual's *current* last-versions set: a snippet is 'latest' iff
      * at least one of the versions it appears in is still a last version. Run after importing any
      * version, so re-rendering the newest version (or main) self-heals stale state.
+     *
+     * A snippet whose state is already right is not written again.
+     *
+     * @return int The number of snippets skipped because of a version conflict, for example
+     *             because another import changed them at the same time. They keep their state
+     *             until the next import of the manual.
      */
-    public function recalculateLatestVersions(Manual $manual): void
+    public function recalculateLatestVersions(Manual $manual): int
     {
         $lastVersions = array_values($manual->getLastVersionsList());
         // If the last-versions set cannot be determined, leave the index untouched.
         if ($lastVersions === []) {
-            return;
+            return 0;
         }
 
         $query = new Query([
@@ -165,6 +171,10 @@ for (def v : ctx._source.manual_version) {
     if (params.lastVersions.contains(v)) { isLatest = true; break; }
 }
 int idx = ctx._source.major_versions.indexOf('latest');
+if ((idx >= 0) == isLatest && ctx._source.is_last_versions == isLatest) {
+    ctx.op = 'noop';
+    return;
+}
 if (isLatest) {
     if (idx < 0) { ctx._source.major_versions.add('latest'); }
 } else if (idx >= 0) {
@@ -175,8 +185,10 @@ EOD;
 
         $script = new Script($scriptCode, ['lastVersions' => $lastVersions], AbstractScript::LANG_PAINLESS);
         $this->elasticIndex->refresh();
-        $this->elasticIndex->updateByQuery($query, $script, ['wait_for_completion' => true, 'conflicts' => 'proceed']);
+        $response = $this->elasticIndex->updateByQuery($query, $script, ['wait_for_completion' => true, 'conflicts' => 'proceed']);
         $this->elasticIndex->refresh();
+
+        return (int)($response->getData()['version_conflicts'] ?? 0);
     }
 
     /**
