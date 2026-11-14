@@ -84,6 +84,13 @@ readonly class SearchDemand
             // @see https://github.com/TYPO3-Documentation/t3docs-search-indexer/issues/128
             if (str_starts_with($scope, 'c/typo3/cms-core/') && empty($filters['manual_type'])) {
                 $filters['manual_type'] = ManualType::CoreChangelog->value;
+
+                // A scope that names one changelog version (…/Changelog/12.4, or a page
+                // below it) is restricted to that sub-manual's slug as well.
+                // @see https://github.com/TYPO3-Documentation/t3docs-search-indexer/issues/160
+                if (preg_match('#^c/typo3/cms-core/[^/]+/[^/]+/Changelog/[^/]+#', $scope, $matches)) {
+                    $filters['manual_slug'] = [$matches[0]];
+                }
             } else {
                 $filters['manual_slug'] = [$scope];
             }
