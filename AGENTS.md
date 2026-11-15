@@ -99,7 +99,9 @@ every record with its status and explains the format.
   prefer the three above for new commits).
 - Explain *why* in the body — the diff already shows what changed.
 - If AI assistance went beyond spelling/grammar, add an
-  `Assisted-by: <tool/model name> <contact>` trailer.
+  `Assisted-by: <tool/model name> <contact>` trailer. Claude uses
+  `Assisted-by: Claude <model name> <noreply@anthropic.com>` with the name
+  of the model it runs as, not a guess.
 - This repo has **no LTS branches** — everything targets `main`, so there is
   no `Releases:` trailer and no `backport <version>` label to add, unlike the
   manual repos. (The `backport required` / `backport done` labels exist but
