@@ -135,6 +135,32 @@ class SearchDemandTest extends TestCase
     /**
      * @test
      */
+    public function createFromRequestIgnoresArrayValueForStringFilter(): void
+    {
+        $request = Request::create('/search', 'GET', ['filters' => ['package' => ['a' => 'b']]]);
+
+        $searchDemand = SearchDemand::createFromRequest($request);
+
+        $this->assertSame(['major_versions' => ['latest']], $searchDemand->getFilters());
+        $this->assertArrayNotHasKey('package', $searchDemand->getCurrentFilters());
+    }
+
+    /**
+     * @test
+     */
+    public function createFromRequestNormalizesFilterNameCase(): void
+    {
+        $request = Request::create('/search', 'GET', ['filters' => ['Package' => 'typo3/cms-core']]);
+
+        $searchDemand = SearchDemand::createFromRequest($request);
+
+        $this->assertSame('typo3/cms-core', $searchDemand->getFilters()['manual_package']);
+        $this->assertSame('typo3/cms-core', $searchDemand->getCurrentFilters()['package']);
+    }
+
+    /**
+     * @test
+     */
     public function createFromRequestWithNegativePageNumber(): void
     {
         $request = Request::create('/search', 'GET', ['page' => -1]);
