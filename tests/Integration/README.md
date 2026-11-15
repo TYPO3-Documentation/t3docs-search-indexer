@@ -1,10 +1,10 @@
 # Integration tests
 
 These tests run against a **real Elasticsearch** instance and cover behaviour the
-unit tests mock away — the Painless `latest` recompute, content-hash de-duplication,
-and version-aware queries.
+unit tests mock away — the Painless `latest` recompute and the content-hash
+de-duplication.
 
-They are **not part of CI yet** and are run manually:
+CI runs them against an Elasticsearch service container. To run them locally:
 
 ```bash
 composer ci:test:integration

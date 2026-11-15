@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!-- Integration tests against a REAL Elasticsearch instance.
-     NOT wired into CI yet — run manually:  composer ci:test:integration
+     CI runs them against an Elasticsearch service container.
+     Locally:  composer ci:test:integration
      (inside DDEV the ELASTICA_HOST is preset to "elasticsearch"). -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"

@@ -56,3 +56,36 @@ jobs:
         run: composer install --prefer-dist --no-progress --optimize-autoloader
       - name: Run Unit tests
         run: composer ci:test:unit
+  integration-tests:
+    name: Run Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      elasticsearch:
+        image: elasticsearch:7.17.1
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: 'false'
+          ES_JAVA_OPTS: -Xms512m -Xmx512m
+        ports:
+          - 9200:9200
+        options: >-
+          --health-cmd "curl -fs http://localhost:9200/_cluster/health?wait_for_status=yellow"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Set up PHP 8.2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: 8.2
+          coverage: none
+          tools: composer:v2.9.8
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --optimize-autoloader
+      - name: Run integration tests
+        env:
+          ELASTICA_HOST: 127.0.0.1
+          ELASTICA_PORT: 9200
+        run: composer ci:test:integration
