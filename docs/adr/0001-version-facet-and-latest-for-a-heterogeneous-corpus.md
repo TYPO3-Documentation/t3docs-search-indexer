@@ -1,8 +1,8 @@
 # 1. Version facet and `latest` semantics for a heterogeneous corpus
 
-- Status: **Proposed**
-- Date: 2026-07-31
-- Deciders: TYPO3 Documentation Team
+- Status: **Accepted** (baseline and step 1; step 2 is not decided)
+- Date: 2026-11-15
+- Deciders: Lina Wolf (TYPO3 Documentation Team)
 - Related: #143 (symptoms), #144 (fixes the stale-`latest` maintenance bug)
 
 ## Context and problem statement
@@ -68,19 +68,20 @@ re-litigated here; this ADR records the semantics as the baseline.)
 4. **Replace the extension version facet with a per-manual `latest`/`all` toggle** — drop major buckets
    for extensions entirely.
 
-## Decision outcome (recommended)
+## Decision outcome
 
 Adopt a staged combination, keeping `latest` semantics unchanged:
 
 - **Baseline (already true after #144):** `latest` = "the manual's current last-versions set", correctly
   maintained on every import. No change of meaning.
-- **Step 1 — Option 2 (scope-aware facet):** stop showing the numeric-major mix across manuals. In
-  cross-manual scope the version facet is reduced to `latest` vs `all`; numeric majors remain only
-  within a single manual / the core corpus. Low cost, removes the most confusing behavior.
-- **Step 2 — Option 3 (TYPO3-compatibility facet):** index a `typo3_versions` field for community
-  extensions from the deployment metadata and expose it as the primary version-ish facet for them.
-  This is the axis users actually filter on. Larger change (new field + reindex + UI), tracked as
-  follow-up work.
+- **Step 1 — Option 2, adjusted (scope-aware facet):** in cross-manual scope, the version facet
+  shows `latest`, `all`, and the TYPO3 core majors only. Extension majors are not listed there, and
+  community extensions pass a core-major filter with their `latest` set. Within a single manual, the
+  facet shows the majors of that manual, as before. The core majors stay in cross-manual scope,
+  because filtering a search across all manuals to one TYPO3 version is the main use of the facet.
+- **Step 2 — Option 3 (TYPO3-compatibility facet): not decided.** The indexer reads only the
+  rendered HTML and has no access to the deployment metadata (Intercept). Step 2 is decided in a
+  new ADR once a data source for the supported TYPO3 version is known.
 
 Option 4 is rejected: it discards useful within-manual version filtering for extensions that *do* have
 meaningful majors (e.g. news). Option 1 is rejected: it is the current, demonstrably confusing state.
@@ -89,7 +90,7 @@ meaningful majors (e.g. news). Option 1 is rejected: it is the current, demonstr
 
 **Positive**
 - Cross-manual search stops presenting a meaningless integer soup.
-- Community extensions gain the facet users actually want (TYPO3 compatibility).
+- Once step 2 is decided, community extensions gain the facet users actually want (TYPO3 compatibility).
 - Core behavior is unchanged.
 
 **Negative / cost**
