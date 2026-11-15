@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       elasticsearch:
-        image: elasticsearch:7.17.1
+        image: elasticsearch:7.17.28
         env:
           discovery.type: single-node
           xpack.security.enabled: 'false'
