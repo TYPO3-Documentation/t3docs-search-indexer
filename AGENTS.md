@@ -71,14 +71,26 @@ Run the tests and the CS check before proposing a change — CI
     full run would skip. That is intentional — don't "fix" it.
 5.  **Search relevance is tuned, not accidental.** Boosting, version handling
     and aggregations in `ElasticQueryBuilder` encode documentation-team
-    decisions (see `CHANGELOG.md`). Don't retune them as a side effect of an
-    unrelated change.
+    decisions (see `CHANGELOG.md` and the ADRs in `docs/adr/`). Don't retune
+    them as a side effect of an unrelated change.
 6.  **Mapping changes need a reindex.** `config/Elasticorn/docsearch/` is
     applied by Elasticorn, not by the application; an altered mapping has no
     effect until the index is re-initialised and the manuals re-imported.
 7.  **CDN asset versions are pinned** in the `assets` section of
     `config/services.yaml` and must be raised together — theme CSS and JS come
     from the same `typo3-docs-theme` version.
+
+## Architecture decisions
+
+The project records decisions about search and indexing behaviour as
+Architecture Decision Records in `docs/adr/`. `docs/adr/README.md` lists
+every record with its status and explains the format.
+
+- Before you change an area, read the ADRs that cover it. A change that
+  contradicts an `Accepted` ADR needs a new ADR first.
+- Do not change the content of an `Accepted` ADR. Write a new record that
+  supersedes it, and set the old record's status to `Superseded by NNNN`.
+- When you add an ADR, add its row to the table in `docs/adr/README.md`.
 
 ## Commit and pull request conventions
 
@@ -106,4 +118,5 @@ to `main` does *not* deploy by itself; someone triggers it.
 
 - `README.rst` — local setup, indexing usage, Kibana, exclusion rules
 - `CHANGELOG.md` — notable search/indexing behaviour changes
+- `docs/adr/README.md` — index of the Architecture Decision Records
 - [render-guides](https://github.com/TYPO3-Documentation/render-guides) — produces the HTML this app indexes
