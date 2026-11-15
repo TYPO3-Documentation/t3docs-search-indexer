@@ -2,6 +2,7 @@
 
 namespace App\Tests\Integration;
 
+use App\Config\ManualType;
 use App\QueryBuilder\ElasticQueryBuilder;
 use App\Repository\ElasticRepository;
 use Elastica\Index;
@@ -14,7 +15,7 @@ use Symfony\Component\Yaml\Yaml;
  * Base class for integration tests that exercise a real Elasticsearch instance
  * (queries, aggregations and Painless scripts that unit tests mock away).
  *
- * These tests are NOT part of CI yet — run them manually against a running ES:
+ * CI runs them against an Elasticsearch service container. To run them locally:
  *
  *     composer ci:test:integration
  *
@@ -79,6 +80,8 @@ abstract class IntegrationTestCase extends TestCase
 
     /**
      * A complete snippet with sensible defaults; override per test.
+     * The defaults are what the importer writes for the community extension
+     * acme/demo, see ImportManualHTMLService::importManual().
      *
      * @param array<string, mixed> $overrides
      * @return array<string, mixed>
@@ -93,7 +96,7 @@ abstract class IntegrationTestCase extends TestCase
             'manual_vendor' => 'acme',
             'manual_extension' => 'demo',
             'manual_package' => 'acme/demo',
-            'manual_type' => 'c',
+            'manual_type' => ManualType::CommunityExtension->value,
             'manual_version' => 'main',
             'manual_language' => 'en-us',
             'manual_slug' => 'p/acme/demo/main/en-us',
@@ -119,5 +122,25 @@ abstract class IntegrationTestCase extends TestCase
             static fn ($result) => $result->getSource(),
             $this->index->search($search)->getResults()
         );
+    }
+
+    /**
+     * Document version of every document matching a query, keyed by fragment.
+     * A version that does not change shows that the document was not written.
+     *
+     * @return array<string, int>
+     */
+    protected function documentVersions(AbstractQuery $query): array
+    {
+        $this->index->refresh();
+        $search = (new Query($query))->setSize(100)->setParam('version', true);
+
+        $versions = [];
+        foreach ($this->index->search($search)->getResults() as $result) {
+            $versions[$result->getSource()['fragment']] = (int)$result->getVersion();
+        }
+        ksort($versions);
+
+        return $versions;
     }
 }

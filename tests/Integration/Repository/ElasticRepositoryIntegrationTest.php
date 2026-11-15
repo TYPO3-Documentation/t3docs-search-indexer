@@ -2,8 +2,10 @@
 
 namespace App\Tests\Integration\Repository;
 
+use App\Config\ManualType;
 use App\Dto\Manual;
 use App\Tests\Integration\IntegrationTestCase;
+use Elastica\Query\MatchAll;
 use Elastica\Query\Term;
 
 /**
@@ -52,6 +54,34 @@ class ElasticRepositoryIntegrationTest extends IntegrationTestCase
     /**
      * @test
      */
+    public function recalculateLatestVersionsDoesNotWriteUnchangedSnippets(): void
+    {
+        $this->repository->addOrUpdateDocument($this->snippet([
+            'fragment' => 'old',
+            'content_hash' => 'old-only',
+            'manual_version' => '0.6',
+        ]));
+        $this->repository->addOrUpdateDocument($this->snippet([
+            'fragment' => 'current',
+            'content_hash' => 'current',
+            'manual_version' => 'main',
+        ]));
+        $before = $this->documentVersions(new MatchAll());
+
+        // The first run changes only the stale snippet "old".
+        self::assertSame(0, $this->repository->recalculateLatestVersions($this->manual(['main'])));
+        $afterFirstRun = $this->documentVersions(new MatchAll());
+        self::assertSame($before['current'], $afterFirstRun['current']);
+        self::assertGreaterThan($before['old'], $afterFirstRun['old']);
+
+        // A second run with the same last versions changes nothing.
+        self::assertSame(0, $this->repository->recalculateLatestVersions($this->manual(['main'])));
+        self::assertSame($afterFirstRun, $this->documentVersions(new MatchAll()));
+    }
+
+    /**
+     * @test
+     */
     public function identicalContentAcrossVersionsIsStoredAsOneDocument(): void
     {
         $shared = $this->snippet(['fragment' => 'shared', 'content_hash' => 'shared']);
@@ -73,7 +103,7 @@ class ElasticRepositoryIntegrationTest extends IntegrationTestCase
         return new Manual(
             absolutePath: '',
             name: 'demo',
-            type: 'c',
+            type: ManualType::CommunityExtension->value,
             version: 'main',
             language: 'en-us',
             slug: 'p/acme/demo/main/en-us',
