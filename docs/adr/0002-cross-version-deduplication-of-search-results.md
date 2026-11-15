@@ -1,7 +1,7 @@
 # 2. Cross-version de-duplication of search results
 
-- Status: **Proposed**
-- Date: 2026-07-31
+- Status: **Accepted**
+- Date: 2026-11-15
 - Deciders: TYPO3 Documentation Team
 - Related: #143 (symptoms), ADR-0001 (deferred this here), #144 (fixed the stale-`latest` bug)
 
