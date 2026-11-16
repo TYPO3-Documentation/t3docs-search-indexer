@@ -194,7 +194,7 @@ run this Docker command:
 
 .. code-block:: bash
 
-   docker run -it --rm --name kib01 --net ddev_default -p 5601:5601 -e ELASTICSEARCH_HOSTS='["http://elasticsearch:9200/"]' docker.elastic.co/kibana/kibana:7.17.1
+   docker run -it --rm --name kib01 --net ddev_default -p 5601:5601 -e ELASTICSEARCH_HOSTS='["http://elasticsearch:9200/"]' docker.elastic.co/kibana/kibana:7.17.29
 
 Then, open http://localhost:5601/app/dev_tools#/console to get the Dev Tools.
 
